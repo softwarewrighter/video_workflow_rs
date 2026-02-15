@@ -1,7 +1,7 @@
 # Examples
 
-- `workflows/shorts_narration.yaml`: stills → drafts
-- `workflows/explainer_outline.yaml`: repo notes → outline
+- `workflows/shorts_narration.yaml`: stills -> drafts
+- `workflows/explainer_outline.yaml`: repo notes -> outline
 
 Put your inputs under the chosen workdir, e.g.:
 

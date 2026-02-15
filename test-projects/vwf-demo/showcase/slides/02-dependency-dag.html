@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            width: 1080px;
+            height: 1920px;
+            background: #1a1a2e;
+            font-family: 'SF Pro Display', -apple-system, sans-serif;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            padding: 100px 60px;
+        }
+        .category {
+            font-size: 32px;
+            color: #ff6b6b;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            margin-bottom: 20px;
+        }
+        .title {
+            font-size: 72px;
+            font-weight: bold;
+            color: #00d4ff;
+            margin-bottom: 60px;
+        }
+        .keypoint {
+            font-size: 48px;
+            color: #4ade80;
+            margin-bottom: 80px;
+        }
+        .dag {
+            font-family: 'SF Mono', monospace;
+            font-size: 32px;
+            line-height: 1.8;
+            color: #f8f8f2;
+        }
+        .dag .node { color: #00d4ff; }
+        .dag .arrow { color: #ffd93d; }
+        .dag .parallel { color: #4ade80; }
+    </style>
+</head>
+<body>
+    <div class="category">Concept 2</div>
+    <div class="title">Dependency DAG</div>
+    <div class="keypoint">Parallel when safe, sequential when needed</div>
+    <div class="dag">
+        <span class="node">[generate_text]</span><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;<span class="arrow">|</span><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;<span class="arrow">v</span><br>
+        <span class="parallel">+-- [create_slides] --+</span><br>
+        <span class="parallel">|                     |</span><br>
+        <span class="parallel">v                     v</span><br>
+        <span class="node">[screenshot]</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="node">[tts_gen]</span><br>
+        <span class="parallel">|                     |</span><br>
+        <span class="parallel">+--------> + <--------+</span><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="arrow">v</span><br>
+        &nbsp;&nbsp;&nbsp;<span class="node">[create_video]</span>
+    </div>
+</body>
+</html>

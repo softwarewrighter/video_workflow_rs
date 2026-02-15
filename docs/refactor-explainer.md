@@ -26,23 +26,23 @@ This document describes the step-by-step process for creating explainer videos u
 
 ```
 projects/<project-name>/
-├── assets/
-│   ├── svg/           # SVG slides (00-title through 99b-epilog)
-│   ├── images/        # Title background, screenshots
-│   └── music/         # Project-specific music (optional)
-├── work/
-│   ├── scripts/       # Narration text files (*.txt)
-│   ├── audio/         # Generated TTS audio (*.wav)
-│   ├── clips/         # Video clips (OBS, VHS, composited)
-│   ├── stills/        # PNG renders from SVG
-│   ├── avatar/        # Avatar processing files
-│   ├── preview/       # Preview assembly workspace
-│   └── generate-tts.sh  # TTS generation script
-├── tts/
-│   ├── .venv/         # Python venv for gradio_client
-│   └── client.py      # VoxCPM client
-├── README.md          # Project documentation
-└── NEXT-STEPS.md      # Progress tracking
++-- assets/
+|   +-- svg/           # SVG slides (00-title through 99b-epilog)
+|   +-- images/        # Title background, screenshots
+|   +-- music/         # Project-specific music (optional)
++-- work/
+|   +-- scripts/       # Narration text files (*.txt)
+|   +-- audio/         # Generated TTS audio (*.wav)
+|   +-- clips/         # Video clips (OBS, VHS, composited)
+|   +-- stills/        # PNG renders from SVG
+|   +-- avatar/        # Avatar processing files
+|   +-- preview/       # Preview assembly workspace
+|   +-- generate-tts.sh  # TTS generation script
++-- tts/
+|   +-- .venv/         # Python venv for gradio_client
+|   +-- client.py      # VoxCPM client
++-- README.md          # Project documentation
++-- NEXT-STEPS.md      # Progress tracking
 ```
 
 ---
@@ -137,13 +137,13 @@ Set Padding 20
 - Will be scaled to 1920x1080 during processing
 - Note timestamps for segment boundaries
 
-### Phase 6: Render SVG → PNG → Video
+### Phase 6: Render SVG -> PNG -> Video
 
 ```bash
-# SVG → PNG
+# SVG -> PNG
 rsvg-convert -w 1920 -h 1080 assets/svg/01-hook.svg -o work/stills/01-hook.png
 
-# PNG → Base video (duration = audio + 1s)
+# PNG -> Base video (duration = audio + 1s)
 AUDIO_DUR=$(ffprobe -v error -show_entries format=duration -of csv=p=0 work/audio/01-hook.wav)
 VID_DUR=$(echo "$AUDIO_DUR + 1" | bc)
 $VID_IMAGE --image work/stills/01-hook.png --duration $VID_DUR --output work/clips/01-hook-base.mp4

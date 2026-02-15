@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            width: 1080px;
+            height: 1920px;
+            background: #1a1a2e;
+            font-family: 'SF Pro Display', -apple-system, sans-serif;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            padding: 100px 60px;
+        }
+        .category {
+            font-size: 32px;
+            color: #ff6b6b;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            margin-bottom: 20px;
+        }
+        .title {
+            font-size: 72px;
+            font-weight: bold;
+            color: #00d4ff;
+            margin-bottom: 60px;
+        }
+        .keypoint {
+            font-size: 48px;
+            color: #4ade80;
+            margin-bottom: 80px;
+        }
+        .ui-mock {
+            background: #282a36;
+            border-radius: 20px;
+            padding: 40px;
+        }
+        .ui-header {
+            font-size: 28px;
+            color: #ffd93d;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #44475a;
+        }
+        .ui-file {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            border-bottom: 1px solid #44475a;
+            font-size: 24px;
+        }
+        .ui-file:last-child { border-bottom: none; }
+        .ui-status { color: #4ade80; }
+        .ui-buttons {
+            display: flex;
+            gap: 20px;
+            margin-top: 40px;
+        }
+        .btn {
+            flex: 1;
+            padding: 20px;
+            border-radius: 10px;
+            font-size: 24px;
+            text-align: center;
+        }
+        .btn-approve { background: #4ade80; color: #1a1a2e; }
+        .btn-reject { background: #ff6b6b; color: white; }
+    </style>
+</head>
+<body>
+    <div class="category">Concept 4</div>
+    <div class="title">Checkpoints</div>
+    <div class="keypoint">Human review at critical points</div>
+    <div class="ui-mock">
+        <div class="ui-header">CHECKPOINT: Review Text</div>
+        <div class="ui-file">
+            <span>narration.txt</span>
+            <span class="ui-status">Ready</span>
+        </div>
+        <div class="ui-file">
+            <span>slides-outline.txt</span>
+            <span class="ui-status">Ready</span>
+        </div>
+        <div class="ui-file">
+            <span>description.txt</span>
+            <span class="ui-status">Ready</span>
+        </div>
+        <div class="ui-buttons">
+            <div class="btn btn-approve">Approve</div>
+            <div class="btn btn-reject">Reject</div>
+        </div>
+    </div>
+</body>
+</html>

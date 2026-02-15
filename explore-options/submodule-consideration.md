@@ -39,14 +39,14 @@ Move `video-publishing/tools` crates into VWF workspace:
 
 ```
 video_workflow_rs/
-├── crates/
-│   ├── vwf-core/
-│   ├── vwf-cli/
-│   ├── vwf-web/
-│   ├── vid-concat/      # Moved from video-publishing
-│   ├── vid-image/
-│   ├── vid-avatar/
-│   └── ...
++-- crates/
+|   +-- vwf-core/
+|   +-- vwf-cli/
+|   +-- vwf-web/
+|   +-- vid-concat/      # Moved from video-publishing
+|   +-- vid-image/
+|   +-- vid-avatar/
+|   +-- ...
 ```
 
 **Pros:**

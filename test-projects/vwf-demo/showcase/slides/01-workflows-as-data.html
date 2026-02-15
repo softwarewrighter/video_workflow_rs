@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            width: 1080px;
+            height: 1920px;
+            background: #1a1a2e;
+            font-family: 'SF Pro Display', -apple-system, sans-serif;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            padding: 100px 60px;
+        }
+        .category {
+            font-size: 32px;
+            color: #ff6b6b;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            margin-bottom: 20px;
+        }
+        .title {
+            font-size: 72px;
+            font-weight: bold;
+            color: #00d4ff;
+            margin-bottom: 60px;
+        }
+        .keypoint {
+            font-size: 48px;
+            color: #4ade80;
+            margin-bottom: 80px;
+        }
+        .code {
+            background: #282a36;
+            border-radius: 20px;
+            padding: 40px;
+            font-family: 'SF Mono', monospace;
+            font-size: 28px;
+            color: #f8f8f2;
+            text-align: left;
+            line-height: 1.6;
+        }
+        .code .key { color: #ff79c6; }
+        .code .str { color: #f1fa8c; }
+        .code .comment { color: #6272a4; }
+    </style>
+</head>
+<body>
+    <div class="category">Concept 1</div>
+    <div class="title">Workflows as Data</div>
+    <div class="keypoint">YAML files, not agent memory</div>
+    <div class="code">
+        <span class="key">name:</span> <span class="str">"5mlc-episode"</span><br>
+        <span class="key">steps:</span><br>
+        &nbsp;&nbsp;- <span class="key">id:</span> <span class="str">generate_text</span><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;<span class="key">kind:</span> <span class="str">llm_generate</span><br>
+        &nbsp;&nbsp;- <span class="key">id:</span> <span class="str">create_slides</span><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;<span class="key">kind:</span> <span class="str">html_template</span><br>
+        <span class="comment"># No forgotten steps!</span>
+    </div>
+</body>
+</html>

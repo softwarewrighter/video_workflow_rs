@@ -2,8 +2,15 @@
 //!
 //! Design principle: **workflows are data**, runner is code.
 //! All side effects are mediated by `Runtime` so tests can swap in fakes.
+//!
+//! ## Modules
+//!
+//! - `config`: Linear workflow YAML parsing
+//! - `engine`: Linear step execution
+//! - `dag`: Reactive DAG-based workflow engine (Phase 2)
 
 pub mod config;
+pub mod dag;
 pub mod engine;
 pub mod render;
 pub mod runtime;

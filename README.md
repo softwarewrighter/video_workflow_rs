@@ -6,15 +6,15 @@ A Rust framework for *repeatable* video-production workflows with strict, minima
 
 - **Inversion of control:** workflows are data (YAML/JSON), the runner is code.
 - **Determinism & auditability:** every run produces a manifest + logs + artifacts.
-- **AI calls as “steps”:** prompts are templated and stored; responses are captured and validated.
+- **AI calls as "steps":** prompts are templated and stored; responses are captured and validated.
 - **TDD-friendly:** core logic is unit-tested with mocks (no network, no shell by default).
 - **Extensible:** add new step kinds without rewriting the runner.
 
-## What’s in this repo
+## What's in this repo
 
-- `crates/vwf-core` — workflow engine + config schema + step library.
-- `crates/vwf-cli`  — command-line runner (`vwf`).
-- `crates/vwf-web`  — Yew/WASM UI skeleton (uploads + workflow selection).
+- `crates/vwf-core` -- workflow engine + config schema + step library.
+- `crates/vwf-cli`  -- command-line runner (`vwf`).
+- `crates/vwf-web`  -- Yew/WASM UI skeleton (uploads + workflow selection).
 
 ## Quick start
 
@@ -28,7 +28,7 @@ The first run uses `--dry-run` to show what would happen; the second run will cr
 
 ## Philosophy
 
-Your agents are unreliable because *the world is huge* and “helpful guessing” is the default failure mode.
+Your agents are unreliable because *the world is huge* and "helpful guessing" is the default failure mode.
 This project forces:
 - small prompts
 - pinned parameters

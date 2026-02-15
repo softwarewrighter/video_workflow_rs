@@ -62,7 +62,7 @@
 4. CHECKPOINT: User reviews text files
 5. Create SVG slides
 6. CHECKPOINT: User reviews slide layout (via /style-check)
-7. Render SVG → PNG
+7. Render SVG -> PNG
 8. Generate TTS audio
 9. Create base video clips
 10. If demo recordings provided: process and composite
@@ -140,7 +140,7 @@
 
 **System Behavior:**
 1. Identify parallelizable work:
-   - SVG → PNG rendering (CPU-bound, parallelizable)
+   - SVG -> PNG rendering (CPU-bound, parallelizable)
    - ffmpeg encoding (CPU-bound, parallelizable)
    - Screenshot capture (I/O-bound, parallelizable)
 2. Identify sequential work:

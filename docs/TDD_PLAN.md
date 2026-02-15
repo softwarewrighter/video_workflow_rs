@@ -1,6 +1,6 @@
 # TDD Plan (Red/Green)
 
-The goal is an engine where “workflow YAML + inputs” → “artifacts + manifest”.
+The goal is an engine where "workflow YAML + inputs" -> "artifacts + manifest".
 
 ## Recommended loop
 
@@ -12,7 +12,7 @@ The goal is an engine where “workflow YAML + inputs” → “artifacts + mani
 ## Suggested test sequence
 
 1. **Parse** minimal workflow YAML into structs.
-2. **Validate**: unknown step type → error includes step id.
+2. **Validate**: unknown step type -> error includes step id.
 3. **Render templates**: `{{var}}` substitution works; missing var errors.
 4. **Write artifact** step: creates file; manifest references it.
 5. **Dry run**: no filesystem mutation except manifest preview.
@@ -25,4 +25,4 @@ The goal is an engine where “workflow YAML + inputs” → “artifacts + mani
 
 - Deterministic output paths (no random names unless explicitly requested).
 - Full provenance: inputs, versions, step configs, environment snapshots.
-- “Explainable failure”: errors should say *what* and *how to fix*.
+- "Explainable failure": errors should say *what* and *how to fix*.

@@ -1,0 +1,16 @@
+5 Things About VWF - The Video Workflow Framework
+
+Ever struggle with AI agents forgetting steps or making up parameters? VWF solves this by making workflows explicit data, not remembered instructions.
+
+In this short, we cover:
+- Workflows as Data (YAML, not memory)
+- Dependency DAG (parallel when safe)
+- Placeholders (progress without all assets)
+- Checkpoints (human review points)
+- Incremental Builds (only redo what changed)
+
+Links:
+- Source: https://github.com/softwarewrighter/video_workflow_rs
+- Blog: https://softwarewrighter.com
+
+#VibeCoding #RustLang #VideoProduction #AITools

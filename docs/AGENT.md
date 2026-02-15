@@ -7,7 +7,7 @@ deterministically and produce a `run.json` manifest in the chosen `--workdir`.
 
 1. **Do not expand scope while tests are red.**
 2. Treat YAML as untrusted input: validate and fail with actionable messages.
-3. No “magic defaults.” If a parameter matters, it must be explicit.
+3. No "magic defaults." If a parameter matters, it must be explicit.
 4. No network calls in unit tests. Use mocks.
 
 ## Milestones
@@ -26,7 +26,7 @@ deterministically and produce a `run.json` manifest in the chosen `--workdir`.
 ### M3: LLM adapter layer
 - Define a trait `LlmClient` with a request struct (system/user/tools/attachments)
 - Implement a `MockLlmClient` for tests
-- Provide an optional “Claude Code CLI” adapter behind a feature flag:
+- Provide an optional "Claude Code CLI" adapter behind a feature flag:
   - binary path configured
   - arguments pinned
   - tool docs mounted as files
@@ -39,4 +39,4 @@ deterministically and produce a `run.json` manifest in the chosen `--workdir`.
   - upload inputs
   - generate a `run request` JSON for the CLI (or call a local HTTP runner)
 
-Keep the UI “dumb”: it should *not* implement workflow logic; it should just produce config + inputs.
+Keep the UI "dumb": it should *not* implement workflow logic; it should just produce config + inputs.

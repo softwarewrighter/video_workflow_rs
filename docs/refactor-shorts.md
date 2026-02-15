@@ -22,37 +22,37 @@ Before starting an episode, I need:
 
 ```
 projects/5MLC-NN/
-├── assets/
-│   ├── intro.mp4        # Copied from user-provided file
-│   ├── outro.mp4        # Copied from user-provided file
-│   ├── background.jpg   # Copied from user-provided file
-│   └── music.mp3        # Copied from reference/music/
-├── showcase/
-│   ├── images/
-│   │   └── background.jpg
-│   └── slides/
-│       ├── 00-intro.html
-│       ├── 01-concept-name.html
-│       ├── 02-concept-name.html
-│       ├── 03-concept-name.html
-│       ├── 04-concept-name.html
-│       ├── 05-concept-name.html
-│       └── 06-cta.html
-├── tts/
-│   ├── client.py        # VoxCPM Gradio client
-│   └── .venv/           # Python environment
-└── work/
-    ├── scripts/         # Individual sentence TTS scripts
-    ├── audio/           # Generated WAV files
-    ├── images/          # Screenshot PNGs of slides
-    ├── clips/           # Intermediate video clips
-    ├── description.txt  # YouTube description
-    ├── narration.txt    # Full narration script
-    ├── slides-outline.txt
-    ├── generate-tts.sh
-    ├── combine-audio.sh
-    ├── build-video.sh
-    └── final.mp4        # Final output
++-- assets/
+|   +-- intro.mp4        # Copied from user-provided file
+|   +-- outro.mp4        # Copied from user-provided file
+|   +-- background.jpg   # Copied from user-provided file
+|   +-- music.mp3        # Copied from reference/music/
++-- showcase/
+|   +-- images/
+|   |   +-- background.jpg
+|   +-- slides/
+|       +-- 00-intro.html
+|       +-- 01-concept-name.html
+|       +-- 02-concept-name.html
+|       +-- 03-concept-name.html
+|       +-- 04-concept-name.html
+|       +-- 05-concept-name.html
+|       +-- 06-cta.html
++-- tts/
+|   +-- client.py        # VoxCPM Gradio client
+|   +-- .venv/           # Python environment
++-- work/
+    +-- scripts/         # Individual sentence TTS scripts
+    +-- audio/           # Generated WAV files
+    +-- images/          # Screenshot PNGs of slides
+    +-- clips/           # Intermediate video clips
+    +-- description.txt  # YouTube description
+    +-- narration.txt    # Full narration script
+    +-- slides-outline.txt
+    +-- generate-tts.sh
+    +-- combine-audio.sh
+    +-- build-video.sh
+    +-- final.mp4        # Final output
 ```
 
 ## Workflow Steps

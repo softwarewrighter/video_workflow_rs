@@ -11,7 +11,7 @@ cargo install trunk
 trunk serve --open
 ```
 
-Today it only exports a JSON “run request” for the CLI.
+Today it only exports a JSON "run request" for the CLI.
 Later milestones can add:
 - file uploads (stills, OBS clips)
 - workflow picker

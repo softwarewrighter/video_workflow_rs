@@ -2,7 +2,7 @@
 
 This repo intentionally runs workflows directly from YAML.
 
-For “UI → runner” integration, a `RunRequest` JSON object is useful:
+For "UI -> runner" integration, a `RunRequest` JSON object is useful:
 
 ```json
 {
