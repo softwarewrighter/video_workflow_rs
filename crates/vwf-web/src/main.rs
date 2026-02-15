@@ -1,25 +1,31 @@
-use yew::prelude::*;
 use serde::{Deserialize, Serialize};
+use yew::prelude::*;
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 struct RunRequest {
     workflow_text: String,
     workdir: String,
-    vars: Vec<(String,String)>,
+    vars: Vec<(String, String)>,
 }
 
 #[function_component(App)]
 fn app() -> Html {
-    let workflow = use_state(|| include_str!("../../../examples/workflows/shorts_narration.yaml").to_string());
+    let workflow =
+        use_state(|| include_str!("../../../examples/workflows/shorts_narration.yaml").to_string());
     let workdir = use_state(|| "work/web-demo".to_string());
     let var_key = use_state(|| "project_name".to_string());
     let var_val = use_state(|| "My Demo Project".to_string());
-    let vars = use_state(|| vec![
-        ("project_name".to_string(), "My Demo Project".to_string()),
-        ("audience".to_string(), "curious beginners".to_string()),
-        ("style".to_string(), "energetic, nerdy, no fluff".to_string()),
-        ("max_words".to_string(), "220".to_string()),
-    ]);
+    let vars = use_state(|| {
+        vec![
+            ("project_name".to_string(), "My Demo Project".to_string()),
+            ("audience".to_string(), "curious beginners".to_string()),
+            (
+                "style".to_string(),
+                "energetic, nerdy, no fluff".to_string(),
+            ),
+            ("max_words".to_string(), "220".to_string()),
+        ]
+    });
 
     let on_add = {
         let vars = vars.clone();
@@ -37,13 +43,15 @@ fn app() -> Html {
         let workdir = workdir.clone();
         let vars = vars.clone();
         Callback::from(move |_| {
-            let req = RunRequest{
+            let req = RunRequest {
                 workflow_text: (*workflow).clone(),
                 workdir: (*workdir).clone(),
                 vars: (*vars).clone(),
             };
             let json = serde_json::to_string_pretty(&req).unwrap();
-            gloo::dialogs::alert(&format!("Copy this JSON into your CLI runner (future: auto-run):\n\n{json}"));
+            gloo::dialogs::alert(&format!(
+                "Copy this JSON into your CLI runner (future: auto-run):\n\n{json}"
+            ));
         })
     };
 

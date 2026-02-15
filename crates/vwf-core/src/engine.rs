@@ -31,13 +31,21 @@ pub struct StepReport {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all="snake_case")]
-pub enum StepStatus { Ok, Skipped, Failed }
+#[serde(rename_all = "snake_case")]
+pub enum StepStatus {
+    Ok,
+    Skipped,
+    Failed,
+}
 
 pub struct Runner;
 
 impl Runner {
-    pub fn run(rt: &mut dyn Runtime, cfg: &WorkflowConfig, extra_vars: BTreeMap<String,String>) -> Result<RunReport> {
+    pub fn run(
+        rt: &mut dyn Runtime,
+        cfg: &WorkflowConfig,
+        extra_vars: BTreeMap<String, String>,
+    ) -> Result<RunReport> {
         let started_at = Utc::now();
         let run_id = Uuid::new_v4();
         let mut vars = cfg.vars.clone();
@@ -53,7 +61,7 @@ impl Runner {
             let s_finished = Utc::now();
 
             match res {
-                Ok(()) => steps_report.push(StepReport{
+                Ok(()) => steps_report.push(StepReport {
                     id: step.id.clone(),
                     kind: format!("{:?}", step.kind),
                     status: StepStatus::Ok,
@@ -63,7 +71,7 @@ impl Runner {
                     duration_ms: dur,
                 }),
                 Err(e) => {
-                    steps_report.push(StepReport{
+                    steps_report.push(StepReport {
                         id: step.id.clone(),
                         kind: format!("{:?}", step.kind),
                         status: StepStatus::Failed,
@@ -72,7 +80,7 @@ impl Runner {
                         error: Some(e.to_string()),
                         duration_ms: dur,
                     });
-                    let report = RunReport{
+                    let report = RunReport {
                         run_id,
                         workflow_name: cfg.name.clone(),
                         started_at,
@@ -80,13 +88,17 @@ impl Runner {
                         steps: steps_report,
                         vars,
                     };
-                    return Err(anyhow::anyhow!("Workflow failed at step `{}`: {}", step.id, e))
-                        .context(serde_json::to_string_pretty(&report).unwrap_or_default());
+                    return Err(anyhow::anyhow!(
+                        "Workflow failed at step `{}`: {}",
+                        step.id,
+                        e
+                    ))
+                    .context(serde_json::to_string_pretty(&report).unwrap_or_default());
                 }
             }
         }
 
-        Ok(RunReport{
+        Ok(RunReport {
             run_id,
             workflow_name: cfg.name.clone(),
             started_at,
@@ -105,7 +117,8 @@ mod tests {
 
     #[test]
     fn runner_writes_files() {
-        let cfg: WorkflowConfig = serde_yaml::from_str(r#"
+        let cfg: WorkflowConfig = serde_yaml::from_str(
+            r#"
 version: 1
 name: test
 steps:
@@ -116,7 +129,9 @@ steps:
     kind: write_file
     path: "work/hello.txt"
     content: "hi"
-"#).unwrap();
+"#,
+        )
+        .unwrap();
 
         let tmp = TempDir::new().unwrap();
         let mut rt = FsRuntime::new(tmp.path(), Box::new(MockLlmClient::echo()));
@@ -126,4 +141,3 @@ steps:
         assert_eq!(s, "hi");
     }
 }
-

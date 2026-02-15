@@ -9,7 +9,12 @@ pub trait Runtime {
     fn write_text(&mut self, rel: &str, content: &str) -> Result<()>;
     fn read_text(&self, rel: &str) -> Result<String>;
 
-    fn run_command(&mut self, _program: &str, _args: &[String], _cwd: Option<&str>) -> Result<CommandOutput>;
+    fn run_command(
+        &mut self,
+        _program: &str,
+        _args: &[String],
+        _cwd: Option<&str>,
+    ) -> Result<CommandOutput>;
 
     fn llm(&mut self) -> &mut dyn LlmClient;
 }
@@ -55,7 +60,9 @@ impl FsRuntime {
 }
 
 impl Runtime for FsRuntime {
-    fn workdir(&self) -> &Path { &self.workdir }
+    fn workdir(&self) -> &Path {
+        &self.workdir
+    }
 
     fn ensure_dir(&mut self, rel: &str) -> Result<()> {
         let p = self.abs(rel);
@@ -65,7 +72,9 @@ impl Runtime for FsRuntime {
 
     fn write_text(&mut self, rel: &str, content: &str) -> Result<()> {
         let p = self.abs(rel);
-        if let Some(parent) = p.parent() { std::fs::create_dir_all(parent)?; }
+        if let Some(parent) = p.parent() {
+            std::fs::create_dir_all(parent)?;
+        }
         std::fs::write(&p, content.as_bytes()).with_context(|| format!("write {}", p.display()))?;
         Ok(())
     }
@@ -76,7 +85,12 @@ impl Runtime for FsRuntime {
         Ok(String::from_utf8(bytes)?)
     }
 
-    fn run_command(&mut self, program: &str, args: &[String], cwd: Option<&str>) -> Result<CommandOutput> {
+    fn run_command(
+        &mut self,
+        program: &str,
+        args: &[String],
+        cwd: Option<&str>,
+    ) -> Result<CommandOutput> {
         if !self.command_allowlist.is_empty() && !self.command_allowlist.contains(program) {
             anyhow::bail!("Command not allowed: `{program}`. Add it to the allowlist explicitly.");
         }
@@ -120,7 +134,9 @@ impl DryRunRuntime {
 }
 
 impl Runtime for DryRunRuntime {
-    fn workdir(&self) -> &Path { &self.workdir }
+    fn workdir(&self) -> &Path {
+        &self.workdir
+    }
 
     fn ensure_dir(&mut self, rel: &str) -> Result<()> {
         self.planned_dirs.push(rel.to_string());
@@ -128,7 +144,8 @@ impl Runtime for DryRunRuntime {
     }
 
     fn write_text(&mut self, rel: &str, content: &str) -> Result<()> {
-        self.planned_writes.push((rel.to_string(), content.to_string()));
+        self.planned_writes
+            .push((rel.to_string(), content.to_string()));
         Ok(())
     }
 
@@ -136,8 +153,17 @@ impl Runtime for DryRunRuntime {
         anyhow::bail!("DryRunRuntime cannot read files (provide fixtures via FsRuntime in tests)")
     }
 
-    fn run_command(&mut self, program: &str, _args: &[String], _cwd: Option<&str>) -> Result<CommandOutput> {
-        Ok(CommandOutput { status: 0, stdout: format!("[dry-run] would run {program}"), stderr: String::new() })
+    fn run_command(
+        &mut self,
+        program: &str,
+        _args: &[String],
+        _cwd: Option<&str>,
+    ) -> Result<CommandOutput> {
+        Ok(CommandOutput {
+            status: 0,
+            stdout: format!("[dry-run] would run {program}"),
+            stderr: String::new(),
+        })
     }
 
     fn llm(&mut self) -> &mut dyn LlmClient {
@@ -151,12 +177,21 @@ pub struct MockLlmClient {
 }
 
 impl MockLlmClient {
-    pub fn canned(s: impl Into<String>) -> Self { Self { canned: Some(s.into()) } }
-    pub fn echo() -> Self { Self { canned: None } }
+    pub fn canned(s: impl Into<String>) -> Self {
+        Self {
+            canned: Some(s.into()),
+        }
+    }
+    pub fn echo() -> Self {
+        Self { canned: None }
+    }
 }
 
 impl LlmClient for MockLlmClient {
     fn generate(&mut self, req: LlmRequest) -> Result<String> {
-        Ok(self.canned.clone().unwrap_or_else(|| format!("SYSTEM:\n{}\n\nUSER:\n{}", req.system, req.user)))
+        Ok(self
+            .canned
+            .clone()
+            .unwrap_or_else(|| format!("SYSTEM:\n{}\n\nUSER:\n{}", req.system, req.user)))
     }
 }
