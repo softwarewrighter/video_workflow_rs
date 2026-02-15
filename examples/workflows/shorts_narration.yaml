@@ -1,0 +1,73 @@
+version: 1
+name: "Shorts: stills → narration drafts"
+description: >
+  Takes extracted stills and produces work/description.txt and work/narration.txt
+  using a templated prompt (LLM adapter stub for now).
+
+vars:
+  project_name: "My Demo Project"
+  style: "energetic, nerdy, no fluff"
+  audience: "curious beginners"
+  max_words: "220"
+
+steps:
+  - id: ensure_dirs
+    kind: ensure_dirs
+    dirs:
+      - "artifacts"
+      - "work"
+
+  - id: write_template_prompt
+    kind: write_file
+    path: "work/prompt_user.txt"
+    content: |
+      You are writing narration for a YouTube Short (portrait, 1–3 minutes).
+      Project: {{project_name}}
+      Audience: {{audience}}
+      Style: {{style}}
+      Word limit: {{max_words}}
+
+      Input stills are in: inputs/stills/
+      Task:
+      1) Write a 3-sentence DESCRIPTION for the Short.
+      2) Write NARRATION text, tight and concrete.
+      Output format:
+      DESCRIPTION:
+      ...
+      NARRATION:
+      ...
+
+  - id: llm_generate_text
+    kind: llm_generate
+    system: "You are a precise video script assistant. No guessing. Follow format."
+    user_prompt_path: "work/prompt_user.txt"
+    output_path: "work/llm_output.txt"
+    # For now, vwf-core uses a mock LLM provider unless CLI is configured.
+    provider: "mock"
+    mock_response: |
+      DESCRIPTION:
+      A tiny demo of how still frames become a crisp script.
+      We extract structure, then generate tight narration.
+      Finally we validate format and save to work/.
+
+      NARRATION:
+      Here are the stills. First, we identify what the viewer sees and what they need next.
+      Then we write narration that matches the visuals—no extra lore, no invented facts.
+      Last, we save drafts so a stronger model can review and polish.
+
+  - id: split_sections
+    kind: split_sections
+    input_path: "work/llm_output.txt"
+    outputs:
+      - heading: "DESCRIPTION:"
+        path: "work/description.txt"
+      - heading: "NARRATION:"
+        path: "work/narration.txt"
+
+  - id: manifest_note
+    kind: write_file
+    path: "work/notes.txt"
+    content: |
+      Next:
+      - Review work/description.txt and work/narration.txt
+      - If good, feed to a “cloud reviewer” workflow that enforces style + avoids repetition

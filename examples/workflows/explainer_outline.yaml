@@ -1,0 +1,58 @@
+version: 1
+name: "Explainer: repo → outline"
+description: >
+  Reads repo notes (provided as text) and generates slide-outline and narration-outline.
+
+vars:
+  topic: "Your Repo Topic"
+  duration_minutes: "8"
+  tone: "calm, confident, curious"
+  call_to_action: "Star the repo and read the blog post."
+
+steps:
+  - id: ensure_dirs
+    kind: ensure_dirs
+    dirs: ["work", "artifacts"]
+
+  - id: write_madlib
+    kind: write_file
+    path: "work/madlib.txt"
+    content: |
+      Topic: {{topic}}
+      Duration: {{duration_minutes}} minutes
+      Tone: {{tone}}
+      CTA: {{call_to_action}}
+
+      Deliver:
+      - Hook (10s)
+      - 4 sections with slide titles
+      - Summary
+      - CTA line
+
+  - id: llm_outline
+    kind: llm_generate
+    system: "You are an explainer-video outline engine. Output plain text with headings."
+    user_prompt_path: "work/madlib.txt"
+    output_path: "work/outline.txt"
+    provider: "mock"
+    mock_response: |
+      HOOK:
+      What if your video workflow stopped “forgetting steps” because the steps were code?
+
+      SECTION 1 — The Pain
+      Slide: Agents guess; pipelines drift.
+
+      SECTION 2 — The Fix
+      Slide: Workflows as data + deterministic runner.
+
+      SECTION 3 — The Pattern
+      Slide: Small prompts, pinned parameters, validation gates.
+
+      SECTION 4 — Demo
+      Slide: Run a workflow; inspect artifacts; iterate with TDD.
+
+      SUMMARY:
+      Deterministic steps beat “vibes”.
+
+      CTA:
+      Star the repo and read the blog post.

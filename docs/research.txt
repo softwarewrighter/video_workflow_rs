@@ -1,0 +1,138 @@
+
+
+
+
+You said:
+I'd like to streamline several video production processes I've been using for weeks, with the help of Claude Code CLI.  I am mostly producing two kinds of videos: YouTube "Shorts" portrait-mode between one and three minutes and "Explainer" landscape-mode videos between one and twenty minutes.  There are a lot of components, tools, steps, and processes shared between video productions.   Unfortunately, the overall process is complex enough that the AI agents routinely forget steps, hallucinate, guess, change parameters, make similar mistakes repeatedly, even with documentation that describes the repeated errors and how to avoid them.  I envision the need to have a framework (inversion of control) that invokes the AI agent with very limited context, very focused system prompt, very clear user prompt, and is provided only the relevant tools and documentation.  I'd like you to come up with the architecture and design for a Rust-based framework and related Rust library code that can be configured to perform certain steps for each kind of video (or subset of a video) I am trying to produce.  Typically I provide a title image, title text, background music (only for certain parts), OBS clips, instructions for vhs CLI (tape) recordings, sometimes intro videos, sometime outro videos, often a reused "like & subscribe" segment, a custom outro generated from that, etc.,  Often I ask the Agent to analyze stills extracted from a video to come up with narration.  Or I ask an Agent to read a git repo project and come up with hook, intro, section slides, summary, call-to-action, etc.  Sometimes I ask the agent to follow a template, like a Mad-lib script with fill-in-the-blanks.  I often request it to generate work/{description,narration,slide-outline}.txt files for review by a cloud LLM.    Can you provide a zip file for this project so that I can delegate to a CLI AI Agent to complete the implementation, using TDD Red/Green tesing.  We can start with CLI, but add on a Yew-based Rust/WASM Web UI to fill in the blanks, choose which wofklow, upload files, etc. 
+
+ChatGPT said:
+
+Thought for 9s
+Requirements I’m solving (as stated)
+Two recurring video types: Shorts (portrait, 1–3 min) + Explainers (landscape, 1–20 min).
+
+Many shared steps/components (title stills, OBS clips, VHS tape scripts, BGM, intro/outro/CTA segments, still extraction, narration generation, repo analysis → hooks/slides, “mad-lib” templates).
+
+Core problem: agents drift—forget steps, guess parameters, hallucinate, repeat known mistakes—even with docs.
+
+Desired fix: a Rust framework with inversion-of-control that runs configured workflows with tight prompts, limited context, and only relevant tooling/docs, producing work/{description,narration,slide-outline}.txt etc.
+
+Deliverable: a zip repo skeleton suitable for delegation to a CLI coding agent using TDD (red/green); start with CLI, later add Yew/WASM UI.
+
+Architecture (high level)
+The framework is built around one idea: “Workflow YAML + inputs + vars → deterministic artifacts + manifest.”
+
+Core concepts
+WorkflowConfig (YAML/JSON): versioned workflow with vars and ordered steps.
+
+Runner (engine): executes steps sequentially, capturing timing/status/errors.
+
+Runtime (side-effects boundary): filesystem, command execution, and LLM calls go through a trait so tests can swap in mocks.
+
+Steps (small, explicit units): ensure_dirs, write_file, split_sections, run_command, llm_generate (stubbed/mockable initially).
+
+Manifest (run.json): provenance + step reports so you can diff runs and stop “parameter drift”.
+
+Why this solves agent drift
+Workflows are data, not “remembered instructions.”
+
+Prompts/parameters are pinned in files, not improvised.
+
+Each step has explicit inputs/outputs and can be validated.
+
+LLM calls become one step among many, with captured output that other steps can parse/validate.
+
+Design details (low level)
+CLI (vwf)
+vwf run <workflow.yaml> --workdir <dir> [--var k=v]* [--dry-run] [--allow <cmd>]*
+
+Dry-run prints planned writes/dirs and a report without touching disk.
+
+Non-dry-run writes artifacts and always writes workdir/run.json.
+
+Step behavior (initial set)
+ensure_dirs: create directories relative to workdir.
+
+write_file: render a tiny {{var}} template system and write text.
+
+llm_generate: calls an LlmClient trait (default is mock/echo), writes output to file.
+
+split_sections: extracts sections under headings like DESCRIPTION: and NARRATION: into separate files.
+
+run_command: optional/guarded by an allowlist; captures stdout/stderr if configured.
+
+Web UI (Yew/WASM) — intentionally “dumb” at first
+Choose a workflow, fill vars (mad-lib), export a “run request” JSON.
+
+Later: file uploads + calling a local runner service.
+
+Nonfunctional requirements baked in
+Determinism: stable paths, explicit config, minimal implicit defaults.
+
+Auditability: structured run report + artifacts.
+
+Safety: command allowlist prevents “oops I rm -rf’d my workdir”.
+
+Testability: Runtime trait + mock LLM means red/green without network/shell.
+
+Pros / Cons / Risks / Alternatives
+Pros
+Stops “agent amnesia” by making the pipeline executable and repeatable.
+
+TDD-friendly: core logic is pure-ish, side effects are mockable.
+
+Evolves naturally: add new step kinds as your pipeline grows.
+
+Cons / Risks
+You’ll spend some time defining workflows up front (but you get that time back every day after).
+
+Real Claude Code CLI integration needs careful sandboxing and output parsing (the skeleton purposely defers that to a milestone).
+
+Template/rendering is intentionally simple; if you later want conditionals/loops, you’ll either extend it or adopt a templating crate (tradeoff: more power, more footguns).
+
+Alternatives
+Use an off-the-shelf workflow runner (e.g., Makefiles, Taskfiles, Airflow, Temporal) + custom scripts for LLM steps. Faster initial setup, but less “workflow-as-data + provenance” coherence for your exact use case.
+
+Use a Python-based pipeline (e.g., Invoke, Prefect). Great ecosystem, but you asked for Rust-first and tighter control.
+
+Download the project zip
+Download the zip
+
+It includes:
+
+crates/vwf-core (engine + steps + mockable runtime)
+
+crates/vwf-cli (runner)
+
+crates/vwf-web (Yew UI skeleton)
+
+examples/workflows/*.yaml
+
+docs/AGENT.md + docs/TDD_PLAN.md
+
+How to run it
+# from repo root
+cargo test
+
+# dry run (prints planned writes)
+cargo run -p vwf-cli -- run examples/workflows/shorts_narration.yaml --workdir work/demo --dry-run
+
+# real run (writes artifacts + run.json)
+cargo run -p vwf-cli -- run examples/workflows/shorts_narration.yaml --workdir work/demo
+What your delegated CLI agent should implement next
+In order:
+
+Tighten validation errors (step id + field + remediation).
+
+Improve split_sections robustness (edge cases, missing headings).
+
+Implement run_command safely (already scaffolded; expand tests).
+
+Add a real ClaudeCodeCliLlmClient behind a feature flag (and keep unit tests using MockLlmClient).
+
+Add a small local HTTP runner for the Yew UI to call (UI stays “form + request”, runner does execution). 
+
+
+
+
+
