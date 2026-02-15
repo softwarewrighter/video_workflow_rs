@@ -149,8 +149,14 @@ impl Runtime for DryRunRuntime {
         Ok(())
     }
 
-    fn read_text(&self, _rel: &str) -> Result<String> {
-        anyhow::bail!("DryRunRuntime cannot read files (provide fixtures via FsRuntime in tests)")
+    fn read_text(&self, rel: &str) -> Result<String> {
+        // Check if the file was written during this dry run
+        for (path, content) in self.planned_writes.iter().rev() {
+            if path == rel {
+                return Ok(content.clone());
+            }
+        }
+        anyhow::bail!("DryRunRuntime: file `{rel}` not found (was not written during this run)")
     }
 
     fn run_command(

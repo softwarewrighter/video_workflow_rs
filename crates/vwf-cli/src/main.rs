@@ -59,7 +59,7 @@ fn main() -> Result<()> {
         Cmd::Show { workflow } => {
             let text = std::fs::read_to_string(&workflow)
                 .with_context(|| format!("read {}", workflow.display()))?;
-            let cfg: WorkflowConfig = serde_yaml::from_str(&text).context("parse workflow yaml")?;
+            let cfg = WorkflowConfig::from_yaml(&text)?;
             println!("{}", serde_json::to_string_pretty(&cfg)?);
             Ok(())
         }
@@ -73,7 +73,7 @@ fn main() -> Result<()> {
         } => {
             let text = std::fs::read_to_string(&workflow)
                 .with_context(|| format!("read {}", workflow.display()))?;
-            let cfg: WorkflowConfig = serde_yaml::from_str(&text).context("parse workflow yaml")?;
+            let cfg = WorkflowConfig::from_yaml(&text)?;
 
             let extra_vars: BTreeMap<String, String> = vars.into_iter().collect();
 
