@@ -1,8 +1,8 @@
 # Project Status
 
-## Current State: Skeleton Implementation
+## Current State: M1 Complete
 
-The project has a working skeleton with core modules defined but incomplete implementations.
+The workflow runner is fully functional with validation, dry-run support, and comprehensive tests.
 
 ## Last Updated: 2026-02-15
 
@@ -10,9 +10,9 @@ The project has a working skeleton with core modules defined but incomplete impl
 
 | Milestone | Status | Progress |
 |-----------|--------|----------|
-| M1: Workflow Runner | In Progress | 40% |
-| M2: Shell Step | Not Started | 0% |
-| M3: LLM Adapter | Not Started | 0% |
+| M1: Workflow Runner | Complete | 100% |
+| M2: Shell Step | Complete | 100% |
+| M3: LLM Adapter | Partial | 30% (mock only) |
 | M4: Web UI | Not Started | 0% |
 
 ## Component Status
@@ -21,61 +21,62 @@ The project has a working skeleton with core modules defined but incomplete impl
 
 | Component | Status | Notes |
 |-----------|--------|-------|
-| config.rs | Partial | Basic structs, needs validation |
-| engine.rs | Partial | Runner skeleton, needs manifest |
-| render.rs | Partial | Basic substitution, needs error handling |
-| runtime.rs | Partial | Traits defined, implementations incomplete |
-| steps.rs | Partial | ensure_dirs and write_file started |
+| config.rs | Complete | Parsing + validation (duplicate IDs, empty IDs) |
+| engine.rs | Complete | Runner with timing, manifest generation |
+| render.rs | Complete | {{var}} substitution with error on missing |
+| runtime.rs | Complete | FsRuntime, DryRunRuntime (can read planned writes) |
+| steps.rs | Complete | All 5 step types implemented |
 
 ### vwf-cli
 
 | Component | Status | Notes |
 |-----------|--------|-------|
-| Argument parsing | Basic | Needs --dry-run, --var, --allow |
-| Workflow execution | Partial | Calls core, no manifest output |
-| Error reporting | Basic | Needs step ID context |
+| Argument parsing | Complete | --dry-run, --var, --allow all work |
+| Workflow execution | Complete | Produces run.json manifest |
+| Error reporting | Complete | Includes step ID in all errors |
 
 ### vwf-web
 
 | Component | Status | Notes |
 |-----------|--------|-------|
-| Yew setup | Skeleton | main.rs exists, no UI |
+| Yew setup | Skeleton | main.rs exists, compiles, no UI logic |
 
 ### Examples
 
 | Workflow | Status | Notes |
 |----------|--------|-------|
-| shorts_narration.yaml | Complete | Demonstrates all step types |
-| explainer_outline.yaml | Exists | Needs verification |
+| shorts_narration.yaml | Verified | Full dry-run and real execution tested |
+| explainer_outline.yaml | Exists | Not yet verified |
 
 ## Test Coverage
 
 | Module | Unit Tests | Integration | Notes |
 |--------|------------|-------------|-------|
-| config | None | None | Needs parsing tests |
-| engine | None | None | Needs runner tests |
-| render | None | None | Needs template tests |
-| runtime | None | None | Needs mock tests |
-| steps | None | None | Needs step tests |
+| config | 5 | - | Parsing, validation, unknown kinds |
+| engine | 1 | - | Basic runner test |
+| render | 2 | - | Substitution, missing var |
+| runtime | - | - | Tested via integration |
+| steps | 1 | - | split_sections |
+| lib.rs | - | 10 | Full workflow tests |
+
+**Total: 19 tests passing**
 
 ## Known Issues
 
-1. **No validation errors with step IDs**: Errors don't include context
-2. **split_sections not implemented**: Step exists in YAML but code incomplete
-3. **No run.json generation**: Manifest output not implemented
-4. **No dry-run mode**: CLI flag not wired up
-5. **No integration tests**: Missing temp directory tests
+1. **Mock LLM echo includes user prompt**: When using mock_response, the echoed output includes both mock response and original prompt. Real LLM adapter will fix this.
 
 ## Recent Changes
 
-- Initial skeleton from ChatGPT zip
-- Workspace structure with three crates
-- Example workflows defined
-- Documentation created
+- Completed M1: Workflow runner with all step types
+- Completed M2: Shell step with allowlist enforcement
+- Added WorkflowConfig::from_yaml() with validation
+- DryRunRuntime can read files written during same run
+- 19 comprehensive tests added
+- CLI produces run.json manifest on every run
 
 ## Blockers
 
-None currently. Ready for TDD implementation.
+None currently.
 
 ## Next Steps (Priority Order)
 
