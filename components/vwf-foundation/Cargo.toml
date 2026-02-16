@@ -4,6 +4,7 @@ members = [
   "crates/vwf-types",
   "crates/vwf-runtime",
   "crates/vwf-dag",
+  "crates/vwf-queue",
 ]
 
 [workspace.package]
@@ -18,3 +19,4 @@ thiserror = "1"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 chrono = { version = "0.4", default-features = false, features = ["clock", "serde"] }
+tokio = { version = "1", features = ["sync", "rt-multi-thread", "macros", "time"] }

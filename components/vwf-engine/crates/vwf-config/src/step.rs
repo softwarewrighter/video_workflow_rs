@@ -6,6 +6,9 @@ use serde::{Deserialize, Serialize};
 pub struct StepConfig {
     pub id: String,
     pub kind: StepKind,
+    /// Output path for resume checking (optional).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub output_path: Option<String>,
     #[serde(flatten)]
     pub payload: serde_json::Value,
 }
@@ -18,4 +21,5 @@ pub enum StepKind {
     SplitSections,
     RunCommand,
     LlmGenerate,
+    TtsGenerate,
 }

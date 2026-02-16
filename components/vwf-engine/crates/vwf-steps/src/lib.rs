@@ -5,6 +5,7 @@ mod ensure_dirs;
 mod llm_generate;
 mod run_command;
 mod split_sections;
+mod tts_generate;
 mod write_file;
 
 use anyhow::Result;
@@ -27,5 +28,6 @@ fn dispatch(ctx: &mut StepCtx<'_>, kind: &StepKind, payload: &serde_json::Value)
         StepKind::SplitSections => split_sections::execute(ctx, payload),
         StepKind::RunCommand => run_command::execute(ctx, payload),
         StepKind::LlmGenerate => llm_generate::execute(ctx, payload),
+        StepKind::TtsGenerate => tts_generate::execute(ctx, payload),
     }
 }

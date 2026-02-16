@@ -5,7 +5,7 @@ use std::path::PathBuf;
 
 use anyhow::{Context, Result};
 
-use vwf_core::{DryRunRuntime, FsRuntime, LlmClient, MockLlmClient, Runner, RunReport, WorkflowConfig};
+use vwf_core::{DryRunRuntime, FsRuntime, LlmClient, MockLlmClient, RunOptions, Runner, RunReport, WorkflowConfig};
 
 pub fn show(workflow: &PathBuf) -> Result<()> {
     let text = std::fs::read_to_string(workflow).with_context(|| format!("read {}", workflow.display()))?;
@@ -14,7 +14,7 @@ pub fn show(workflow: &PathBuf) -> Result<()> {
     Ok(())
 }
 
-pub fn execute(workflow: &PathBuf, workdir: &PathBuf, vars: Vec<(String, String)>, dry_run: bool, allow: Vec<String>, mock_llm: Option<String>) -> Result<()> {
+pub fn execute(workflow: &PathBuf, workdir: &PathBuf, vars: Vec<(String, String)>, dry_run: bool, resume: bool, allow: Vec<String>, mock_llm: Option<String>) -> Result<()> {
     let text = std::fs::read_to_string(workflow).with_context(|| format!("read {}", workflow.display()))?;
     let cfg = WorkflowConfig::from_yaml(&text)?;
     let extra_vars: BTreeMap<_, _> = vars.into_iter().collect();
@@ -22,7 +22,8 @@ pub fn execute(workflow: &PathBuf, workdir: &PathBuf, vars: Vec<(String, String)
         Some(s) => Box::new(MockLlmClient::canned(s)),
         None => Box::new(MockLlmClient::echo()),
     };
-    if dry_run { run_dry(workdir, llm, &cfg, extra_vars) } else { run_real(workdir, llm, &cfg, extra_vars, allow) }
+    let opts = RunOptions { resume };
+    if dry_run { run_dry(workdir, llm, &cfg, extra_vars) } else { run_real(workdir, llm, &cfg, extra_vars, allow, opts) }
 }
 
 fn run_dry(workdir: &PathBuf, llm: Box<dyn LlmClient>, cfg: &WorkflowConfig, vars: BTreeMap<String, String>) -> Result<()> {
@@ -34,11 +35,11 @@ fn run_dry(workdir: &PathBuf, llm: Box<dyn LlmClient>, cfg: &WorkflowConfig, var
     Ok(())
 }
 
-fn run_real(workdir: &PathBuf, llm: Box<dyn LlmClient>, cfg: &WorkflowConfig, vars: BTreeMap<String, String>, allow: Vec<String>) -> Result<()> {
+fn run_real(workdir: &PathBuf, llm: Box<dyn LlmClient>, cfg: &WorkflowConfig, vars: BTreeMap<String, String>, allow: Vec<String>, opts: RunOptions) -> Result<()> {
     std::fs::create_dir_all(workdir).with_context(|| format!("create {}", workdir.display()))?;
     let mut rt = FsRuntime::new(workdir, llm);
     rt.command_allowlist = allow.into_iter().collect::<BTreeSet<_>>();
-    let rep = Runner::run(&mut rt, cfg, vars)?;
+    let rep = Runner::run_with_options(&mut rt, cfg, vars, opts)?;
     write_manifest(workdir, &rep)
 }
 

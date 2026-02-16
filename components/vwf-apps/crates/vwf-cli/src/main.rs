@@ -18,7 +18,11 @@ USAGE FOR AI AGENTS:
   2. Use `vwf run <workflow.yaml> --workdir <dir> --dry-run` to preview
   3. Use `vwf run <workflow.yaml> --workdir <dir>` to execute
 
-WORKFLOW STEPS: ensure_dirs, write_file, split_sections, run_command, llm_generate
+WORKFLOW STEPS: ensure_dirs, write_file, split_sections, run_command, llm_generate, tts_generate
+
+RESUME MODE:
+  Use `--resume` to skip steps whose output files already exist and are valid.
+  Useful after power outage or interrupted workflow.
 ";
 
 #[derive(Parser, Debug)]
@@ -42,6 +46,7 @@ struct RunArgs {
     #[arg(long)] workdir: PathBuf,
     #[arg(long = "var", value_parser = parse_kv, num_args = 0..)] vars: Vec<(String, String)>,
     #[arg(long)] dry_run: bool,
+    #[arg(long)] resume: bool,
     #[arg(long = "allow", num_args = 0..)] allow: Vec<String>,
     #[arg(long)] mock_llm_canned: Option<String>,
 }
@@ -59,6 +64,6 @@ fn main() -> Result<()> {
     let cli = Cli::parse();
     match cli.cmd {
         Cmd::Show { workflow } => run::show(&workflow),
-        Cmd::Run(args) => run::execute(&args.workflow, &args.workdir, args.vars, args.dry_run, args.allow, args.mock_llm_canned),
+        Cmd::Run(args) => run::execute(&args.workflow, &args.workdir, args.vars, args.dry_run, args.resume, args.allow, args.mock_llm_canned),
     }
 }

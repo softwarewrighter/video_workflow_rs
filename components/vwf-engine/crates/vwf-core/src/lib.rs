@@ -3,7 +3,7 @@
 mod engine;
 mod report;
 
-pub use engine::Runner;
+pub use engine::{RunOptions, Runner};
 pub use report::{RunReport, StepReport, StepStatus};
 
 // Re-export dependencies for convenience
