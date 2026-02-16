@@ -18,8 +18,7 @@ echo
 
 # Step 1: Generate scripts via workflow
 echo "Step 1/4: Generating narration scripts..."
-cd "$PROJECT_DIR"
-cargo run -p vwf-cli --release -- run workflow.yaml --workdir . --resume
+cargo run -p vwf-cli --manifest-path "$REPO_DIR/components/vwf-apps/Cargo.toml" --release -- run "$PROJECT_DIR/workflow.yaml" --workdir "$PROJECT_DIR" --resume
 echo
 
 # Step 2: Generate TTS audio
