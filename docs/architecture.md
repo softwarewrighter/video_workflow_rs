@@ -6,36 +6,81 @@ VWF (Video Workflow Framework) is a Rust-based workflow engine designed to elimi
 
 ```
 +-------------------+     +------------------+     +-------------------+
-|   Workflow YAML   | --> |   vwf-core       | --> |   Artifacts +     |
-|   + Variables     |     |   (Engine)       |     |   run.json        |
+|   Workflow YAML   | --> |   vwf-engine     | --> |   Artifacts +     |
+|   + Variables     |     |   (Core)         |     |   run.json        |
 +-------------------+     +------------------+     +-------------------+
         ^                         |
         |                         v
 +-------------------+     +------------------+
-|   vwf-cli         |     |   Runtime        |
-|   (User Interface)|     |   (Side Effects) |
+|   vwf-apps        |     |   vwf-foundation |
+|   (CLI + Web)     |     |   (Runtime+DAG)  |
 +-------------------+     +------------------+
-        ^
-        |
-+-------------------+
-|   vwf-web (Yew)   |
-|   (Future UI)     |
-+-------------------+
 ```
 
-## Workspace Structure
+## Component Structure
+
+The project is organized into three top-level components, each designed to become a separate git repository:
 
 ```
 video_workflow_rs/
-|-- Cargo.toml              # Workspace root
-|-- crates/
-|   |-- vwf-core/           # Engine + steps + runtime traits
-|   |-- vwf-cli/            # Command-line interface
-|   |-- vwf-web/            # Yew/WASM UI (future)
+|-- components/
+|   |-- vwf-foundation/        # Layer 0: External deps only
+|   |   |-- Cargo.toml         # Workspace root
+|   |   |-- crates/
+|   |   |   |-- vwf-types/     # Shared type definitions
+|   |   |   |-- vwf-runtime/   # Runtime abstraction layer
+|   |   |   |-- vwf-dag/       # DAG scheduler primitives
+|   |   |-- scripts/
+|   |       |-- build-all.sh
+|   |       |-- test-all.sh
+|   |
+|   |-- vwf-engine/            # Layer 1: Depends on foundation
+|   |   |-- Cargo.toml         # Workspace root
+|   |   |-- crates/
+|   |   |   |-- vwf-config/    # Workflow configuration
+|   |   |   |-- vwf-render/    # Template rendering
+|   |   |   |-- vwf-steps/     # Step implementations
+|   |   |   |-- vwf-core/      # Engine orchestration
+|   |   |-- scripts/
+|   |       |-- build-all.sh
+|   |       |-- test-all.sh
+|   |
+|   |-- vwf-apps/              # Layer 2: Depends on engine
+|       |-- Cargo.toml         # Workspace root
+|       |-- crates/
+|       |   |-- vwf-cli/       # Command-line interface
+|       |   |-- vwf-web/       # Yew/WASM UI
+|       |-- scripts/
+|           |-- build-all.sh
+|           |-- test-all.sh
+|
+|-- scripts/
+|   |-- build-all.sh           # Uber build script
+|   |-- test-all.sh            # Uber test script
+|
 |-- examples/
-|   |-- workflows/          # Example YAML workflows
-|-- docs/                   # Documentation
-|-- work/                   # Runtime artifacts (gitignored)
+|-- docs/
+```
+
+## Dependency Hierarchy (No Cycles)
+
+```
+Layer 0: vwf-types (external crates only)
+         |
+         v
+Layer 1: vwf-runtime, vwf-dag (depend on vwf-types)
+         |
+         v
+Layer 2: vwf-config, vwf-render (depend on Layer 1)
+         |
+         v
+Layer 3: vwf-steps (depends on Layer 2)
+         |
+         v
+Layer 4: vwf-core (depends on Layer 3)
+         |
+         v
+Layer 5: vwf-cli, vwf-web (depend on Layer 4)
 ```
 
 ## Core Concepts
@@ -83,30 +128,37 @@ Each step has:
 4. Write run.json manifest
 ```
 
-## Key Modules
+## Key Crates
 
-### vwf-core/config.rs
-- `WorkflowConfig`: Deserialize from YAML
-- `StepConfig`: Enum over step types
-- Validation logic with actionable errors
+### vwf-foundation
 
-### vwf-core/engine.rs
-- `Runner`: Orchestrates step execution
-- `RunReport`: Manifest with step statuses
-- `StepStatus`: Ok, Skipped, Failed(reason)
+- **vwf-types**: Core type definitions (TaskId, ArtifactId, TaskStatus, ArtifactStatus)
+- **vwf-runtime**: Runtime trait and implementations (FsRuntime, DryRunRuntime, MockLlmClient)
+- **vwf-dag**: DAG scheduler, task/artifact tracking, state persistence
 
-### vwf-core/runtime.rs
-- `Runtime` trait: Abstract filesystem + commands
-- `FsRuntime`: Production implementation
-- `DryRunRuntime`: No-op for preview
-- `LlmClient` trait: Mock or real LLM calls
+### vwf-engine
 
-### vwf-core/render.rs
-- `{{var}}` template substitution
-- Error on missing variables (no silent defaults)
+- **vwf-config**: Workflow YAML parsing and validation
+- **vwf-render**: Template variable substitution
+- **vwf-steps**: Step handler implementations
+- **vwf-core**: Engine orchestration and reporting
 
-### vwf-core/steps.rs
-- Step implementations: ensure_dirs, write_file, split_sections, run_command, llm_generate
+### vwf-apps
+
+- **vwf-cli**: Command-line interface
+- **vwf-web**: Yew/WASM browser UI
+
+## Build System
+
+Each component has its own workspace and build scripts. The uber scripts coordinate builds in dependency order:
+
+```bash
+# Build everything
+./scripts/build-all.sh
+
+# Test everything
+./scripts/test-all.sh
+```
 
 ## Security Considerations
 
@@ -116,7 +168,7 @@ Each step has:
 
 ## Extension Points
 
-1. **New Step Types**: Add variant to `StepConfig` enum, implement in steps.rs
+1. **New Step Types**: Add variant to `StepKind` enum, implement in vwf-steps
 2. **LLM Providers**: Implement `LlmClient` trait (mock, Claude Code CLI, API)
 3. **Output Formats**: Extend `RunReport` for different consumers
 

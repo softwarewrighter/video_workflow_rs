@@ -1,0 +1,29 @@
+[workspace]
+resolver = "2"
+members = [
+  "crates/vwf-config",
+  "crates/vwf-render",
+  "crates/vwf-steps",
+  "crates/vwf-core",
+]
+
+[workspace.package]
+edition = "2024"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/softwarewrighter/vwf-engine"
+authors = ["Video Workflow Team"]
+
+[workspace.dependencies]
+anyhow = "1"
+thiserror = "1"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+serde_yaml = "0.9"
+regex = "1"
+chrono = { version = "0.4", default-features = false, features = ["clock", "serde"] }
+uuid = { version = "1", features = ["v4", "serde"] }
+
+# Internal dependencies (path to foundation component)
+vwf-types = { path = "../vwf-foundation/crates/vwf-types" }
+vwf-runtime = { path = "../vwf-foundation/crates/vwf-runtime" }
+vwf-dag = { path = "../vwf-foundation/crates/vwf-dag" }

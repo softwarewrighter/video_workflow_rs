@@ -1,0 +1,21 @@
+[package]
+name = "vwf-core"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+description = "Workflow engine orchestration for VWF"
+
+[dependencies]
+anyhow.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+chrono.workspace = true
+uuid.workspace = true
+vwf-runtime.workspace = true
+vwf-config = { path = "../vwf-config" }
+vwf-render = { path = "../vwf-render" }
+vwf-steps = { path = "../vwf-steps" }
+
+[dev-dependencies]
+tempfile = "3"
+serde_yaml = "0.9"
