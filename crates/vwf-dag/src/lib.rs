@@ -13,5 +13,5 @@ mod task;
 
 pub use artifact::{Artifact, ArtifactId, ArtifactStatus};
 pub use scheduler::{Scheduler, SchedulerEvent};
-pub use state::{WorkflowState, StateStore};
+pub use state::{CheckpointStatus, StateStore, WorkflowState};
 pub use task::{Task, TaskId, TaskStatus, Constraint, InputSpec, OutputSpec};
