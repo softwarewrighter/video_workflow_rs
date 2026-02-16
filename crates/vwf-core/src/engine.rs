@@ -8,7 +8,7 @@ use std::time::Instant;
 use uuid::Uuid;
 
 use crate::config::{StepConfig, WorkflowConfig};
-use crate::runtime::Runtime;
+use vwf_runtime::Runtime;
 use crate::steps::execute_step;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -116,7 +116,7 @@ fn fail_workflow(run_id: Uuid, name: &str, started: DateTime<Utc>, mut steps: Ve
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::runtime::{FsRuntime, MockLlmClient};
+    use vwf_runtime::{FsRuntime, MockLlmClient};
     use tempfile::TempDir;
 
     #[test]

@@ -11,7 +11,7 @@ use anyhow::Result;
 use std::collections::BTreeMap;
 
 use crate::config::{StepConfig, StepKind};
-use crate::runtime::Runtime;
+use vwf_runtime::Runtime;
 use context::StepCtx;
 
 /// Execute a single step with dependency injection via Runtime trait.

@@ -1525,6 +1525,26 @@ dependencies = [
  "thiserror",
  "tracing",
  "uuid",
+ "vwf-runtime",
+]
+
+[[package]]
+name = "vwf-dag"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "chrono",
+ "serde",
+ "serde_json",
+ "tempfile",
+]
+
+[[package]]
+name = "vwf-runtime"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "tempfile",
 ]
 
 [[package]]

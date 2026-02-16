@@ -5,7 +5,7 @@ use serde::Deserialize;
 use serde_json::Value;
 
 use super::context::StepCtx;
-use crate::runtime::CmdOut;
+use vwf_runtime::CmdOut;
 
 #[derive(Deserialize)]
 struct Payload {
@@ -51,7 +51,7 @@ fn write_capture(ctx: &mut StepCtx<'_>, path: &str, out: &CmdOut) -> Result<()> 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::runtime::{DryRunRuntime, MockLlmClient};
+    use vwf_runtime::{DryRunRuntime, MockLlmClient};
     use std::collections::BTreeMap;
 
     #[test]

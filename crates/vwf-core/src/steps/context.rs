@@ -3,7 +3,7 @@
 use anyhow::Result;
 use std::collections::BTreeMap;
 
-use crate::runtime::Runtime;
+use vwf_runtime::Runtime;
 
 /// Execution context passed to all step handlers.
 pub struct StepCtx<'a> {

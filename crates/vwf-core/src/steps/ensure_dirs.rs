@@ -23,7 +23,7 @@ pub fn execute(ctx: &mut StepCtx<'_>, payload: &Value) -> Result<()> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::runtime::{DryRunRuntime, MockLlmClient};
+    use vwf_runtime::{DryRunRuntime, MockLlmClient};
     use std::collections::BTreeMap;
 
     #[test]

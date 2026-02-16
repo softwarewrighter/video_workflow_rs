@@ -1,0 +1,15 @@
+[package]
+name = "vwf-dag"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+description = "DAG-based reactive workflow scheduler for VWF"
+
+[dependencies]
+anyhow.workspace = true
+chrono.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+
+[dev-dependencies]
+tempfile = "3"

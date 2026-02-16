@@ -242,7 +242,7 @@ impl Default for Scheduler {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::dag::{Artifact, OutputSpec};
+    use crate::{Artifact, OutputSpec};
 
     fn create_test_state() -> WorkflowState {
         let mut state = WorkflowState::new("test", 1);

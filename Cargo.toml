@@ -1,6 +1,8 @@
 [workspace]
 resolver = "2"
 members = [
+  "crates/vwf-runtime",
+  "crates/vwf-dag",
   "crates/vwf-core",
   "crates/vwf-cli",
   "crates/vwf-web",

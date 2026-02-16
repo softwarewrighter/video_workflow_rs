@@ -5,8 +5,7 @@ use anyhow::{Context, Result};
 use clap::{Parser, Subcommand};
 use tracing_subscriber::EnvFilter;
 
-use vwf_core::runtime::{DryRunRuntime, FsRuntime, MockLlmClient};
-use vwf_core::{Runner, WorkflowConfig};
+use vwf_core::{DryRunRuntime, FsRuntime, LlmClient, MockLlmClient, Runner, WorkflowConfig};
 
 const LONG_ABOUT: &str = "\
 Video Workflow Framework CLI - Repeatable video production workflows.
@@ -119,7 +118,7 @@ fn run_workflow(args: RunArgs) -> Result<()> {
     }
 }
 
-fn make_llm_client(canned: Option<String>) -> Box<dyn vwf_core::runtime::LlmClient> {
+fn make_llm_client(canned: Option<String>) -> Box<dyn LlmClient> {
     match canned {
         Some(s) => Box::new(MockLlmClient::canned(s)),
         None => Box::new(MockLlmClient::echo()),
@@ -128,7 +127,7 @@ fn make_llm_client(canned: Option<String>) -> Box<dyn vwf_core::runtime::LlmClie
 
 fn run_dry(
     workdir: &PathBuf,
-    llm: Box<dyn vwf_core::runtime::LlmClient>,
+    llm: Box<dyn LlmClient>,
     cfg: &WorkflowConfig,
     vars: BTreeMap<String, String>,
 ) -> Result<()> {
@@ -152,7 +151,7 @@ fn print_dry_run_plan(rt: &DryRunRuntime) {
 
 fn run_real(
     workdir: &PathBuf,
-    llm: Box<dyn vwf_core::runtime::LlmClient>,
+    llm: Box<dyn LlmClient>,
     cfg: &WorkflowConfig,
     vars: BTreeMap<String, String>,
     allow: Vec<String>,

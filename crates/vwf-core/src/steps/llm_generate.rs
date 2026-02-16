@@ -5,7 +5,7 @@ use serde::Deserialize;
 use serde_json::Value;
 
 use super::context::StepCtx;
-use crate::runtime::LlmReq;
+use vwf_runtime::LlmReq;
 
 #[derive(Deserialize)]
 struct Payload {
@@ -45,7 +45,7 @@ fn inject_mock_response(user: String, mock: Option<String>) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::runtime::{DryRunRuntime, MockLlmClient};
+    use vwf_runtime::{DryRunRuntime, MockLlmClient};
     use std::collections::BTreeMap;
 
     #[test]
