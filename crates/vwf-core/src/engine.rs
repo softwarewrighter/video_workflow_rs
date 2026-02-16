@@ -1,3 +1,5 @@
+//! Workflow engine: executes steps sequentially.
+
 use anyhow::{Context, Result};
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
@@ -5,7 +7,7 @@ use std::collections::BTreeMap;
 use std::time::Instant;
 use uuid::Uuid;
 
-use crate::config::WorkflowConfig;
+use crate::config::{StepConfig, WorkflowConfig};
 use crate::runtime::Runtime;
 use crate::steps::execute_step;
 
@@ -41,72 +43,74 @@ pub enum StepStatus {
 pub struct Runner;
 
 impl Runner {
-    pub fn run(
-        rt: &mut dyn Runtime,
-        cfg: &WorkflowConfig,
-        extra_vars: BTreeMap<String, String>,
-    ) -> Result<RunReport> {
-        let started_at = Utc::now();
-        let run_id = Uuid::new_v4();
-        let mut vars = cfg.vars.clone();
-        vars.extend(extra_vars);
-
-        let mut steps_report = vec![];
-
-        for step in &cfg.steps {
-            let s_started = Utc::now();
-            let t0 = Instant::now();
-            let res = execute_step(rt, &vars, step);
-            let dur = t0.elapsed().as_millis();
-            let s_finished = Utc::now();
-
-            match res {
-                Ok(()) => steps_report.push(StepReport {
-                    id: step.id.clone(),
-                    kind: format!("{:?}", step.kind),
-                    status: StepStatus::Ok,
-                    started_at: s_started,
-                    finished_at: s_finished,
-                    error: None,
-                    duration_ms: dur,
-                }),
-                Err(e) => {
-                    steps_report.push(StepReport {
-                        id: step.id.clone(),
-                        kind: format!("{:?}", step.kind),
-                        status: StepStatus::Failed,
-                        started_at: s_started,
-                        finished_at: s_finished,
-                        error: Some(e.to_string()),
-                        duration_ms: dur,
-                    });
-                    let report = RunReport {
-                        run_id,
-                        workflow_name: cfg.name.clone(),
-                        started_at,
-                        finished_at: Utc::now(),
-                        steps: steps_report,
-                        vars,
-                    };
-                    return Err(anyhow::anyhow!(
-                        "Workflow failed at step `{}`: {}",
-                        step.id,
-                        e
-                    ))
-                    .context(serde_json::to_string_pretty(&report).unwrap_or_default());
-                }
-            }
-        }
-
-        Ok(RunReport {
-            run_id,
-            workflow_name: cfg.name.clone(),
-            started_at,
-            finished_at: Utc::now(),
-            steps: steps_report,
-            vars,
-        })
+    pub fn run(rt: &mut dyn Runtime, cfg: &WorkflowConfig, extra: BTreeMap<String, String>) -> Result<RunReport> {
+        run_workflow(rt, cfg, extra)
     }
+}
+
+/// Pure function to run a workflow.
+pub fn run_workflow(rt: &mut dyn Runtime, cfg: &WorkflowConfig, extra: BTreeMap<String, String>) -> Result<RunReport> {
+    let run_id = Uuid::new_v4();
+    let started_at = Utc::now();
+    let vars = merge_vars(&cfg.vars, extra);
+    execute_steps(rt, &vars, &cfg.steps, run_id, &cfg.name, started_at)
+}
+
+fn merge_vars(base: &BTreeMap<String, String>, extra: BTreeMap<String, String>) -> BTreeMap<String, String> {
+    let mut vars = base.clone();
+    vars.extend(extra);
+    vars
+}
+
+fn execute_steps(
+    rt: &mut dyn Runtime,
+    vars: &BTreeMap<String, String>,
+    steps: &[StepConfig],
+    run_id: Uuid,
+    name: &str,
+    started: DateTime<Utc>,
+) -> Result<RunReport> {
+    let mut reports = Vec::new();
+    for step in steps {
+        let report = run_step(rt, vars, step);
+        if matches!(report.status, StepStatus::Failed) {
+            return fail_workflow(run_id, name, started, reports, report, vars);
+        }
+        reports.push(report);
+    }
+    Ok(make_run_report(run_id, name, started, reports, vars))
+}
+
+fn run_step(rt: &mut dyn Runtime, vars: &BTreeMap<String, String>, step: &StepConfig) -> StepReport {
+    let started = Utc::now();
+    let t0 = Instant::now();
+    let result = execute_step(rt, vars, step);
+    make_step_report(step, started, t0.elapsed().as_millis(), result)
+}
+
+fn make_step_report(step: &StepConfig, started: DateTime<Utc>, dur: u128, result: Result<()>) -> StepReport {
+    StepReport {
+        id: step.id.clone(),
+        kind: format!("{:?}", step.kind),
+        status: if result.is_ok() { StepStatus::Ok } else { StepStatus::Failed },
+        started_at: started,
+        finished_at: Utc::now(),
+        error: result.err().map(|e| e.to_string()),
+        duration_ms: dur,
+    }
+}
+
+fn make_run_report(run_id: Uuid, name: &str, started: DateTime<Utc>, steps: Vec<StepReport>, vars: &BTreeMap<String, String>) -> RunReport {
+    RunReport { run_id, workflow_name: name.to_string(), started_at: started, finished_at: Utc::now(), steps, vars: vars.clone() }
+}
+
+fn fail_workflow(run_id: Uuid, name: &str, started: DateTime<Utc>, mut steps: Vec<StepReport>, failed: StepReport, vars: &BTreeMap<String, String>) -> Result<RunReport> {
+    let step_id = failed.id.clone();
+    let error_msg = failed.error.clone().unwrap_or_default();
+    steps.push(failed);
+    let report = make_run_report(run_id, name, started, steps, vars);
+    Err(anyhow::anyhow!("Workflow failed at step `{}`: {}", step_id, error_msg))
+        .context(serde_json::to_string_pretty(&report).unwrap_or_default())
 }
 
 #[cfg(test)]
@@ -117,27 +121,12 @@ mod tests {
 
     #[test]
     fn runner_writes_files() {
-        let cfg: WorkflowConfig = serde_yaml::from_str(
-            r#"
-version: 1
-name: test
-steps:
-  - id: d
-    kind: ensure_dirs
-    dirs: ["work"]
-  - id: w
-    kind: write_file
-    path: "work/hello.txt"
-    content: "hi"
-"#,
-        )
-        .unwrap();
-
+        let yaml = "version: 1\nname: test\nsteps:\n  - id: d\n    kind: ensure_dirs\n    dirs: [\"work\"]\n  - id: w\n    kind: write_file\n    path: \"work/hello.txt\"\n    content: \"hi\"";
+        let cfg: WorkflowConfig = serde_yaml::from_str(yaml).unwrap();
         let tmp = TempDir::new().unwrap();
         let mut rt = FsRuntime::new(tmp.path(), Box::new(MockLlmClient::echo()));
-        let rep = Runner::run(&mut rt, &cfg, BTreeMap::new()).unwrap();
+        let rep = run_workflow(&mut rt, &cfg, BTreeMap::new()).unwrap();
         assert_eq!(rep.workflow_name, "test");
-        let s = rt.read_text("work/hello.txt").unwrap();
-        assert_eq!(s, "hi");
+        assert_eq!(rt.read_text("work/hello.txt").unwrap(), "hi");
     }
 }
