@@ -1,0 +1,6 @@
+# Generated artifacts
+.venv/
+work/
+output/
+run.json
+tts_client.py

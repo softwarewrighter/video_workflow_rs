@@ -1,0 +1,66 @@
+version: 1
+name: "VWF Promo: Video Workflow Framework"
+description: >
+  A YouTube Short promoting the Video Workflow Framework.
+  Showcases actual features: YAML workflows, TTS voice cloning, resume support.
+
+vars:
+  project_name: "Video Workflow Framework"
+  duration_secs: "45"
+  style: "confident, technical, direct"
+
+steps:
+  - id: ensure_dirs
+    kind: ensure_dirs
+    dirs:
+      - "work/scripts"
+      - "work/audio"
+      - "work/slides"
+      - "work/clips"
+      - "output"
+
+  - id: write_hook
+    kind: write_file
+    path: "work/scripts/01-hook.txt"
+    content: |
+      Making videos takes forever. Scripts, voice overs, slides, assembly. What if you could automate all of it?
+
+  - id: write_problem
+    kind: write_file
+    path: "work/scripts/02-problem.txt"
+    content: |
+      Manual video production is slow and error prone. Miss a step, and you're starting over. Forget a setting, and the output is wrong.
+
+  - id: write_solution
+    kind: write_file
+    path: "work/scripts/03-solution.txt"
+    content: |
+      VWF is workflows as code. Define your steps in YAML. Scripts, TTS with voice cloning, video assembly. All automated, all reproducible.
+
+  - id: write_features
+    kind: write_file
+    path: "work/scripts/04-features.txt"
+    content: |
+      Resume interrupted work. Skip completed steps. Validate outputs automatically. Built in Rust for speed.
+
+  - id: write_cta
+    kind: write_file
+    path: "work/scripts/05-cta.txt"
+    content: |
+      VWF. Automate your video pipeline. Check out the repo on GitHub.
+
+  - id: write_manifest
+    kind: write_file
+    path: "output/manifest.txt"
+    content: |
+      VWF Promo - Scripts Complete
+      =============================
+      Project: {{project_name}}
+      Format: YouTube Short (1080x1920 vertical)
+
+      Scripts:
+      - work/scripts/01-hook.txt
+      - work/scripts/02-problem.txt
+      - work/scripts/03-solution.txt
+      - work/scripts/04-features.txt
+      - work/scripts/05-cta.txt
