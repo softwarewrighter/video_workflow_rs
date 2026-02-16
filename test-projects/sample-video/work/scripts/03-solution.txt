@@ -1,0 +1,1 @@
+A workflow is a sequence of automated steps. Define it once, runn it reliably every time.

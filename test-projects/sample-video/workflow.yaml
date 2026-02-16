@@ -1,0 +1,114 @@
+version: 1
+name: "Sample Video: What is a Workflow?"
+description: >
+  Produces narration scripts for a 30-45 second explainer video.
+  Phase 1: Script generation only. TTS and video assembly added in Phase 2.
+
+vars:
+  project_name: "What is a Workflow?"
+  duration_secs: "45"
+  style: "clear, friendly, professional"
+  audience: "developers new to automation"
+
+steps:
+  # Setup directories
+  - id: ensure_dirs
+    kind: ensure_dirs
+    dirs:
+      - "work/scripts"
+      - "work/audio"
+      - "output"
+
+  # Generate narration prompt
+  - id: write_prompt
+    kind: write_file
+    path: "work/prompt.txt"
+    content: |
+      Write narration for a {{duration_secs}}-second explainer video.
+      Topic: {{project_name}}
+      Audience: {{audience}}
+      Style: {{style}}
+
+      Structure (5 sections, ~9 seconds each):
+      1. HOOK: Question that grabs attention
+      2. PROBLEM: Pain point of manual processes
+      3. SOLUTION: What a workflow does
+      4. BENEFIT: Why it matters
+      5. CTA: Call to action
+
+      Output format - one section per block:
+      HOOK:
+      [1-2 sentences]
+
+      PROBLEM:
+      [1-2 sentences]
+
+      SOLUTION:
+      [1-2 sentences]
+
+      BENEFIT:
+      [1-2 sentences]
+
+      CTA:
+      [1-2 sentences]
+
+  # Generate script with LLM (mock for now)
+  - id: generate_script
+    kind: llm_generate
+    system: "You write clear, concise video narration. Each section is 1-2 sentences max."
+    user_prompt_path: "work/prompt.txt"
+    output_path: "work/full_script.txt"
+    provider: "mock"
+    mock_response: |
+      HOOK:
+      Ever find yourself doing the same steps over and over? There's a better way.
+
+      PROBLEM:
+      Manual processes are slow, error-prone, and tedious. One missed step can break everything.
+
+      SOLUTION:
+      A workflow is a sequence of automated steps. Define it once, run it reliably every time.
+
+      BENEFIT:
+      Save hours of repetitive work. Reduce errors. Focus on what actually matters—your creative work.
+
+      CTA:
+      Try VWF. Workflows as code. Your future self will thank you.
+
+  # Split script into individual section files
+  - id: split_sections
+    kind: split_sections
+    input_path: "work/full_script.txt"
+    outputs:
+      - heading: "HOOK:"
+        path: "work/scripts/01-hook.txt"
+      - heading: "PROBLEM:"
+        path: "work/scripts/02-problem.txt"
+      - heading: "SOLUTION:"
+        path: "work/scripts/03-solution.txt"
+      - heading: "BENEFIT:"
+        path: "work/scripts/04-benefit.txt"
+      - heading: "CTA:"
+        path: "work/scripts/05-cta.txt"
+
+  # Write production manifest
+  - id: write_manifest
+    kind: write_file
+    path: "output/manifest.txt"
+    content: |
+      Sample Video Production - Phase 1 Complete
+      ===========================================
+      Project: {{project_name}}
+      Duration: {{duration_secs}} seconds
+
+      Generated Scripts:
+      - work/scripts/01-hook.txt
+      - work/scripts/02-problem.txt
+      - work/scripts/03-solution.txt
+      - work/scripts/04-benefit.txt
+      - work/scripts/05-cta.txt
+
+      Next Steps (Phase 2):
+      1. Install edge-tts: pip install edge-tts
+      2. Generate audio: edge-tts --file work/scripts/01-hook.txt --write-media work/audio/01-hook.mp3
+      3. Assemble video with ffmpeg

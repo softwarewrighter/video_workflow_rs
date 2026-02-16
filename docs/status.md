@@ -1,8 +1,8 @@
 # Project Status
 
-## Current State: Ready for Sample Video Production
+## Current State: Sample Video Phase 1 Complete
 
-All components pass sw-checklist (0 failures). The framework is ready to produce a sample video to validate the end-to-end workflow.
+All components pass sw-checklist (0 failures). Phase 1 of sample video production is complete - scripts generated successfully.
 
 ## Last Updated: 2026-02-15
 
@@ -16,6 +16,8 @@ All components pass sw-checklist (0 failures). The framework is ready to produce
 | M4: Web UI | Skeleton | 15% (footer added) |
 | M5: Component Restructure | Complete | 100% |
 | M6: sw-checklist Compliance | Complete | 100% |
+| M7: Sample Video Phase 1 | Complete | 100% |
+| M8: Sample Video Phase 2 | Complete | 100% |
 
 ## Component Structure
 
@@ -72,15 +74,33 @@ cd components/vwf-foundation && ./scripts/build-all.sh
 | vwf-apps | 0 | Integration tests pending |
 | **Total** | **20** | All passing |
 
+## Sample Video Project
+
+**Location:** `test-projects/sample-video/`
+
+**Generated Artifacts:**
+- `work/scripts/*.txt` - 5 narration script sections
+- `work/audio/*.wav` - 5 voice-cloned audio files (~30 sec total)
+- `output/manifest.txt` - Production summary
+
+**Audio Durations (VoxCPM voice clone):**
+- 01-hook.wav: 4.2 sec
+- 02-problem.wav: 5.8 sec
+- 03-solution.wav: 6.7 sec
+- 04-benefit.wav: 7.0 sec
+- 05-cta.wav: 5.8 sec
+
 ## Recent Changes
 
-- All components pass sw-checklist (0 failures, warnings only)
+- **Phase 2 Complete:** Voice-cloned audio with VoxCPM (~30 sec total)
+- **Phase 1 Complete:** Sample video scripts generated via workflow
+- Fixed llm_generate bug that appended user prompt to mock response
+- All components pass sw-checklist (0 failures)
 - Added footer to vwf-web with copyright/license info
 - Reduced function counts across all crates to meet 7-function limit
 - Split vwf-cli and vwf-web into smaller modules
 - Consolidated vwf-dag scheduler and state modules
 - Restructured into 3 top-level components (future git submodules)
-- Clear dependency hierarchy: foundation -> engine -> apps
 
 ## Dependency Graph
 
@@ -113,26 +133,26 @@ vwf-cli + vwf-web (L5)
 ### Goal
 Produce a complete sample video using the VWF framework to validate the end-to-end workflow.
 
-### Phase 1: Prepare Assets
-1. Create a sample project in `test-projects/sample-video/`
-2. Write a simple script topic (30-60 seconds of content)
-3. Gather placeholder assets (images, background music)
+### Phase 1: Script Generation ✅ COMPLETE
+- Created `test-projects/sample-video/` with workflow.yaml
+- Generated 5 script sections via mock LLM + split_sections
+- Output: work/scripts/{01-hook,02-problem,03-solution,04-benefit,05-cta}.txt
 
-### Phase 2: Workflow Execution
-1. Create workflow YAML for the sample video
-2. Run with mock LLM to generate narration script
-3. Integrate TTS step (e.g., edge-tts or similar)
-4. Add ffmpeg steps for video assembly
+### Phase 2: TTS Integration ✅ COMPLETE
+- Using VoxCPM voice cloning via Gradio client (curiosity:7860)
+- Reference: mike-medium-ref-1.wav (63s) with matching transcript
+- Generated voice-cloned audio for all 5 script sections
+- Output: work/audio/*.wav (~30 seconds total)
 
 ### Phase 3: Real LLM Integration
 1. Implement Claude API adapter in vwf-runtime
 2. Replace mock LLM with real generation
 3. Test full workflow with actual AI-generated content
 
-### Phase 4: Polish
-1. Add integration tests based on sample video workflow
-2. Document the sample video production process
-3. Create reusable workflow templates
+### Phase 4: Video Assembly
+1. Add ffmpeg steps for image+audio composition
+2. Concatenate segments into final video
+3. Add intro/outro, transitions, background music
 
 ## Commands
 

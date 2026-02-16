@@ -2,7 +2,7 @@
 
 use std::collections::{HashMap, HashSet};
 
-use crate::{ArtifactStatus, InputSpec, Task, TaskId, TaskStatus, WorkflowState};
+use crate::{ArtifactStatus, InputSpec, Task, TaskStatus, WorkflowState};
 
 pub fn update_all_task_statuses(state: &mut WorkflowState) {
     let available: HashSet<_> = state.artifacts.values()

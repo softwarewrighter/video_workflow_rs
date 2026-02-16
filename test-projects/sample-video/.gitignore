@@ -1,0 +1,16 @@
+# Virtual environment
+.venv/
+
+# Generated runtime output
+run.json
+work/prompt.txt
+work/full_script.txt
+
+# Generated audio/video files
+work/audio/
+work/clips/
+work/slides/
+output/
+
+# Keep scripts (text files)
+!work/scripts/

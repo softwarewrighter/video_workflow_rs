@@ -37,7 +37,7 @@ fn read_user_prompt(ctx: &mut StepCtx<'_>, path: &str) -> Result<String> {
 
 fn inject_mock_response(user: String, mock: Option<String>) -> String {
     match mock {
-        Some(m) => format!("[MOCK_RESPONSE]\n{}\n\n{}", m, user),
+        Some(m) => m,
         None => user,
     }
 }

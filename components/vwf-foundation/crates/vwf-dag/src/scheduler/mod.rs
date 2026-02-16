@@ -2,9 +2,9 @@
 
 mod helpers;
 
-use std::collections::{BTreeSet, HashSet};
+use std::collections::BTreeSet;
 
-use crate::{InputSpec, Task, TaskId, TaskStatus, WorkflowState};
+use crate::{Task, TaskId, WorkflowState};
 
 /// Events emitted by the scheduler.
 #[derive(Debug, Clone)]
