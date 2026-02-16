@@ -1,0 +1,96 @@
+version: 1
+name: "Sample Short: VWF in 30 Seconds"
+description: >
+  Produces a YouTube Short (vertical 1080x1920, <60 sec).
+  Quick 3-section format: hook, content, CTA.
+
+vars:
+  project_name: "VWF in 30 Seconds"
+  duration_secs: "30"
+  style: "energetic, punchy, direct"
+  audience: "developers curious about automation"
+
+steps:
+  # Setup directories
+  - id: ensure_dirs
+    kind: ensure_dirs
+    dirs:
+      - "work/scripts"
+      - "work/audio"
+      - "work/slides"
+      - "work/clips"
+      - "output"
+
+  # Generate narration prompt
+  - id: write_prompt
+    kind: write_file
+    path: "work/prompt.txt"
+    content: |
+      Write narration for a {{duration_secs}}-second YouTube Short.
+      Topic: {{project_name}}
+      Audience: {{audience}}
+      Style: {{style}}
+
+      Structure (3 sections, ~10 seconds each):
+      1. HOOK: Attention-grabbing question or statement
+      2. CONTENT: The key insight or value
+      3. CTA: Call to action
+
+      Output format - one section per block:
+      HOOK:
+      [1-2 punchy sentences]
+
+      CONTENT:
+      [2-3 sentences with the core message]
+
+      CTA:
+      [1 sentence call to action]
+
+  # Generate script with LLM (mock for now)
+  - id: generate_script
+    kind: llm_generate
+    system: "You write punchy, energetic video narration for YouTube Shorts. Keep it fast-paced."
+    user_prompt_path: "work/prompt.txt"
+    output_path: "work/full_script.txt"
+    provider: "mock"
+    mock_response: |
+      HOOK:
+      Still writing the same scripts by hand? What if your workflow wrote itself?
+
+      CONTENT:
+      VWF turns your process into code. Define steps in YAML, hit run, and watch it go. Scripts, TTS, video assembly, all automated.
+
+      CTA:
+      Try VWF. Automate everything.
+
+  # Split script into individual section files
+  - id: split_sections
+    kind: split_sections
+    input_path: "work/full_script.txt"
+    outputs:
+      - heading: "HOOK:"
+        path: "work/scripts/01-hook.txt"
+      - heading: "CONTENT:"
+        path: "work/scripts/02-content.txt"
+      - heading: "CTA:"
+        path: "work/scripts/03-cta.txt"
+
+  # Write production manifest
+  - id: write_manifest
+    kind: write_file
+    path: "output/manifest.txt"
+    content: |
+      Sample Short Production - Scripts Complete
+      ===========================================
+      Project: {{project_name}}
+      Format: YouTube Short (1080x1920 vertical)
+      Target Duration: {{duration_secs}} seconds
+
+      Generated Scripts:
+      - work/scripts/01-hook.txt
+      - work/scripts/02-content.txt
+      - work/scripts/03-cta.txt
+
+      Next Steps:
+      1. Run generate-tts.sh for voice-cloned audio
+      2. Run build-video.sh to create vertical slides and assemble

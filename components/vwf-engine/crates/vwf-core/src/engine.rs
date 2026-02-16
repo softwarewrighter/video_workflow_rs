@@ -57,7 +57,7 @@ fn execute_steps(rt: &mut dyn Runtime, vars: &BTreeMap<String, String>, steps: &
 }
 
 fn should_skip(rt: &dyn Runtime, vars: &BTreeMap<String, String>, step: &StepConfig) -> bool {
-    let Some(ref output) = step.output_path else { return false };
+    let Some(ref output) = step.resume_output else { return false };
     let Ok(path) = render_template(output, vars) else { return false };
     let full_path = rt.workdir().join(&path);
     output_is_valid(&full_path)

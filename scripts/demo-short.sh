@@ -1,16 +1,18 @@
 #!/bin/bash
-# Demo: Generate a sample short (~32 sec)
-# This script runs the complete video generation pipeline
+# Demo: Generate a YouTube Short (~30 sec, 1080x1920 vertical)
+# This script runs the complete video generation pipeline for vertical shorts
 set -e
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-PROJECT_DIR="$REPO_DIR/test-projects/sample-video"
+PROJECT_DIR="$REPO_DIR/test-projects/sample-short"
 
-echo "=========================================="
-echo "VWF Demo: Generate Sample Short (~32 sec)"
-echo "=========================================="
+echo "=============================================="
+echo "VWF Demo: Generate YouTube Short"
+echo "=============================================="
 echo
-echo "Project: What is a Workflow?"
+echo "Project: VWF in 30 Seconds"
+echo "Format: 1080x1920 vertical (9:16)"
+echo "Target: < 60 seconds"
 echo "Location: $PROJECT_DIR"
 echo
 
@@ -21,20 +23,11 @@ echo
 
 # Step 2: Generate TTS audio
 echo "Step 2/4: Generating voice-cloned TTS audio..."
-if [[ ! -f "$PROJECT_DIR/.venv/bin/activate" ]]; then
-    echo "  Creating Python venv..."
-    uv venv "$PROJECT_DIR/.venv"
-fi
-source "$PROJECT_DIR/.venv/bin/activate"
-if ! python -c "import gradio_client" 2>/dev/null; then
-    echo "  Installing gradio_client..."
-    uv pip install gradio_client
-fi
 "$PROJECT_DIR/scripts/generate-tts.sh"
 echo
 
 # Step 3: Build video
-echo "Step 3/4: Building video (slides + audio + concat)..."
+echo "Step 3/4: Building vertical video (1080x1920)..."
 "$PROJECT_DIR/scripts/build-video.sh"
 echo
 
@@ -45,7 +38,10 @@ PREVIEW="$PROJECT_DIR/output/preview-sample-short.mp4"
 if [[ -f "$SRC" ]]; then
     mv "$SRC" "$PREVIEW"
     dur=$(ffprobe -i "$PREVIEW" -show_entries format=duration -v quiet -of csv="p=0")
-    printf "Preview: %s (%.1f seconds)\n" "$PREVIEW" "$dur"
+    dims=$(ffprobe -i "$PREVIEW" -v error -select_streams v:0 -show_entries stream=width,height -of csv=p=0)
+    printf "Preview: %s\n" "$PREVIEW"
+    printf "Duration: %.1f seconds\n" "$dur"
+    echo "Dimensions: $dims (vertical)"
     open "$PREVIEW"
 else
     echo "ERROR: Preview not found at $SRC"
@@ -53,6 +49,6 @@ else
 fi
 
 echo
-echo "=========================================="
-echo "Demo complete!"
-echo "=========================================="
+echo "=============================================="
+echo "YouTube Short demo complete!"
+echo "=============================================="

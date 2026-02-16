@@ -7,8 +7,9 @@ pub struct StepConfig {
     pub id: String,
     pub kind: StepKind,
     /// Output path for resume checking (optional).
+    /// Use a separate field name to avoid conflicts with step payload fields.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub output_path: Option<String>,
+    pub resume_output: Option<String>,
     #[serde(flatten)]
     pub payload: serde_json::Value,
 }

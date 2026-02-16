@@ -22,12 +22,19 @@ All components pass sw-checklist (0 failures). Full video pipeline working: scri
 ## Quick Start
 
 ```bash
-# Generate a sample short (~32 sec)
+# Generate a YouTube Short (vertical 1080x1920, ~30 sec)
 ./scripts/demo-short.sh
 
-# Generate a sample explainer (longer format)
+# Generate an explainer video (landscape 1920x1080, ~32 sec)
 ./scripts/demo-explainer.sh
 ```
+
+## Video Formats
+
+| Format | Dimensions | Orientation | Duration |
+|--------|-----------|-------------|----------|
+| **YouTube Short** | 1080x1920 | Vertical (9:16) | < 60 sec (max 3 min) |
+| **Explainer** | 1920x1080 | Landscape (16:9) | 1.5-30 min (ideal 5-10) |
 
 ## New Features
 
@@ -62,7 +69,7 @@ Skip steps whose outputs already exist:
 vwf run workflow.yaml --workdir work --resume
 ```
 
-Steps declare `output_path` for completion checking. Media files validated via ffprobe duration.
+Steps declare `resume_output` for completion checking. Media files validated via ffprobe duration.
 
 ## Component Structure
 
@@ -83,21 +90,28 @@ components/
     +-- vwf-web
 ```
 
-## Sample Video Project
+## Test Projects
+
+### sample-short (YouTube Short)
+
+**Location:** `test-projects/sample-short/`
+**Format:** 1080x1920 vertical (9:16)
+**Duration:** ~30 seconds
+
+3-section structure: Hook, Content, CTA. Uses ImageMagick for vertical slides.
+
+### sample-video (Explainer)
 
 **Location:** `test-projects/sample-video/`
+**Format:** 1920x1080 landscape (16:9)
+**Duration:** ~32 seconds
 
-**Demo Scripts:**
+5-section structure: Hook, Problem, Solution, Benefit, CTA. Uses vid-slide for slides.
+
+**Common Scripts (in each project):**
 - `scripts/generate-tts.sh` - Generate voice-cloned audio
 - `scripts/verify-tts.sh` - Verify with Whisper
 - `scripts/build-video.sh` - Assemble final video
-
-**Generated Artifacts:**
-- `work/scripts/*.txt` - 5 narration sections
-- `work/audio/*.wav` - Voice-cloned audio (~32 sec)
-- `work/slides/*.png` - Title slides
-- `work/clips/*.mp4` - Video segments
-- `output/preview.mp4` - Final video
 
 ## Step Kinds
 
