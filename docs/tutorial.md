@@ -174,7 +174,7 @@ Generates images using FLUX.1 schnell via ComfyUI.
 |-------|----------|-------------|
 | `prompt` | Yes | Text prompt for image generation |
 | `output_path` | Yes | Where to save the image |
-| `orientation` | No | portrait (768x1344), landscape (1344x768), square (1024x1024) |
+| `orientation` | No | portrait (720x1280), landscape (1280x720), square (1024x1024) |
 | `width` | No | Custom width (overrides orientation) |
 | `height` | No | Custom height (overrides orientation) |
 | `seed` | No | Random seed for reproducibility |

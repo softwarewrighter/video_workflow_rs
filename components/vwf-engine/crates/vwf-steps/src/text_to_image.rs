@@ -46,13 +46,14 @@ pub fn execute(ctx: &mut StepCtx<'_>, payload: &Value) -> Result<()> {
     let server = ctx.render(&p.server)?;
     let orientation = ctx.render(&p.orientation)?;
 
-    // Determine dimensions
+    // Determine dimensions - exact aspect ratios, divisible by 8 for FLUX latent space
+    // 720x1280 is standard HD, exact 9:16/16:9, scales cleanly to 1080x1920/1920x1080
     let (width, height) = match (p.width, p.height) {
         (Some(w), Some(h)) => (w, h),
         _ => match orientation.as_str() {
-            "landscape" => (1344, 768),
+            "landscape" => (1280, 720),  // 16:9 - scales 1.5x to 1920x1080
             "square" => (1024, 1024),
-            _ => (768, 1344), // portrait default
+            _ => (720, 1280),  // 9:16 portrait - scales 1.5x to 1080x1920
         },
     };
 
@@ -158,14 +159,14 @@ mod tests {
         let script = image_gen_script(
             "http://localhost:8570",
             "A test prompt",
-            768,
-            1344,
+            720,
+            1280,
             42,
             "/tmp/out.png",
         );
         assert!(script.contains("flux1-schnell-fp8.safetensors"));
         assert!(script.contains("A test prompt"));
-        assert!(script.contains("768"));
-        assert!(script.contains("1344"));
+        assert!(script.contains("720"));
+        assert!(script.contains("1280"));
     }
 }

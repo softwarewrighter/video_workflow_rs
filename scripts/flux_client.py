@@ -16,10 +16,11 @@ import sys
 
 SERVER = "http://192.168.1.64:8570"
 
-# Resolution presets
+# Resolution presets - exact aspect ratios, divisible by 8 for FLUX latent space
+# 720x1280 is standard HD, exact 9:16/16:9, scales cleanly to 1080x1920/1920x1080
 RESOLUTIONS = {
-    "portrait": (768, 1344),   # 9:16 for YouTube Shorts
-    "landscape": (1344, 768),  # 16:9 for explainers
+    "portrait": (720, 1280),   # 9:16 for YouTube Shorts (scales 1.5x to 1080x1920)
+    "landscape": (1280, 720),  # 16:9 for explainers (scales 1.5x to 1920x1080)
     "square": (1024, 1024),
 }
 

@@ -5,3 +5,4 @@
 **/*.wasm
 **/*.js
 **/*.d.ts
+test-projects/flux-demo/
