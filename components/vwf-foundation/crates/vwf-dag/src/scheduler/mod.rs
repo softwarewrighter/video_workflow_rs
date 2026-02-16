@@ -1,11 +1,10 @@
 //! DAG scheduler with constraint enforcement.
 
-mod invalidation;
-mod status;
+mod helpers;
 
-use std::collections::BTreeSet;
+use std::collections::{BTreeSet, HashSet};
 
-use crate::{Task, TaskId, TaskStatus, WorkflowState};
+use crate::{InputSpec, Task, TaskId, TaskStatus, WorkflowState};
 
 /// Events emitted by the scheduler.
 #[derive(Debug, Clone)]
@@ -30,65 +29,39 @@ pub struct Scheduler {
 impl Scheduler {
     /// Update task statuses based on artifact availability.
     pub fn update_task_statuses(&self, state: &mut WorkflowState) {
-        let available = status::build_available_set(state);
-        let producers = status::build_producer_map(state);
-
-        for task in state.tasks.values_mut() {
-            if status::should_skip(task) {
-                continue;
-            }
-            let (can_run, waiting_on) = status::check_task_inputs(task, &available, &producers);
-            task.status = if can_run && waiting_on.is_empty() {
-                TaskStatus::Ready
-            } else {
-                TaskStatus::Blocked { waiting_on }
-            };
-        }
+        helpers::update_all_task_statuses(state);
     }
 
     /// Get tasks that can be started now, respecting constraints.
     pub fn get_runnable_tasks<'a>(&self, state: &'a WorkflowState) -> Vec<&'a Task> {
-        state.tasks.values().filter(|t| {
-            t.is_ready() && !self.is_blocked(t)
-        }).collect()
+        state.tasks.values().filter(|t| t.is_ready() && !self.is_blocked(t)).collect()
     }
 
-    fn is_blocked(&self, task: &Task) -> bool {
-        let group_blocked = task.constraints.sequential_group.as_ref()
-            .is_some_and(|g| self.occupied_groups.contains(g));
-        let resource_blocked = task.constraints.resource.as_ref()
-            .is_some_and(|r| self.occupied_resources.contains(r));
-        group_blocked || resource_blocked
-    }
-
+    /// Mark a task as started and reserve its resources.
     pub fn start_task(&mut self, task: &Task) {
         self.running.insert(task.id.clone());
-        if let Some(g) = &task.constraints.sequential_group {
-            self.occupied_groups.insert(g.clone());
-        }
-        if let Some(r) = &task.constraints.resource {
-            self.occupied_resources.insert(r.clone());
-        }
+        if let Some(g) = &task.constraints.sequential_group { self.occupied_groups.insert(g.clone()); }
+        if let Some(r) = &task.constraints.resource { self.occupied_resources.insert(r.clone()); }
     }
 
+    /// Mark a task as finished and release its resources.
     pub fn finish_task(&mut self, task: &Task) {
         self.running.remove(&task.id);
-        if let Some(g) = &task.constraints.sequential_group {
-            self.occupied_groups.remove(g);
-        }
-        if let Some(r) = &task.constraints.resource {
-            self.occupied_resources.remove(r);
-        }
+        if let Some(g) = &task.constraints.sequential_group { self.occupied_groups.remove(g); }
+        if let Some(r) = &task.constraints.resource { self.occupied_resources.remove(r); }
     }
 
-    pub fn running_count(&self) -> usize {
-        self.running.len()
-    }
+    /// Get number of currently running tasks.
+    pub fn running_count(&self) -> usize { self.running.len() }
 
     /// Invalidate artifacts downstream of a changed artifact.
     pub fn invalidate_downstream(state: &mut WorkflowState, changed: &str) {
-        let (artifacts, tasks) = invalidation::collect_targets(state, changed);
-        invalidation::reset_tasks(state, tasks);
-        invalidation::invalidate_artifacts(state, artifacts);
+        let invalidated = helpers::collect_invalidation_targets(state, changed);
+        helpers::apply_invalidations(state, invalidated);
+    }
+
+    fn is_blocked(&self, task: &Task) -> bool {
+        task.constraints.sequential_group.as_ref().is_some_and(|g| self.occupied_groups.contains(g))
+            || task.constraints.resource.as_ref().is_some_and(|r| self.occupied_resources.contains(r))
     }
 }

@@ -20,9 +20,7 @@ impl DryRunRuntime {
 }
 
 impl Runtime for DryRunRuntime {
-    fn workdir(&self) -> &Path {
-        &self.workdir
-    }
+    fn workdir(&self) -> &Path { &self.workdir }
 
     fn ensure_dir(&mut self, rel: &str) -> Result<()> {
         self.planned_dirs.push(rel.to_string());
@@ -35,23 +33,15 @@ impl Runtime for DryRunRuntime {
     }
 
     fn read_text(&self, rel: &str) -> Result<String> {
-        find_planned_write(&self.planned_writes, rel)
+        self.planned_writes.iter().rev()
+            .find(|(path, _)| path == rel)
+            .map(|(_, content)| content.clone())
+            .ok_or_else(|| anyhow::anyhow!("DryRunRuntime: file `{rel}` not found"))
     }
 
     fn run_command(&mut self, prog: &str, _args: &[String], _cwd: Option<&str>) -> Result<CmdOut> {
         Ok(CmdOut { status: 0, stdout: format!("[dry-run] would run {prog}"), stderr: String::new() })
     }
 
-    fn llm(&mut self) -> &mut dyn LlmClient {
-        self.llm.as_mut()
-    }
-}
-
-fn find_planned_write(writes: &[(String, String)], rel: &str) -> Result<String> {
-    for (path, content) in writes.iter().rev() {
-        if path == rel {
-            return Ok(content.clone());
-        }
-    }
-    anyhow::bail!("DryRunRuntime: file `{rel}` not found (not written during this run)")
+    fn llm(&mut self) -> &mut dyn LlmClient { self.llm.as_mut() }
 }

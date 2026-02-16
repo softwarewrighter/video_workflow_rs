@@ -1,6 +1,7 @@
 //! VWF Web UI - workflow configuration interface.
 
 mod components;
+mod defaults;
 
 use components::{VarEditor, WorkdirInput, WorkflowEditor};
 use serde::{Deserialize, Serialize};
@@ -13,86 +14,40 @@ struct RunRequest {
     vars: Vec<(String, String)>,
 }
 
-fn main() {
-    yew::Renderer::<App>::new().render();
-}
+fn main() { yew::Renderer::<App>::new().render(); }
 
 #[function_component(App)]
 fn app() -> Html {
-    let workflow = use_state(|| default_workflow());
+    let workflow = use_state(defaults::workflow);
     let workdir = use_state(|| "work/web-demo".to_string());
-    let vars = use_state(default_vars);
-
+    let vars = use_state(defaults::vars);
+    let set_wf = { let h = workflow.clone(); Callback::from(move |v| h.set(v)) };
+    let set_wd = { let h = workdir.clone(); Callback::from(move |v| h.set(v)) };
+    let add_v = { let v = vars.clone(); Callback::from(move |kv| { let mut n = (*v).clone(); n.push(kv); v.set(n); }) };
+    let on_export = { let (wf, wd, vs) = (workflow.clone(), workdir.clone(), vars.clone()); Callback::from(move |_| {
+        let req = RunRequest { workflow_text: (*wf).clone(), workdir: (*wd).clone(), vars: (*vs).clone() };
+        gloo::dialogs::alert(&format!("Copy this JSON:\n\n{}", serde_json::to_string_pretty(&req).unwrap()));
+    })};
     html! {
         <>
-            <Header />
-            <WorkflowEditor value={(*workflow).clone()} onchange={set_state(&workflow)} />
-            <WorkdirInput value={(*workdir).clone()} onchange={set_state(&workdir)} />
-            <VarEditor vars={(*vars).clone()} on_add={add_var(&vars)} />
-            <ExportButton workflow={workflow} workdir={workdir} vars={vars} />
+            <header><h1>{"VWF Web"}</h1><p>{"Configure and export workflow run requests."}</p></header>
+            <main>
+                <WorkflowEditor value={(*workflow).clone()} onchange={set_wf} />
+                <WorkdirInput value={(*workdir).clone()} onchange={set_wd} />
+                <VarEditor vars={(*vars).clone()} on_add={add_v} />
+                <div class="card"><button onclick={on_export}>{"Export run request JSON"}</button></div>
+            </main>
+            <Footer />
         </>
     }
 }
 
-fn set_state(handle: &UseStateHandle<String>) -> Callback<String> {
-    let h = handle.clone();
-    Callback::from(move |v| h.set(v))
-}
-
-fn add_var(vars: &UseStateHandle<Vec<(String, String)>>) -> Callback<(String, String)> {
-    let vars = vars.clone();
-    Callback::from(move |kv| {
-        let mut next = (*vars).clone();
-        next.push(kv);
-        vars.set(next);
-    })
-}
-
-fn default_workflow() -> String {
-    include_str!("../../../../../examples/workflows/shorts_narration.yaml").to_string()
-}
-
-fn default_vars() -> Vec<(String, String)> {
-    vec![
-        ("project_name".into(), "My Demo Project".into()),
-        ("audience".into(), "curious beginners".into()),
-        ("style".into(), "energetic, nerdy, no fluff".into()),
-        ("max_words".into(), "220".into()),
-    ]
-}
-
-#[function_component(Header)]
-fn header() -> Html {
+#[function_component(Footer)]
+fn footer() -> Html {
     html! {
-        <>
-            <h1>{"VWF Web (skeleton)"}</h1>
-            <p>{"This UI helps you fill in vars and export a run request."}</p>
-        </>
+        <footer style="margin-top: 2em; padding-top: 1em; border-top: 1px solid #ddd; font-size: 0.9em; color: #666;">
+            <p>{"Copyright: 2025 Software Wrighter LLC | License: MIT"}</p>
+            <p>{"Repository: "}<a href="https://github.com/softwarewrighter/video_workflow_rs">{"github.com/softwarewrighter/video_workflow_rs"}</a></p>
+        </footer>
     }
-}
-
-#[derive(Properties, PartialEq)]
-struct ExportProps {
-    workflow: UseStateHandle<String>,
-    workdir: UseStateHandle<String>,
-    vars: UseStateHandle<Vec<(String, String)>>,
-}
-
-#[function_component(ExportButton)]
-fn export_button(props: &ExportProps) -> Html {
-    let workflow = props.workflow.clone();
-    let workdir = props.workdir.clone();
-    let vars = props.vars.clone();
-    let onclick = Callback::from(move |_| export_request(&workflow, &workdir, &vars));
-    html! {
-        <div class="card">
-            <button {onclick}>{"Export run request JSON"}</button>
-        </div>
-    }
-}
-
-fn export_request(workflow: &str, workdir: &str, vars: &[(String, String)]) {
-    let req = RunRequest { workflow_text: workflow.into(), workdir: workdir.into(), vars: vars.to_vec() };
-    let json = serde_json::to_string_pretty(&req).unwrap();
-    gloo::dialogs::alert(&format!("Copy this JSON:\n\n{json}"));
 }

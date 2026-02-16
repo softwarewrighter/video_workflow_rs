@@ -37,8 +37,12 @@ fn task_status_updates() {
 #[test]
 fn sequential_constraint() {
     let mut state = WorkflowState::new("test", 1);
-    state.add_task(Task::new("tts_1", "tts").sequential("tts"));
-    state.add_task(Task::new("tts_2", "tts").sequential("tts"));
+    let mut task1 = Task::new("tts_1", "tts");
+    task1.constraints.sequential_group = Some("tts".to_string());
+    state.add_task(task1);
+    let mut task2 = Task::new("tts_2", "tts");
+    task2.constraints.sequential_group = Some("tts".to_string());
+    state.add_task(task2);
     state.get_task_mut("tts_1").unwrap().status = TaskStatus::Ready;
     state.get_task_mut("tts_2").unwrap().status = TaskStatus::Ready;
 

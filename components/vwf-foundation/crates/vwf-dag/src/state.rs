@@ -1,4 +1,4 @@
-//! Workflow state management.
+//! Workflow state persistence.
 
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
@@ -6,7 +6,15 @@ use std::collections::BTreeMap;
 
 use crate::{Artifact, ArtifactId, Task, TaskId};
 
-use super::CheckpointStatus;
+/// Checkpoint status for user review points.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct CheckpointStatus {
+    pub name: String,
+    pub message: String,
+    pub reached_at: DateTime<Utc>,
+    pub approved: bool,
+    pub approved_at: Option<DateTime<Utc>>,
+}
 
 /// Complete workflow state, persisted to state.json.
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -60,5 +68,9 @@ impl WorkflowState {
 
     pub fn get_artifact(&self, id: &str) -> Option<&Artifact> {
         self.artifacts.get(id)
+    }
+
+    pub fn ready_tasks(&self) -> Vec<&Task> {
+        self.tasks.values().filter(|t| t.is_ready()).collect()
     }
 }

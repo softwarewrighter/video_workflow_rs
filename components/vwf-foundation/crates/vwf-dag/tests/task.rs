@@ -4,10 +4,10 @@ use vwf_dag::{Task, TaskStatus};
 
 #[test]
 fn task_builder() {
-    let task = Task::new("generate_tts", "tts_generate")
-        .with_required_input("work/scripts/01.txt")
-        .with_output("work/audio/01.wav")
-        .sequential("tts");
+    let mut task = Task::new("generate_tts", "tts_generate")
+        .with_input("work/scripts/01.txt")
+        .with_output("work/audio/01.wav");
+    task.constraints.sequential_group = Some("tts".to_string());
 
     assert_eq!(task.id, "generate_tts");
     assert_eq!(task.kind, "tts_generate");

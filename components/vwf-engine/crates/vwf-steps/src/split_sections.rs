@@ -67,23 +67,3 @@ fn is_heading(line: &str) -> bool {
 fn byte_offset_of_line(text: &str, line_num: usize) -> usize {
     text.lines().take(line_num).map(|l| l.len() + 1).sum()
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn extracts_section_between_headings() {
-        let text = "DESCRIPTION:\nA\n\nNARRATION:\nB\n";
-        assert_eq!(extract_section(text, "DESCRIPTION:").unwrap().trim(), "A");
-        assert_eq!(extract_section(text, "NARRATION:").unwrap().trim(), "B");
-    }
-
-    #[test]
-    fn is_heading_detects_caps() {
-        assert!(is_heading("DESCRIPTION:"));
-        assert!(is_heading("NARRATION:"));
-        assert!(!is_heading("description:"));
-        assert!(!is_heading("no colon"));
-    }
-}

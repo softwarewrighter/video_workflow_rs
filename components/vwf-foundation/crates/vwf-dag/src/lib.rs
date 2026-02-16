@@ -9,9 +9,11 @@
 mod artifact;
 mod scheduler;
 mod state;
+mod store;
 mod task;
 
 pub use artifact::{Artifact, ArtifactId, ArtifactStatus};
 pub use scheduler::{Scheduler, SchedulerEvent};
-pub use state::{CheckpointStatus, StateStore, WorkflowState};
-pub use task::{Task, TaskId, TaskStatus, Constraint, InputSpec, OutputSpec};
+pub use state::{CheckpointStatus, WorkflowState};
+pub use store::StateStore;
+pub use task::{Constraint, InputSpec, OutputSpec, Task, TaskId, TaskStatus};

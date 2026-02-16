@@ -17,61 +17,37 @@ impl FsRuntime {
     pub fn new(workdir: impl Into<PathBuf>, llm: Box<dyn LlmClient>) -> Self {
         Self { workdir: workdir.into(), llm, command_allowlist: Default::default() }
     }
-
-    fn abs(&self, rel: &str) -> PathBuf {
-        self.workdir.join(rel)
-    }
 }
 
 impl Runtime for FsRuntime {
-    fn workdir(&self) -> &Path {
-        &self.workdir
-    }
+    fn workdir(&self) -> &Path { &self.workdir }
 
     fn ensure_dir(&mut self, rel: &str) -> Result<()> {
-        let p = self.abs(rel);
+        let p = self.workdir.join(rel);
         std::fs::create_dir_all(&p).with_context(|| format!("create_dir_all {}", p.display()))
     }
 
     fn write_text(&mut self, rel: &str, content: &str) -> Result<()> {
-        let p = self.abs(rel);
-        if let Some(parent) = p.parent() {
-            std::fs::create_dir_all(parent)?;
-        }
+        let p = self.workdir.join(rel);
+        if let Some(parent) = p.parent() { std::fs::create_dir_all(parent)?; }
         std::fs::write(&p, content).with_context(|| format!("write {}", p.display()))
     }
 
     fn read_text(&self, rel: &str) -> Result<String> {
-        let p = self.abs(rel);
+        let p = self.workdir.join(rel);
         let bytes = std::fs::read(&p).with_context(|| format!("read {}", p.display()))?;
         Ok(String::from_utf8(bytes)?)
     }
 
     fn run_command(&mut self, prog: &str, args: &[String], cwd: Option<&str>) -> Result<CmdOut> {
-        check_allowlist(&self.command_allowlist, prog)?;
-        execute_command(prog, args, cwd, &self.workdir)
+        if !self.command_allowlist.is_empty() && !self.command_allowlist.contains(prog) {
+            anyhow::bail!("Command not allowed: `{prog}`. Add it to the allowlist.");
+        }
+        let mut cmd = std::process::Command::new(prog);
+        cmd.args(args).current_dir(cwd.map(|c| self.workdir.join(c)).unwrap_or_else(|| self.workdir.clone()));
+        let output = cmd.output().with_context(|| format!("run `{prog}`"))?;
+        Ok(CmdOut { status: output.status.code().unwrap_or(-1), stdout: String::from_utf8_lossy(&output.stdout).into(), stderr: String::from_utf8_lossy(&output.stderr).into() })
     }
 
-    fn llm(&mut self) -> &mut dyn LlmClient {
-        self.llm.as_mut()
-    }
-}
-
-fn check_allowlist(allowlist: &BTreeSet<String>, prog: &str) -> Result<()> {
-    if !allowlist.is_empty() && !allowlist.contains(prog) {
-        anyhow::bail!("Command not allowed: `{prog}`. Add it to the allowlist.");
-    }
-    Ok(())
-}
-
-fn execute_command(prog: &str, args: &[String], cwd: Option<&str>, workdir: &Path) -> Result<CmdOut> {
-    let mut cmd = std::process::Command::new(prog);
-    cmd.args(args);
-    cmd.current_dir(cwd.map(|c| workdir.join(c)).unwrap_or_else(|| workdir.to_path_buf()));
-    let output = cmd.output().with_context(|| format!("run `{prog}`"))?;
-    Ok(CmdOut {
-        status: output.status.code().unwrap_or(-1),
-        stdout: String::from_utf8_lossy(&output.stdout).to_string(),
-        stderr: String::from_utf8_lossy(&output.stderr).to_string(),
-    })
+    fn llm(&mut self) -> &mut dyn LlmClient { self.llm.as_mut() }
 }
