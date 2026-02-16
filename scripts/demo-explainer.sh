@@ -44,15 +44,17 @@ echo "  - Concatenating clips (vid-concat)"
 "$PROJECT_DIR/scripts/build-video.sh"
 echo
 
-# Step 4: Open preview
+# Step 4: Rename and open preview
 echo "Step 4/4: Opening preview..."
-PREVIEW="$PROJECT_DIR/output/preview.mp4"
-if [[ -f "$PREVIEW" ]]; then
+SRC="$PROJECT_DIR/output/preview.mp4"
+PREVIEW="$PROJECT_DIR/output/preview-sample-explainer.mp4"
+if [[ -f "$SRC" ]]; then
+    mv "$SRC" "$PREVIEW"
     dur=$(ffprobe -i "$PREVIEW" -show_entries format=duration -v quiet -of csv="p=0")
     printf "Preview: %s (%.1f seconds)\n" "$PREVIEW" "$dur"
     open "$PREVIEW"
 else
-    echo "ERROR: Preview not found at $PREVIEW"
+    echo "ERROR: Preview not found at $SRC"
     exit 1
 fi
 
