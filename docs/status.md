@@ -1,8 +1,8 @@
 # Project Status
 
-## Current State: Component Restructure Complete
+## Current State: Ready for Sample Video Production
 
-The project has been restructured into three independent components (future git repositories) with clear dependency hierarchy.
+All components pass sw-checklist (0 failures). The framework is ready to produce a sample video to validate the end-to-end workflow.
 
 ## Last Updated: 2026-02-15
 
@@ -13,15 +13,16 @@ The project has been restructured into three independent components (future git 
 | M1: Workflow Runner | Complete | 100% |
 | M2: Shell Step | Complete | 100% |
 | M3: LLM Adapter | Partial | 30% (mock only) |
-| M4: Web UI | Skeleton | 10% |
+| M4: Web UI | Skeleton | 15% (footer added) |
 | M5: Component Restructure | Complete | 100% |
+| M6: sw-checklist Compliance | Complete | 100% |
 
 ## Component Structure
 
 ```
 components/
 |-- vwf-foundation/   # 3 crates, 9 tests
-|-- vwf-engine/       # 4 crates, 13 tests
+|-- vwf-engine/       # 4 crates, 11 tests
 |-- vwf-apps/         # 2 crates
 ```
 
@@ -67,18 +68,19 @@ cd components/vwf-foundation && ./scripts/build-all.sh
 | Component | Tests | Notes |
 |-----------|-------|-------|
 | vwf-foundation | 9 | DAG scheduler, state, task tests |
-| vwf-engine | 13 | Config, render, steps tests |
+| vwf-engine | 11 | Config, render, steps tests |
 | vwf-apps | 0 | Integration tests pending |
-| **Total** | **22** | All passing |
+| **Total** | **20** | All passing |
 
 ## Recent Changes
 
+- All components pass sw-checklist (0 failures, warnings only)
+- Added footer to vwf-web with copyright/license info
+- Reduced function counts across all crates to meet 7-function limit
+- Split vwf-cli and vwf-web into smaller modules
+- Consolidated vwf-dag scheduler and state modules
 - Restructured into 3 top-level components (future git submodules)
-- Created vwf-types for shared type definitions
-- Split vwf-core into vwf-config, vwf-render, vwf-steps, vwf-core
-- Added build-all.sh and test-all.sh scripts at each level
 - Clear dependency hierarchy: foundation -> engine -> apps
-- No cyclic dependencies (enforced by crate structure)
 
 ## Dependency Graph
 
@@ -104,13 +106,33 @@ vwf-cli + vwf-web (L5)
 ## Known Issues
 
 1. vwf-web path dependencies need verification for WASM builds
-2. Integration tests not yet migrated to new structure
+2. Real LLM adapter not yet implemented (using mock)
 
-## Next Steps
+## Next Steps: Sample Video Production
 
-1. Run sw-checklist on new component structure
-2. Add integration tests to vwf-apps
-3. Implement real LLM adapter in vwf-runtime
+### Goal
+Produce a complete sample video using the VWF framework to validate the end-to-end workflow.
+
+### Phase 1: Prepare Assets
+1. Create a sample project in `test-projects/sample-video/`
+2. Write a simple script topic (30-60 seconds of content)
+3. Gather placeholder assets (images, background music)
+
+### Phase 2: Workflow Execution
+1. Create workflow YAML for the sample video
+2. Run with mock LLM to generate narration script
+3. Integrate TTS step (e.g., edge-tts or similar)
+4. Add ffmpeg steps for video assembly
+
+### Phase 3: Real LLM Integration
+1. Implement Claude API adapter in vwf-runtime
+2. Replace mock LLM with real generation
+3. Test full workflow with actual AI-generated content
+
+### Phase 4: Polish
+1. Add integration tests based on sample video workflow
+2. Document the sample video production process
+3. Create reusable workflow templates
 
 ## Commands
 
