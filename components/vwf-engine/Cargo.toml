@@ -22,6 +22,7 @@ serde_yaml = "0.9"
 regex = "1"
 chrono = { version = "0.4", default-features = false, features = ["clock", "serde"] }
 uuid = { version = "1", features = ["v4", "serde"] }
+rand = "0.8"
 
 # Internal dependencies (path to foundation component)
 vwf-types = { path = "../vwf-foundation/crates/vwf-types" }

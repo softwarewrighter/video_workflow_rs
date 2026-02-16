@@ -23,4 +23,5 @@ pub enum StepKind {
     RunCommand,
     LlmGenerate,
     TtsGenerate,
+    TextToImage,
 }

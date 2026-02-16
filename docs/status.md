@@ -123,6 +123,7 @@ components/
 | `run_command` | Execute shell command |
 | `llm_generate` | Generate text via LLM |
 | `tts_generate` | Voice clone via VoxCPM |
+| `text_to_image` | Generate image via FLUX |
 
 ## Recent Changes
 

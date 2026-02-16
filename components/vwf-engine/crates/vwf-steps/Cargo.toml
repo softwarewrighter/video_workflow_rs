@@ -9,6 +9,7 @@ description = "Step implementations for VWF workflows"
 anyhow.workspace = true
 serde.workspace = true
 serde_json.workspace = true
+rand.workspace = true
 vwf-runtime.workspace = true
 vwf-render = { path = "../vwf-render" }
 vwf-config = { path = "../vwf-config" }

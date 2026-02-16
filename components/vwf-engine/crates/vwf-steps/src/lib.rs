@@ -5,6 +5,7 @@ mod ensure_dirs;
 mod llm_generate;
 mod run_command;
 mod split_sections;
+mod text_to_image;
 mod tts_generate;
 mod write_file;
 
@@ -29,5 +30,6 @@ fn dispatch(ctx: &mut StepCtx<'_>, kind: &StepKind, payload: &serde_json::Value)
         StepKind::RunCommand => run_command::execute(ctx, payload),
         StepKind::LlmGenerate => llm_generate::execute(ctx, payload),
         StepKind::TtsGenerate => tts_generate::execute(ctx, payload),
+        StepKind::TextToImage => text_to_image::execute(ctx, payload),
     }
 }

@@ -157,6 +157,29 @@ Generates TTS audio using VoxCPM voice cloning.
 | `reference_audio` | Yes | Path to voice reference WAV |
 | `reference_text` | Yes | Transcript of reference audio |
 
+### text_to_image
+
+Generates images using FLUX.1 schnell via ComfyUI.
+
+```yaml
+- id: gen_background
+  kind: text_to_image
+  prompt: "A futuristic coding workspace, dark theme, neon accents"
+  output_path: "work/images/background.png"
+  orientation: "landscape"  # portrait, landscape, or square
+  server: "http://192.168.1.64:8570"
+```
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| `prompt` | Yes | Text prompt for image generation |
+| `output_path` | Yes | Where to save the image |
+| `orientation` | No | portrait (768x1344), landscape (1344x768), square (1024x1024) |
+| `width` | No | Custom width (overrides orientation) |
+| `height` | No | Custom height (overrides orientation) |
+| `seed` | No | Random seed for reproducibility |
+| `server` | No | ComfyUI server URL (default: http://192.168.1.64:8570) |
+
 ## Running Workflows
 
 ### Basic Run
