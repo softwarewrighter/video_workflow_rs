@@ -1,0 +1,56 @@
+#!/bin/bash
+# Demo: Generate a sample short (~32 sec)
+# This script runs the complete video generation pipeline
+set -e
+
+REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+PROJECT_DIR="$REPO_DIR/test-projects/sample-video"
+
+echo "=========================================="
+echo "VWF Demo: Generate Sample Short (~32 sec)"
+echo "=========================================="
+echo
+echo "Project: What is a Workflow?"
+echo "Location: $PROJECT_DIR"
+echo
+
+# Step 1: Generate scripts via workflow
+echo "Step 1/4: Generating narration scripts..."
+cd "$PROJECT_DIR"
+cargo run -p vwf-cli --release -- run workflow.yaml --workdir . --resume
+echo
+
+# Step 2: Generate TTS audio
+echo "Step 2/4: Generating voice-cloned TTS audio..."
+if [[ ! -f "$PROJECT_DIR/.venv/bin/activate" ]]; then
+    echo "  Creating Python venv..."
+    uv venv "$PROJECT_DIR/.venv"
+fi
+source "$PROJECT_DIR/.venv/bin/activate"
+if ! python -c "import gradio_client" 2>/dev/null; then
+    echo "  Installing gradio_client..."
+    uv pip install gradio_client
+fi
+"$PROJECT_DIR/scripts/generate-tts.sh"
+echo
+
+# Step 3: Build video
+echo "Step 3/4: Building video (slides + audio + concat)..."
+"$PROJECT_DIR/scripts/build-video.sh"
+echo
+
+# Step 4: Open preview
+echo "Step 4/4: Opening preview..."
+PREVIEW="$PROJECT_DIR/output/preview.mp4"
+if [[ -f "$PREVIEW" ]]; then
+    echo "Preview: $PREVIEW"
+    open "$PREVIEW"
+else
+    echo "ERROR: Preview not found at $PREVIEW"
+    exit 1
+fi
+
+echo
+echo "=========================================="
+echo "Demo complete!"
+echo "=========================================="

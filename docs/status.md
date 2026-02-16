@@ -1,10 +1,10 @@
 # Project Status
 
-## Current State: Sample Video Phase 1 Complete
+## Current State: Video Pipeline Complete
 
-All components pass sw-checklist (0 failures). Phase 1 of sample video production is complete - scripts generated successfully.
+All components pass sw-checklist (0 failures). Full video pipeline working: script generation, TTS voice cloning, video assembly.
 
-## Last Updated: 2026-02-15
+## Last Updated: 2026-02-16
 
 ## Milestone Progress
 
@@ -16,91 +16,108 @@ All components pass sw-checklist (0 failures). Phase 1 of sample video productio
 | M4: Web UI | Skeleton | 15% (footer added) |
 | M5: Component Restructure | Complete | 100% |
 | M6: sw-checklist Compliance | Complete | 100% |
-| M7: Sample Video Phase 1 | Complete | 100% |
-| M8: Sample Video Phase 2 | Complete | 100% |
+| M7: Sample Video Pipeline | Complete | 100% |
+| M8: GPU Queue + Resume | Complete | 100% |
+
+## Quick Start
+
+```bash
+# Generate a sample short (~32 sec)
+./scripts/demo-short.sh
+
+# Generate a sample explainer (longer format)
+./scripts/demo-explainer.sh
+```
+
+## New Features
+
+### GPU Queue (vwf-queue)
+
+Semaphore-based queue for serializing GPU-bound tasks:
+
+```rust
+let queue = GpuQueue::new(1, 2);  // TTS=1, Lipsync=2
+let result = queue.run_tts(async { ... }).await;
+```
+
+### TTS Step (tts_generate)
+
+Voice cloning via VoxCPM Gradio API:
+
+```yaml
+- id: tts_narration
+  kind: tts_generate
+  output_path: work/audio/narration.wav
+  script_path: work/scripts/narration.txt
+  reference_audio: /path/to/reference.wav
+  reference_text: "Transcript of reference audio..."
+  server: http://curiosity:7860
+```
+
+### Resume Support (--resume)
+
+Skip steps whose outputs already exist:
+
+```bash
+vwf run workflow.yaml --workdir work --resume
+```
+
+Steps declare `output_path` for completion checking. Media files validated via ffprobe duration.
 
 ## Component Structure
 
 ```
 components/
-|-- vwf-foundation/   # 3 crates, 9 tests
-|-- vwf-engine/       # 4 crates, 11 tests
-|-- vwf-apps/         # 2 crates
+|-- vwf-foundation/   # 4 crates, 10 tests
+|   |-- vwf-types
+|   |-- vwf-runtime   # + output_is_valid()
+|   |-- vwf-dag
+|   +-- vwf-queue     # NEW: GPU semaphores
+|-- vwf-engine/       # 4 crates, 12 tests
+|   |-- vwf-config    # + output_path, TtsGenerate
+|   |-- vwf-render
+|   |-- vwf-steps     # + tts_generate
+|   +-- vwf-core      # + RunOptions, resume
++-- vwf-apps/         # 2 crates
+    |-- vwf-cli       # + --resume flag
+    +-- vwf-web
 ```
-
-### vwf-foundation (Layer 0)
-
-| Crate | Status | Tests | Notes |
-|-------|--------|-------|-------|
-| vwf-types | Complete | 0 | TaskId, ArtifactId, TaskStatus, ArtifactStatus |
-| vwf-runtime | Complete | 0 | Runtime trait, FsRuntime, DryRunRuntime, MockLlmClient |
-| vwf-dag | Complete | 9 | Scheduler, Task, Artifact, State persistence |
-
-### vwf-engine (Layer 1-4)
-
-| Crate | Status | Tests | Notes |
-|-------|--------|-------|-------|
-| vwf-config | Complete | 5 | Workflow YAML parsing + validation |
-| vwf-render | Complete | 2 | Template {{var}} substitution |
-| vwf-steps | Complete | 6 | All 5 step types implemented |
-| vwf-core | Complete | 0 | Engine orchestration, RunReport |
-
-### vwf-apps (Layer 5)
-
-| Crate | Status | Notes |
-|-------|--------|-------|
-| vwf-cli | Complete | Argument parsing, execution, dry-run |
-| vwf-web | Skeleton | Yew UI, compiles but minimal functionality |
-
-## Build System
-
-```bash
-# Build all components
-./scripts/build-all.sh
-
-# Test all components
-./scripts/test-all.sh
-
-# Build/test individual component
-cd components/vwf-foundation && ./scripts/build-all.sh
-```
-
-## Test Coverage
-
-| Component | Tests | Notes |
-|-----------|-------|-------|
-| vwf-foundation | 9 | DAG scheduler, state, task tests |
-| vwf-engine | 11 | Config, render, steps tests |
-| vwf-apps | 0 | Integration tests pending |
-| **Total** | **20** | All passing |
 
 ## Sample Video Project
 
 **Location:** `test-projects/sample-video/`
 
-**Generated Artifacts:**
-- `work/scripts/*.txt` - 5 narration script sections
-- `work/audio/*.wav` - 5 voice-cloned audio files (~30 sec total)
-- `output/manifest.txt` - Production summary
+**Demo Scripts:**
+- `scripts/generate-tts.sh` - Generate voice-cloned audio
+- `scripts/verify-tts.sh` - Verify with Whisper
+- `scripts/build-video.sh` - Assemble final video
 
-**Audio Durations (VoxCPM voice clone):**
-- 01-hook.wav: 4.2 sec
-- 02-problem.wav: 5.8 sec
-- 03-solution.wav: 6.7 sec
-- 04-benefit.wav: 7.0 sec
-- 05-cta.wav: 5.8 sec
+**Generated Artifacts:**
+- `work/scripts/*.txt` - 5 narration sections
+- `work/audio/*.wav` - Voice-cloned audio (~32 sec)
+- `work/slides/*.png` - Title slides
+- `work/clips/*.mp4` - Video segments
+- `output/preview.mp4` - Final video
+
+## Step Kinds
+
+| Kind | Description |
+|------|-------------|
+| `ensure_dirs` | Create directories |
+| `write_file` | Write templated content |
+| `split_sections` | Split LLM output by headings |
+| `run_command` | Execute shell command |
+| `llm_generate` | Generate text via LLM |
+| `tts_generate` | Voice clone via VoxCPM |
 
 ## Recent Changes
 
-- **Phase 2 Complete:** Voice-cloned audio with VoxCPM (~30 sec total)
-- **Phase 1 Complete:** Sample video scripts generated via workflow
-- Fixed llm_generate bug that appended user prompt to mock response
-- All components pass sw-checklist (0 failures)
-- Added footer to vwf-web with copyright/license info
-- Reduced function counts across all crates to meet 7-function limit
-- Split vwf-cli and vwf-web into smaller modules
-- Consolidated vwf-dag scheduler and state modules
-- Restructured into 3 top-level components (future git submodules)
+- **GPU Queue:** Semaphore-based task serialization for TTS/lipsync
+- **TTS Step:** tts_generate step kind with VoxCPM integration
+- **Resume Support:** --resume flag skips completed steps
+- **Output Validation:** Media duration checking via ffprobe
+- **Demo Scripts:** generate-tts.sh, verify-tts.sh, build-video.sh
+- **HOWTO.md:** Full pipeline documentation
 
 ## Dependency Graph
 
@@ -108,7 +125,7 @@ cd components/vwf-foundation && ./scripts/build-all.sh
 vwf-types (L0)
     |
     v
-vwf-runtime + vwf-dag (L1)
+vwf-runtime + vwf-dag + vwf-queue (L1)
     |
     v
 vwf-config + vwf-render (L2)
@@ -127,45 +144,11 @@ vwf-cli + vwf-web (L5)
 
 1. vwf-web path dependencies need verification for WASM builds
 2. Real LLM adapter not yet implemented (using mock)
+3. Lipsync step not yet implemented (queue ready)
 
-## Next Steps: Sample Video Production
+## Next Steps
 
-### Goal
-Produce a complete sample video using the VWF framework to validate the end-to-end workflow.
-
-### Phase 1: Script Generation ✅ COMPLETE
-- Created `test-projects/sample-video/` with workflow.yaml
-- Generated 5 script sections via mock LLM + split_sections
-- Output: work/scripts/{01-hook,02-problem,03-solution,04-benefit,05-cta}.txt
-
-### Phase 2: TTS Integration ✅ COMPLETE
-- Using VoxCPM voice cloning via Gradio client (curiosity:7860)
-- Reference: mike-medium-ref-1.wav (63s) with matching transcript
-- Generated voice-cloned audio for all 5 script sections
-- Output: work/audio/*.wav (~30 seconds total)
-
-### Phase 3: Real LLM Integration
-1. Implement Claude API adapter in vwf-runtime
-2. Replace mock LLM with real generation
-3. Test full workflow with actual AI-generated content
-
-### Phase 4: Video Assembly
-1. Add ffmpeg steps for image+audio composition
-2. Concatenate segments into final video
-3. Add intro/outro, transitions, background music
-
-## Commands
-
-```bash
-# Build everything
-./scripts/build-all.sh
-
-# Test everything
-./scripts/test-all.sh
-
-# Run CLI
-cargo run -p vwf-cli --manifest-path components/vwf-apps/Cargo.toml -- run examples/workflows/shorts_narration.yaml --workdir work/demo
-
-# Dry run
-cargo run -p vwf-cli --manifest-path components/vwf-apps/Cargo.toml -- run examples/workflows/shorts_narration.yaml --workdir work/demo --dry-run
-```
+1. **Real LLM Integration** - Claude API adapter
+2. **Lipsync Step** - MuseTalk integration using lipsync queue
+3. **Avatar Compositing** - vid-composite integration
+4. **Full Video Pipeline** - End-to-end with all steps
