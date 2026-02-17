@@ -21,6 +21,10 @@ TARGET_FPS=25
 TARGET_AUDIO_RATE=44100
 TARGET_AUDIO_CHANNELS=2
 
+# Volume levels (in dB) - narration should be louder than music
+NARRATION_VOLUME_DB=-18
+MUSIC_VOLUME_DB=-28
+
 # Normalize a clip to standard format (1920x1080, 25fps, 44100Hz stereo AAC)
 normalize_clip() {
     local input="$1"
@@ -68,13 +72,14 @@ rsvg-convert -w $WIDTH -h $HEIGHT "$SVG_DIR/00-title.svg" -o "$IMAGES_DIR/title-
 # Scale robot to 600px height (maintains 1:1 aspect = 600x600)
 # Play forward then backward (boomerang) to double length
 # Right-justify: x = 1920 - 600 = 1320, vertically centered: y = (1080 - 600) / 2 = 240
+# Reduce music volume to not overpower narration
 ffmpeg -y -loop 1 -i "$IMAGES_DIR/title-background.png" \
     -i "$ASSETS_DIR/robot.mp4" \
     -i "$ASSETS_DIR/music-upbeat.wav" \
-    -filter_complex "[1:v]scale=600:600,split[fwd][rev];[rev]reverse[reversed];[fwd][reversed]concat=n=2:v=1:a=0[robot];[0:v][robot]overlay=1320:240:shortest=1[v]" \
-    -map "[v]" -map 2:a \
+    -filter_complex "[1:v]scale=600:600,split[fwd][rev];[rev]reverse[reversed];[fwd][reversed]concat=n=2:v=1:a=0[robot];[0:v][robot]overlay=1320:240:shortest=1[v];[2:a]volume=${MUSIC_VOLUME_DB}dB[a]" \
+    -map "[v]" -map "[a]" \
     -t $TITLE_DURATION \
-    -c:v libx264 -pix_fmt yuv420p -c:a aac \
+    -c:v libx264 -pix_fmt yuv420p -c:a aac -ar ${TARGET_AUDIO_RATE} -ac ${TARGET_AUDIO_CHANNELS} \
     "$CLIPS_DIR/00-title.mp4"
 
 echo "  Created: 00-title.mp4"
@@ -106,18 +111,19 @@ create_section_clip() {
     local output="$CLIPS_DIR/${name}.mp4"
 
     if [ -f "$audio" ]; then
-        # Use TTS audio - duration matches audio length
+        # Use TTS audio - normalize volume and duration matches audio length
         ffmpeg -y -loop 1 -i "$slide" \
             -i "$audio" \
-            -c:v libx264 -pix_fmt yuv420p -c:a aac -shortest \
+            -af "volume=${NARRATION_VOLUME_DB}dB" \
+            -c:v libx264 -pix_fmt yuv420p -c:a aac -ar ${TARGET_AUDIO_RATE} -ac ${TARGET_AUDIO_CHANNELS} -shortest \
             "$output"
         echo "  Created clip with TTS audio: $output"
     else
         # Fallback to silent placeholder
         ffmpeg -y -loop 1 -i "$slide" \
-            -f lavfi -i anullsrc=r=44100:cl=stereo \
+            -f lavfi -i anullsrc=r=${TARGET_AUDIO_RATE}:cl=stereo \
             -t $PLACEHOLDER_DURATION \
-            -c:v libx264 -pix_fmt yuv420p -c:a aac -shortest \
+            -c:v libx264 -pix_fmt yuv420p -c:a aac -ar ${TARGET_AUDIO_RATE} -ac ${TARGET_AUDIO_CHANNELS} -shortest \
             "$output"
         echo "  Created clip (silent placeholder): $output"
     fi
@@ -154,10 +160,12 @@ echo "  Copied: 99a-epilog.mp4"
 # ============================================
 echo "Step 5: Creating epilog extension..."
 
+# Reduce music volume to match narration levels
 ffmpeg -y -loop 1 -i "$ASSETS_DIR/epilog-frame.png" \
     -i "$ASSETS_DIR/music-upbeat.wav" \
+    -af "volume=${MUSIC_VOLUME_DB}dB" \
     -t $EPILOG_EXT_DURATION \
-    -c:v libx264 -pix_fmt yuv420p -c:a aac \
+    -c:v libx264 -pix_fmt yuv420p -c:a aac -ar ${TARGET_AUDIO_RATE} -ac ${TARGET_AUDIO_CHANNELS} \
     "$CLIPS_DIR/99b-epilog-ext.mp4"
 
 echo "  Created: 99b-epilog-ext.mp4"
