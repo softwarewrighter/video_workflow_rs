@@ -41,26 +41,23 @@ ffmpeg -y -loop 1 -i "$IMAGES_DIR/title-background.png" \
 echo "  Created: 00-title.mp4"
 
 # ============================================
-# Step 2: Create narration section placeholders
+# Step 2: Convert SVG slides to PNG and create clips
 # ============================================
-echo "Step 2: Creating narration section placeholders..."
+echo "Step 2: Converting SVG slides and creating clips..."
 
-# Function to create a text slide from narration script
-create_narration_slide() {
+# Function to convert SVG to PNG using rsvg-convert
+convert_svg_to_png() {
     local name="$1"
-    local script_path="$SCRIPTS_DIR/${name}.txt"
-    local output="$IMAGES_DIR/${name}-slide.png"
+    local svg_path="$SVG_DIR/${name}.svg"
+    local png_path="$IMAGES_DIR/${name}-slide.png"
 
-    # Read script content
-    local text=$(cat "$script_path")
-
-    # Create slide with text (dark background for contrast with title)
-    magick -size ${WIDTH}x${HEIGHT} xc:"#1a1a2e" \
-        -font Helvetica -pointsize 48 -fill "#ffffff" \
-        -gravity Center -annotate +0+0 "$text" \
-        "$output"
-
-    echo "  Created slide: $output"
+    if [ -f "$svg_path" ]; then
+        rsvg-convert -w $WIDTH -h $HEIGHT "$svg_path" -o "$png_path"
+        echo "  Converted: $svg_path -> $png_path"
+    else
+        echo "  WARNING: SVG not found: $svg_path"
+        return 1
+    fi
 }
 
 create_section_clip() {
@@ -78,9 +75,9 @@ create_section_clip() {
     echo "  Created clip: $output"
 }
 
-# Create slides and clips for each narration section
+# Convert SVGs to PNGs and create clips for each narration section
 for section in 01-hook 02-intro-demo 03-cta; do
-    create_narration_slide "$section"
+    convert_svg_to_png "$section"
     create_section_clip "$section"
 done
 

@@ -24,6 +24,7 @@ WHISPER_MODEL="/Users/mike/.whisper-models/ggml-base.en.bin"
 
 # Directories
 ASSETS_DIR="$PROJECT_DIR/assets"
+SVG_DIR="$ASSETS_DIR/svg"
 SCRIPTS_DIR="$PROJECT_DIR/work/scripts"
 AUDIO_DIR="$PROJECT_DIR/work/audio"
 IMAGES_DIR="$PROJECT_DIR/work/images"
