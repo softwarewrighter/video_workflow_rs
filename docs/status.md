@@ -1,8 +1,8 @@
 # Project Status
 
-## Current State: Video Pipeline Complete
+## Current State: Full Media Generation Pipeline
 
-All components pass sw-checklist (0 failures). Full video pipeline working: script generation, TTS voice cloning, video assembly.
+All components pass sw-checklist (0 failures). Full video pipeline working: script generation, TTS voice cloning, video assembly. GPU services available for text-to-image, image-to-video, and text-to-video generation.
 
 ## Last Updated: 2026-02-16
 
@@ -125,14 +125,70 @@ components/
 | `tts_generate` | Voice clone via VoxCPM |
 | `text_to_image` | Generate image via FLUX |
 
+## GPU Services (Remote ComfyUI)
+
+Three GPU services share a single NVIDIA RTX 5060 Ti 16GB. Run one at a time.
+
+| Service | Port | Model | Use Case | Gen Time |
+|---------|------|-------|----------|----------|
+| **FLUX** | 8570 | flux1-schnell-fp8 | Text → Image | ~12s |
+| **SVD** | 8100 | svd_xt | Image → Video | ~70s (14 frames) |
+| **Wan 2.2** | 6000 | wan2.2_ti2v_5B | Text → Video | ~13min (81 frames) |
+
+### Client Scripts
+
+```bash
+# Text-to-image (FLUX)
+python scripts/flux_client.py -p "prompt" -o image.png --orientation portrait
+
+# Image-to-video (SVD) - best for natural motion (water, fire, foliage)
+python scripts/svd_client.py -i image.jpg -o video.mp4 --motion 100 --frames 30
+
+# Text-to-video (Wan 2.2) - true text-to-video generation
+python scripts/wan22_client.py -p "prompt" -o video.mp4 --orientation landscape
+
+# Demo: Generate images in all orientations
+./scripts/demo-flux.sh
+```
+
+### SVD Best Practices
+
+SVD works best with natural/organic motion. Avoid complex physics or geometry.
+
+| Works Well | Avoid |
+|------------|-------|
+| Water, waves, ripples | Forward camera travel |
+| Fire, smoke, candles | Architectural scenes |
+| Foliage, grass, wind | Complex object physics |
+| Clouds, sky, aurora | Rotating camera |
+| Subtle zoom/parallax | Action sequences |
+
+## Music Generation (midi-cli-rs)
+
+Generate incidental music for intros/outros:
+
+```bash
+midi-cli-rs preset --mood upbeat --duration 5 -o intro.wav
+midi-cli-rs preset --mood calm --duration 5 -o outro.wav
+midi-cli-rs preset --mood suspense --duration 5 -o dramatic.wav
+midi-cli-rs preset --mood ambient --duration 5 -o background.wav
+midi-cli-rs preset --mood eerie --duration 5 -o creepy.wav
+
+# Reproducible with seed
+midi-cli-rs preset -m upbeat -d 5 --seed 42 -o intro.wav
+```
+
 ## Recent Changes
 
+- **Text-to-Image:** FLUX integration via ComfyUI (flux_client.py, text_to_image step)
+- **Image-to-Video:** SVD integration via ComfyUI (svd_client.py)
+- **Text-to-Video:** Wan 2.2 integration via ComfyUI (wan22_client.py)
+- **Music Generation:** midi-cli-rs integration for incidental music
 - **GPU Queue:** Semaphore-based task serialization for TTS/lipsync
 - **TTS Step:** tts_generate step kind with VoxCPM integration
 - **Resume Support:** --resume flag skips completed steps
 - **Output Validation:** Media duration checking via ffprobe
-- **Demo Scripts:** generate-tts.sh, verify-tts.sh, build-video.sh
-- **HOWTO.md:** Full pipeline documentation
+- **Demo Scripts:** demo-flux.sh, generate-tts.sh, verify-tts.sh, build-video.sh
 
 ## Dependency Graph
 
@@ -160,10 +216,14 @@ vwf-cli + vwf-web (L5)
 1. vwf-web path dependencies need verification for WASM builds
 2. Real LLM adapter not yet implemented (using mock)
 3. Lipsync step not yet implemented (queue ready)
+4. GPU services share one GPU — run one at a time to avoid OOM
+5. SVD struggles with geometric scenes and complex camera motion
 
 ## Next Steps
 
 1. **Real LLM Integration** - Claude API adapter
 2. **Lipsync Step** - MuseTalk integration using lipsync queue
 3. **Avatar Compositing** - vid-composite integration
-4. **Full Video Pipeline** - End-to-end with all steps
+4. **Image-to-Video Step** - Native svd_generate workflow step
+5. **Text-to-Video Step** - Native wan22_generate workflow step
+6. **Music Step** - Native midi_generate workflow step

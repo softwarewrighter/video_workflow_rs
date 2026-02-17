@@ -5,4 +5,15 @@
 **/*.wasm
 **/*.js
 **/*.d.ts
+
+# Demo output directories
 test-projects/flux-demo/
+test-projects/zoom-test/
+test-projects/music-demo/
+test-projects/svd-examples/
+
+# Generated demo files in root
+*.mp4
+geometric-hallway.jpg
+ocean-waves-crashing.jpg
+wheat-field.jpg

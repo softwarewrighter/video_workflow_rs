@@ -180,6 +180,81 @@ Generates images using FLUX.1 schnell via ComfyUI.
 | `seed` | No | Random seed for reproducibility |
 | `server` | No | ComfyUI server URL (default: http://192.168.1.64:8570) |
 
+## Standalone GPU Tools
+
+Beyond workflow steps, these Python scripts provide direct access to GPU services.
+
+### Image-to-Video (SVD)
+
+Animate a still image using Stable Video Diffusion. Best for natural motion.
+
+```bash
+python scripts/svd_client.py \
+  --input image.jpg \
+  --output video.mp4 \
+  --frames 30 \
+  --fps 6 \
+  --motion 100
+```
+
+| Field | Default | Description |
+|-------|---------|-------------|
+| `--input` | Required | Source image |
+| `--output` | Required | Output video path |
+| `--frames` | 14 | Frame count (30 = 5s @ 6fps) |
+| `--fps` | 6 | Frame rate |
+| `--motion` | 127 | Motion intensity 1-300 (higher = more motion) |
+| `--server` | http://192.168.1.64:8100 | SVD ComfyUI server |
+
+**Best subjects for SVD:** Water, fire, clouds, foliage, portraits with hair.
+**Avoid:** Geometric scenes, forward camera travel, complex physics.
+
+### Text-to-Video (Wan 2.2)
+
+Generate video directly from text prompts. No input image needed.
+
+```bash
+python scripts/wan22_client.py \
+  --prompt "A serene forest at sunrise, mist rising" \
+  --output video.mp4 \
+  --orientation landscape \
+  --length 81
+```
+
+| Field | Default | Description |
+|-------|---------|-------------|
+| `--prompt` | Required | Text description |
+| `--output` | Required | Output video path |
+| `--orientation` | landscape | portrait, landscape, or square |
+| `--length` | 81 | Frame count (81 = ~5s @ 16fps) |
+| `--cfg` | 5.0 | Prompt adherence (4-7 recommended) |
+| `--server` | http://192.168.1.64:6000 | Wan 2.2 ComfyUI server |
+
+**Generation time:** ~13 minutes for 81 frames (5 seconds).
+**Output resolution:** 2x latent size (landscape: 1664x960, portrait: 960x1664).
+
+### Music Generation (midi-cli-rs)
+
+Generate incidental music for intros, outros, and backgrounds.
+
+```bash
+midi-cli-rs preset --mood upbeat --duration 5 -o intro.wav
+midi-cli-rs preset --mood calm --duration 5 -o outro.wav
+midi-cli-rs preset --mood suspense --duration 5 -o dramatic.wav
+midi-cli-rs preset --mood ambient --duration 5 -o background.wav
+midi-cli-rs preset --mood eerie --duration 5 -o creepy.wav
+```
+
+| Mood | Key | Description |
+|------|-----|-------------|
+| upbeat | C | Energetic, rhythmic patterns |
+| calm | G | Peaceful, sustained pads |
+| suspense | Am | Tense, low drones |
+| ambient | Em | Atmospheric, pentatonic |
+| eerie | Dm | Creepy, sparse tones |
+
+Use `--seed` for reproducible output: `midi-cli-rs preset -m upbeat -d 5 --seed 42 -o intro.wav`
+
 ## Running Workflows
 
 ### Basic Run
@@ -314,3 +389,40 @@ cargo run -p vwf-cli -- run workflow.yaml --workdir ./project --resume
 # Dry run
 cargo run -p vwf-cli -- run workflow.yaml --workdir ./project --dry-run
 ```
+
+## GPU Services
+
+Three ComfyUI services share a single GPU. Run one at a time to avoid OOM.
+
+| Service | Port | Model | Use Case |
+|---------|------|-------|----------|
+| FLUX | 8570 | flux1-schnell-fp8 | Text → Image |
+| SVD | 8100 | svd_xt | Image → Video |
+| Wan 2.2 | 6000 | wan2.2_ti2v_5B | Text → Video |
+
+### Quick Test
+
+```bash
+# Check which service is running
+curl -s http://192.168.1.64:8570/system_stats  # FLUX
+curl -s http://192.168.1.64:8100/system_stats  # SVD
+curl -s http://192.168.1.64:6000/system_stats  # Wan 2.2
+```
+
+### Service Management (from server host)
+
+```bash
+# Stop SVD, start FLUX
+cd ~/tools/tti/ittv && docker compose down
+cd ~/tools/tti/stable-diffusion-webui-docker && docker compose --profile comfy up -d
+
+# Stop FLUX, start SVD
+cd ~/tools/tti/stable-diffusion-webui-docker && docker compose --profile comfy down
+cd ~/tools/tti/ittv && docker compose up -d
+
+# Stop SVD, start Wan 2.2
+cd ~/tools/tti/ittv && docker compose down
+cd ~/tools/tti/comfy-wan22 && docker compose up -d
+```
+
+See `docs/flux-client-usage.md`, `docs/svd-client-usage.md`, and `docs/wan22-client-usage.md` for detailed API documentation.
