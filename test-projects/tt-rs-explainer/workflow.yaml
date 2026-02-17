@@ -1,0 +1,70 @@
+version: 1
+name: "tt-rs Explainer Video"
+description: >
+  TBT #4: ToonTalk Visual Programming - tt-rs explainer video.
+  Landscape 1920x1080, ~45 seconds total.
+  Sections: title, hook, intro-demo, demo (placeholder), cta, epilog, epilog-ext.
+
+vars:
+  project_name: "tt-rs Explainer"
+  topic: "ToonTalk Visual Programming"
+  duration_secs: "45"
+  style: "straightforward, professional"
+  audience: "developers interested in visual programming"
+
+steps:
+  # Setup directories
+  - id: ensure_dirs
+    kind: ensure_dirs
+    dirs:
+      - "work/scripts"
+      - "work/audio"
+      - "work/images"
+      - "work/clips"
+      - "output"
+
+  # Write production manifest
+  - id: write_manifest
+    kind: write_file
+    path: "output/manifest.txt"
+    content: |
+      tt-rs Explainer Video Production
+      =================================
+      Project: {{project_name}}
+      Topic: {{topic}}
+      Format: Landscape 1920x1080 (16:9)
+      Duration: ~{{duration_secs}} seconds
+
+      Structure:
+      - 00-title (5s) - Robot video on white background with #TBT, tt-rs, ToonTalk text
+      - 01-hook (~5s) - "What if you could teach a computer..."
+      - 02-intro-demo (~5s) - "tt-rs is a modern Rust and WebAssembly..."
+      - 03-demo (variable) - OBS screen capture placeholder
+      - 04-cta (~5s) - "Try the live demo..."
+      - 99a-epilog (~12s) - Standard epilog
+      - 99b-epilog-ext (7s) - Epilog frame with music
+
+      Assets:
+      - assets/robot.mp4 - Robot video for title compositing
+      - assets/epilog.mp4 - Standard epilog video
+      - assets/epilog-frame.png - Last frame for epilog extension
+      - assets/music-upbeat.wav - Background music (8s, seed 1234)
+
+      Narration Scripts:
+      - work/scripts/01-hook.txt
+      - work/scripts/02-intro-demo.txt
+      - work/scripts/03-cta.txt
+
+      Generated Images:
+      - work/images/title-background.png
+      - work/images/demo-placeholder.png
+
+      Build:
+      - scripts/build-video.sh - Assembles preview video
+      - output/preview.mp4 - Final preview output
+
+      Next Steps:
+      1. Generate TTS audio: scripts/generate-tts.sh
+      2. Record OBS demo clips
+      3. Update build script with real audio/demo
+      4. Rebuild: scripts/build-video.sh
