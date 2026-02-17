@@ -147,6 +147,7 @@ Generates TTS audio using VoxCPM voice cloning.
   server: "http://curiosity:7860"
   reference_audio: "/path/to/reference.wav"
   reference_text: "Transcript of reference audio..."
+  python_path: ".venv/bin/python"
 ```
 
 | Field | Required | Description |
@@ -156,6 +157,7 @@ Generates TTS audio using VoxCPM voice cloning.
 | `server` | No | VoxCPM server URL (default: http://curiosity:7860) |
 | `reference_audio` | Yes | Path to voice reference WAV |
 | `reference_text` | Yes | Transcript of reference audio |
+| `python_path` | No | Python interpreter path (default: python3). Use venv path for gradio_client. |
 
 ### text_to_image
 

@@ -22,10 +22,17 @@ struct Payload {
     reference_audio: String,
     /// Transcript of reference audio
     reference_text: String,
+    /// Python interpreter path (default: python3)
+    #[serde(default = "default_python")]
+    python_path: String,
 }
 
 fn default_server() -> String {
     "http://curiosity:7860".to_string()
+}
+
+fn default_python() -> String {
+    "python3".to_string()
 }
 
 pub fn execute(ctx: &mut StepCtx<'_>, payload: &Value) -> Result<()> {
@@ -40,10 +47,18 @@ pub fn execute(ctx: &mut StepCtx<'_>, payload: &Value) -> Result<()> {
 
     // Read script text
     let script_text = ctx.rt.read_text(&script_path)?;
+    let python_path = ctx.render(&p.python_path)?;
+
+    // Make output path absolute (relative paths are relative to workdir)
+    let abs_output = if output_path.starts_with('/') {
+        output_path.clone()
+    } else {
+        ctx.rt.workdir().join(&output_path).to_string_lossy().to_string()
+    };
 
     // Call TTS via Python gradio_client
-    let status = Command::new("python3")
-        .args(["-c", &tts_script(&server, &ref_audio, &ref_text, &script_text, &output_path)])
+    let status = Command::new(&python_path)
+        .args(["-c", &tts_script(&server, &ref_audio, &ref_text, &script_text, &abs_output)])
         .status()
         .with_context(|| ctx.error_context("spawn tts python"))?;
 

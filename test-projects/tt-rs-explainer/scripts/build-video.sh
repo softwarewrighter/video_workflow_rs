@@ -16,6 +16,44 @@ cd "$PROJECT_DIR"
 
 mkdir -p "$CLIPS_DIR" "$OUTPUT_DIR"
 
+# Standard format for concatenation
+TARGET_FPS=25
+TARGET_AUDIO_RATE=44100
+TARGET_AUDIO_CHANNELS=2
+
+# Normalize a clip to standard format (1920x1080, 25fps, 44100Hz stereo AAC)
+normalize_clip() {
+    local input="$1"
+    local output="$2"
+
+    # Get current format
+    local audio_format=$(ffprobe -v error -select_streams a:0 -show_entries stream=sample_rate,channels -of csv=p=0 "$input" 2>/dev/null || echo "0,0")
+    local video_res=$(ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of csv=p=0 "$input" 2>/dev/null)
+    local fps=$(ffprobe -v error -select_streams v:0 -show_entries stream=r_frame_rate -of csv=p=0 "$input" 2>/dev/null)
+
+    local needs_normalize=false
+
+    if [ "$audio_format" != "${TARGET_AUDIO_RATE},${TARGET_AUDIO_CHANNELS}" ]; then
+        needs_normalize=true
+    fi
+
+    if [ "$video_res" != "${WIDTH},${HEIGHT}" ]; then
+        needs_normalize=true
+    fi
+
+    if [ "$needs_normalize" = true ]; then
+        ffmpeg -y -i "$input" \
+            -vf "scale=${WIDTH}:${HEIGHT}:force_original_aspect_ratio=decrease,pad=${WIDTH}:${HEIGHT}:(ow-iw)/2:(oh-ih)/2,fps=${TARGET_FPS}" \
+            -c:v libx264 -preset fast -crf 18 -pix_fmt yuv420p \
+            -c:a aac -ar ${TARGET_AUDIO_RATE} -ac ${TARGET_AUDIO_CHANNELS} -b:a 192k \
+            "$output" 2>/dev/null
+        echo "    Normalized: $(basename "$input")"
+    else
+        cp "$input" "$output"
+        echo "    Already normalized: $(basename "$input")"
+    fi
+}
+
 echo "=== Building tt-rs Explainer Video ==="
 
 # ============================================
@@ -27,11 +65,13 @@ echo "Step 1: Creating title clip..."
 echo "  Converting title SVG to PNG..."
 rsvg-convert -w $WIDTH -h $HEIGHT "$SVG_DIR/00-title.svg" -o "$IMAGES_DIR/title-background.png"
 
-# Scale robot to fit right half, position on right side of canvas
+# Scale robot to 600px height (maintains 1:1 aspect = 600x600)
+# Play forward then backward (boomerang) to double length
+# Right-justify: x = 1920 - 600 = 1320, vertically centered: y = (1080 - 600) / 2 = 240
 ffmpeg -y -loop 1 -i "$IMAGES_DIR/title-background.png" \
     -i "$ASSETS_DIR/robot.mp4" \
     -i "$ASSETS_DIR/music-upbeat.wav" \
-    -filter_complex "[1:v]scale=-1:600[robot];[0:v][robot]overlay=1100:240:shortest=1[v]" \
+    -filter_complex "[1:v]scale=600:600,split[fwd][rev];[rev]reverse[reversed];[fwd][reversed]concat=n=2:v=1:a=0[robot];[0:v][robot]overlay=1320:240:shortest=1[v]" \
     -map "[v]" -map 2:a \
     -t $TITLE_DURATION \
     -c:v libx264 -pix_fmt yuv420p -c:a aac \
@@ -62,16 +102,25 @@ convert_svg_to_png() {
 create_section_clip() {
     local name="$1"
     local slide="$IMAGES_DIR/${name}-slide.png"
+    local audio="$AUDIO_DIR/${name}.wav"
     local output="$CLIPS_DIR/${name}.mp4"
 
-    # Create video clip from slide (silent placeholder)
-    ffmpeg -y -loop 1 -i "$slide" \
-        -f lavfi -i anullsrc=r=44100:cl=stereo \
-        -t $PLACEHOLDER_DURATION \
-        -c:v libx264 -pix_fmt yuv420p -c:a aac -shortest \
-        "$output"
-
-    echo "  Created clip: $output"
+    if [ -f "$audio" ]; then
+        # Use TTS audio - duration matches audio length
+        ffmpeg -y -loop 1 -i "$slide" \
+            -i "$audio" \
+            -c:v libx264 -pix_fmt yuv420p -c:a aac -shortest \
+            "$output"
+        echo "  Created clip with TTS audio: $output"
+    else
+        # Fallback to silent placeholder
+        ffmpeg -y -loop 1 -i "$slide" \
+            -f lavfi -i anullsrc=r=44100:cl=stereo \
+            -t $PLACEHOLDER_DURATION \
+            -c:v libx264 -pix_fmt yuv420p -c:a aac -shortest \
+            "$output"
+        echo "  Created clip (silent placeholder): $output"
+    fi
 }
 
 # Convert SVGs to PNGs and create clips for each narration section
@@ -114,11 +163,23 @@ ffmpeg -y -loop 1 -i "$ASSETS_DIR/epilog-frame.png" \
 echo "  Created: 99b-epilog-ext.mp4"
 
 # ============================================
-# Step 6: Concatenate all clips
+# Step 6: Normalize all clips for concatenation
 # ============================================
-echo "Step 6: Concatenating clips into preview..."
+echo "Step 6: Normalizing clips for concatenation..."
 
-cat > "$CLIPS_DIR/concat.txt" << EOF
+NORMALIZED_DIR="$CLIPS_DIR/normalized"
+mkdir -p "$NORMALIZED_DIR"
+
+for clip in 00-title.mp4 01-hook.mp4 02-intro-demo.mp4 03-demo.mp4 03-cta.mp4 99a-epilog.mp4 99b-epilog-ext.mp4; do
+    normalize_clip "$CLIPS_DIR/$clip" "$NORMALIZED_DIR/$clip"
+done
+
+# ============================================
+# Step 7: Concatenate all normalized clips
+# ============================================
+echo "Step 7: Concatenating clips into preview..."
+
+cat > "$NORMALIZED_DIR/concat.txt" << EOF
 file '00-title.mp4'
 file '01-hook.mp4'
 file '02-intro-demo.mp4'
@@ -128,8 +189,10 @@ file '99a-epilog.mp4'
 file '99b-epilog-ext.mp4'
 EOF
 
-ffmpeg -y -f concat -safe 0 -i "$CLIPS_DIR/concat.txt" \
-    -c:v libx264 -c:a aac \
+# Re-encode during concat to ensure format consistency
+ffmpeg -y -f concat -safe 0 -i "$NORMALIZED_DIR/concat.txt" \
+    -c:v libx264 -preset fast -crf 18 -pix_fmt yuv420p \
+    -c:a aac -ar ${TARGET_AUDIO_RATE} -ac ${TARGET_AUDIO_CHANNELS} -b:a 192k \
     "$OUTPUT_DIR/preview.mp4"
 
 echo ""

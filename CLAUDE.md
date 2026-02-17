@@ -107,3 +107,23 @@ Errors must include step ID:
 ## Command Safety
 
 `run_command` requires explicit `--allow <program>` flags. Without allowlist, commands fail with remediation message.
+
+## Python Package Management
+
+**NEVER run `pip` or `pip3` directly.** Always use a virtual environment with `uv`:
+
+```bash
+# Create virtual environment
+uv venv
+
+# Activate the environment
+source .venv/bin/activate
+
+# Install packages using uv pip
+uv pip install requests
+
+# Or install from requirements
+uv pip install -r requirements.txt
+```
+
+This ensures reproducible environments and avoids polluting the system Python installation.

@@ -2,40 +2,160 @@
   <!-- White background for title card -->
   <rect width="1920" height="1080" fill="#ffffff"/>
 
-  <!-- Left side text block (robot video will be composited on right) -->
-  <!-- All text left-aligned, staying within left 900px -->
+  <!-- Scattered ToonTalk icons - fully opaque on white background -->
 
-  <!-- #TBT tag -->
-  <text x="80" y="200" font-family="Arial, sans-serif" font-size="72"
+  <!-- Bird - top right area -->
+  <g transform="translate(950, 80) scale(1.2)">
+    <path d="M75 55 L92 50 L88 55 L95 55 L88 60 L92 62 L75 60 Z" fill="#4299E1" stroke="#2B6CB0" stroke-width="1"/>
+    <ellipse cx="50" cy="55" rx="28" ry="22" fill="#63B3ED" stroke="#2B6CB0" stroke-width="2"/>
+    <path d="M35 45 Q25 55 30 70 Q45 65 55 50 Q45 42 35 45" fill="#4299E1" stroke="#2B6CB0" stroke-width="1"/>
+    <ellipse cx="52" cy="62" rx="15" ry="12" fill="#EDF2F7"/>
+    <circle cx="30" cy="35" r="18" fill="#63B3ED" stroke="#2B6CB0" stroke-width="2"/>
+    <path d="M15 30 Q30 15 45 30 Q38 35 30 35 Q22 35 15 30" fill="#2B6CB0"/>
+    <circle cx="30" cy="35" r="6" fill="white"/>
+    <circle cx="31" cy="36" r="4" fill="#1A365D"/>
+    <path d="M12 38 L20 40 L12 43 Z" fill="#ED8936"/>
+    <line x1="45" y1="75" x2="42" y2="88" stroke="#C05621" stroke-width="2"/>
+    <line x1="55" y1="75" x2="58" y2="88" stroke="#C05621" stroke-width="2"/>
+  </g>
+
+  <!-- Nest - bottom left corner -->
+  <g transform="translate(20, 850) scale(1.5)">
+    <ellipse cx="50" cy="65" rx="40" ry="25" fill="#8B7355"/>
+    <ellipse cx="50" cy="60" rx="35" ry="20" fill="#A0855B"/>
+    <ellipse cx="50" cy="55" rx="28" ry="15" fill="#8B7355"/>
+    <ellipse cx="50" cy="52" rx="24" ry="12" fill="#6B5344"/>
+    <path d="M15 62 L8 58" stroke="#5D4037" stroke-width="2"/>
+    <path d="M85 62 L92 58" stroke="#5D4037" stroke-width="2"/>
+    <ellipse cx="50" cy="42" rx="15" ry="20" fill="#FFF8E7" stroke="#E2D5C0" stroke-width="1"/>
+    <ellipse cx="44" cy="35" rx="4" ry="6" fill="white" opacity="0.6"/>
+    <circle cx="44" cy="42" r="2" fill="#2D3748"/>
+    <circle cx="56" cy="42" r="2" fill="#2D3748"/>
+    <path d="M47 50 Q50 53 53 50" stroke="#ED8936" stroke-width="2" fill="none"/>
+  </g>
+
+  <!-- Wand - upper middle -->
+  <g transform="translate(700, 30) scale(0.9) rotate(15)">
+    <circle cx="22" cy="22" r="18" fill="#FFF9C4"/>
+    <line x1="22" y1="2" x2="22" y2="8" stroke="#FFF59D" stroke-width="2"/>
+    <line x1="22" y1="36" x2="22" y2="42" stroke="#FFF59D" stroke-width="2"/>
+    <line x1="2" y1="22" x2="8" y2="22" stroke="#FFF59D" stroke-width="2"/>
+    <line x1="36" y1="22" x2="42" y2="22" stroke="#FFF59D" stroke-width="2"/>
+    <polygon points="22,8 25,17 35,17 27,23 30,33 22,27 14,33 17,23 9,17 19,17" fill="#FFD54F" stroke="#FFA000" stroke-width="1.5"/>
+    <polygon points="22,12 24,18 30,18 25,22 27,28 22,25 17,28 19,22 14,18 20,18" fill="#FFECB3" opacity="0.6"/>
+    <rect x="32" y="32" width="58" height="8" rx="2" fill="#8D6E63" stroke="#5D4037" stroke-width="1" transform="rotate(45 32 32)"/>
+    <rect x="34" y="34" width="4" height="8" rx="1" fill="#FFD54F" transform="rotate(45 36 38)"/>
+  </g>
+
+  <!-- Scales - lower left -->
+  <g transform="translate(350, 780) scale(1.0)">
+    <ellipse cx="50" cy="92" rx="18" ry="5" fill="#8B4513"/>
+    <rect x="42" y="88" width="16" height="4" fill="#DAA520"/>
+    <rect x="47" y="25" width="6" height="65" fill="#DAA520" stroke="#B8860B" stroke-width="1"/>
+    <ellipse cx="50" cy="22" rx="4" ry="3" fill="#DAA520" stroke="#B8860B" stroke-width="1"/>
+    <circle cx="50" cy="18" r="3" fill="#DAA520" stroke="#B8860B" stroke-width="1"/>
+    <rect x="10" y="28" width="80" height="5" rx="2" fill="#DAA520" stroke="#B8860B" stroke-width="1"/>
+    <circle cx="50" cy="30" r="4" fill="#B8860B" stroke="#8B4513" stroke-width="1"/>
+    <circle cx="50" cy="30" r="2" fill="#87CEEB"/>
+    <line x1="15" y1="33" x2="15" y2="50" stroke="#8B4513" stroke-width="2"/>
+    <line x1="85" y1="33" x2="85" y2="50" stroke="#8B4513" stroke-width="2"/>
+    <ellipse cx="15" cy="55" rx="14" ry="4" fill="#DAA520" stroke="#B8860B" stroke-width="1"/>
+    <path d="M1 55 Q15 65 29 55" fill="#DAA520" stroke="#B8860B" stroke-width="1"/>
+    <ellipse cx="85" cy="55" rx="14" ry="4" fill="#DAA520" stroke="#B8860B" stroke-width="1"/>
+    <path d="M71 55 Q85 65 99 55" fill="#DAA520" stroke="#B8860B" stroke-width="1"/>
+  </g>
+
+  <!-- Robot - right side (will be partially behind video) -->
+  <g transform="translate(1100, 600) scale(1.8)">
+    <rect x="47" y="8" width="6" height="8" fill="#C53030"/>
+    <line x1="35" y1="5" x2="42" y2="15" stroke="#4A5568" stroke-width="2"/>
+    <circle cx="33" cy="3" r="4" fill="#C53030"/>
+    <line x1="50" y1="2" x2="50" y2="8" stroke="#4A5568" stroke-width="2"/>
+    <circle cx="50" cy="0" r="3" fill="#C53030"/>
+    <line x1="65" y1="5" x2="58" y2="15" stroke="#4A5568" stroke-width="2"/>
+    <circle cx="67" cy="3" r="4" fill="#C53030"/>
+    <rect x="30" y="15" width="40" height="30" rx="5" fill="#63B3ED" stroke="#2B6CB0" stroke-width="2"/>
+    <ellipse cx="28" cy="30" rx="5" ry="7" fill="#C53030" stroke="#9B2C2C" stroke-width="1"/>
+    <ellipse cx="72" cy="30" rx="5" ry="7" fill="#C53030" stroke="#9B2C2C" stroke-width="1"/>
+    <circle cx="40" cy="28" r="7" fill="white" stroke="#2D3748" stroke-width="1"/>
+    <circle cx="60" cy="28" r="7" fill="white" stroke="#2D3748" stroke-width="1"/>
+    <circle cx="41" cy="29" r="4" fill="#2D3748"/>
+    <circle cx="61" cy="29" r="4" fill="#2D3748"/>
+    <rect x="38" y="36" width="24" height="6" rx="2" fill="white" stroke="#2D3748" stroke-width="1"/>
+    <rect x="45" y="45" width="10" height="5" fill="#4A5568"/>
+    <rect x="32" y="50" width="36" height="28" rx="4" fill="#63B3ED" stroke="#2B6CB0" stroke-width="2"/>
+    <rect x="40" y="55" width="20" height="12" rx="2" fill="#ECC94B" stroke="#D69E2E" stroke-width="1"/>
+    <text x="50" y="64" text-anchor="middle" font-size="8" fill="#C53030" font-weight="bold">TT</text>
+  </g>
+
+  <!-- Vacuum - top right -->
+  <g transform="translate(1150, 150) scale(1.3) rotate(-20)">
+    <path d="M55 25 L75 15 Q85 12 88 20 L90 30 Q92 38 85 42 L70 48 L55 45 Z" fill="#4A5568" stroke="#2D3748" stroke-width="2"/>
+    <rect x="72" y="18" width="12" height="20" rx="3" fill="#2D3748" stroke="#1A202C" stroke-width="1"/>
+    <rect x="75" y="22" width="6" height="12" rx="2" fill="#1A202C"/>
+    <ellipse cx="65" cy="32" rx="8" ry="12" fill="#718096" opacity="0.5"/>
+    <circle cx="60" cy="28" r="3" fill="#E53E3E"/>
+    <circle cx="78" cy="40" r="2.5" fill="#E53E3E"/>
+    <path d="M55 45 L45 55 L35 70 L30 75" stroke="#4A5568" stroke-width="8" fill="none" stroke-linecap="round"/>
+    <path d="M55 45 L45 55 L35 70 L30 75" stroke="#718096" stroke-width="4" fill="none" stroke-linecap="round"/>
+    <rect x="18" y="78" width="28" height="10" rx="2" fill="#4A5568" stroke="#2D3748" stroke-width="1"/>
+    <rect x="20" y="85" width="24" height="4" fill="#2D3748"/>
+  </g>
+
+  <!-- Another bird - flying near bottom -->
+  <g transform="translate(580, 920) scale(0.8) rotate(-10)">
+    <path d="M75 55 L92 50 L88 55 L95 55 L88 60 L92 62 L75 60 Z" fill="#4299E1" stroke="#2B6CB0" stroke-width="1"/>
+    <ellipse cx="50" cy="55" rx="28" ry="22" fill="#63B3ED" stroke="#2B6CB0" stroke-width="2"/>
+    <path d="M35 45 Q25 55 30 70 Q45 65 55 50 Q45 42 35 45" fill="#4299E1" stroke="#2B6CB0" stroke-width="1"/>
+    <ellipse cx="52" cy="62" rx="15" ry="12" fill="#EDF2F7"/>
+    <circle cx="30" cy="35" r="18" fill="#63B3ED" stroke="#2B6CB0" stroke-width="2"/>
+    <path d="M15 30 Q30 15 45 30 Q38 35 30 35 Q22 35 15 30" fill="#2B6CB0"/>
+    <circle cx="30" cy="35" r="6" fill="white"/>
+    <circle cx="31" cy="36" r="4" fill="#1A365D"/>
+    <path d="M12 38 L20 40 L12 43 Z" fill="#ED8936"/>
+  </g>
+
+  <!-- Small wand sparkle - decorative -->
+  <g transform="translate(180, 620) scale(0.7)">
+    <circle cx="22" cy="22" r="15" fill="#FFF9C4"/>
+    <polygon points="22,8 25,17 35,17 27,23 30,33 22,27 14,33 17,23 9,17 19,17" fill="#FFD54F" stroke="#FFA000" stroke-width="1.5"/>
+  </g>
+
+  <!-- ============= MAIN TEXT CONTENT ============= -->
+
+  <!-- #TBT tag - small, top left -->
+  <text x="80" y="80" font-family="Arial, sans-serif" font-size="48"
         font-weight="bold" fill="#ff6b6b" text-anchor="start">
     #TBT
   </text>
 
-  <!-- tt-rs title -->
-  <text x="80" y="340" font-family="Arial, sans-serif" font-size="120"
+  <!-- tt-rs subtitle -->
+  <text x="80" y="160" font-family="Arial, sans-serif" font-size="72"
         font-weight="bold" fill="#00d4ff" text-anchor="start">
     tt-rs
   </text>
 
-  <!-- ToonTalk subtitle - wrapped to fit -->
-  <text x="80" y="480" font-family="Arial, sans-serif" font-size="64"
-        fill="#333333" text-anchor="start">
-    ToonTalk
+  <!-- ToonTalk - LARGE colorful block letters -->
+  <text x="80" y="420" font-family="Arial Black, Arial, sans-serif" font-size="200"
+        font-weight="900" text-anchor="start">
+    <tspan fill="#ff6b6b">T</tspan><tspan fill="#ffa500">o</tspan><tspan fill="#ffd93d">o</tspan><tspan fill="#4ade80">n</tspan><tspan fill="#00d4ff">T</tspan><tspan fill="#a855f7">a</tspan><tspan fill="#ec4899">l</tspan><tspan fill="#ff6b6b">k</tspan>
   </text>
-  <text x="80" y="560" font-family="Arial, sans-serif" font-size="64"
+
+  <!-- Visual Programming - below ToonTalk -->
+  <text x="80" y="540" font-family="Arial, sans-serif" font-size="56"
         fill="#333333" text-anchor="start">
     Visual Programming
   </text>
 
-  <!-- Tagline -->
-  <text x="80" y="700" font-family="Arial, sans-serif" font-size="40"
+  <!-- Tagline at bottom -->
+  <text x="80" y="700" font-family="Arial, sans-serif" font-size="36"
         fill="#666666" text-anchor="start">
     Rust + WebAssembly
   </text>
-  <text x="80" y="760" font-family="Arial, sans-serif" font-size="40"
+  <text x="80" y="750" font-family="Arial, sans-serif" font-size="36"
         fill="#666666" text-anchor="start">
     In Your Browser
   </text>
 
-  <!-- Right side (x=960-1920) reserved for robot video overlay -->
+  <!-- Right side (x=1320-1920) reserved for robot video overlay -->
 </svg>
