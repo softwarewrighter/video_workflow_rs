@@ -23,12 +23,11 @@ echo "=== Building tt-rs Explainer Video ==="
 # ============================================
 echo "Step 1: Creating title clip..."
 
-# Get robot video dimensions
-ROBOT_W=$(ffprobe -v error -select_streams v:0 -show_entries stream=width -of csv=p=0 "$ASSETS_DIR/robot.mp4")
-ROBOT_H=$(ffprobe -v error -select_streams v:0 -show_entries stream=height -of csv=p=0 "$ASSETS_DIR/robot.mp4")
+# Convert title SVG to PNG
+echo "  Converting title SVG to PNG..."
+rsvg-convert -w $WIDTH -h $HEIGHT "$SVG_DIR/00-title.svg" -o "$IMAGES_DIR/title-background.png"
 
-# Scale robot to fit right half (960px width max, maintain aspect)
-# Position on right half of 1920x1080 canvas
+# Scale robot to fit right half, position on right side of canvas
 ffmpeg -y -loop 1 -i "$IMAGES_DIR/title-background.png" \
     -i "$ASSETS_DIR/robot.mp4" \
     -i "$ASSETS_DIR/music-upbeat.wav" \
