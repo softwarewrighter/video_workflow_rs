@@ -10,6 +10,7 @@ mod split_sections;
 mod text_to_image;
 mod text_to_video;
 mod tts_generate;
+mod whisper_transcribe;
 mod write_file;
 
 use anyhow::Result;
@@ -37,5 +38,6 @@ fn dispatch(ctx: &mut StepCtx<'_>, kind: &StepKind, payload: &serde_json::Value)
         StepKind::ImageToVideo => image_to_video::execute(ctx, payload),
         StepKind::TextToVideo => text_to_video::execute(ctx, payload),
         StepKind::NormalizeVolume => normalize_volume::execute(ctx, payload),
+        StepKind::WhisperTranscribe => whisper_transcribe::execute(ctx, payload),
     }
 }

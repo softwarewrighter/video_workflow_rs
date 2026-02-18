@@ -11,6 +11,7 @@ description: >
   - Image-to-Video: SVD-XT (svd_xt.safetensors) @ 192.168.1.64:8100
   - Text-to-Video: Wan 2.2 (wan2.2_ti2v_5B_fp16.safetensors) @ 192.168.1.64:6000
   - Music: midi-cli-rs with FluidSynth (VintageDreamsWaves-v2.sf2)
+  - Transcription: whisper.cpp (ggml-base.en.bin) local
 
 vars:
   project_name: "VWF Self-Explainer"
@@ -25,6 +26,9 @@ vars:
   # Music generation
   midi_cli: "/Users/mike/github/softwarewrighter/midi-cli-rs/target/release/midi-cli-rs"
   soundfont: "/opt/homebrew/Cellar/fluid-synth/2.5.2/share/fluid-synth/sf2/VintageDreamsWaves-v2.sf2"
+  # Whisper transcription
+  whisper_cli: "/opt/homebrew/bin/whisper-cli"
+  whisper_model: "/Users/mike/.whisper-models/ggml-base.en.bin"
 
 steps:
   # Setup directories
@@ -37,6 +41,7 @@ steps:
       - "work/videos"
       - "work/clips"
       - "output"
+      - "output/transcripts"
 
   # Write production manifest
   - id: write_manifest
@@ -164,11 +169,88 @@ steps:
     reference_text: "{{reference_text}}"
     python_path: "{{python_path}}"
 
-  # Verify TTS output with Whisper
-  - id: verify_tts
-    kind: run_command
-    program: "./scripts/verify-tts.sh"
-    capture_path: "output/verify-tts.log"
+  # ============================================
+  # Whisper Transcription (verify TTS output)
+  # ============================================
+  - id: transcribe_hook
+    kind: whisper_transcribe
+    resume_output: "output/transcripts/00-hook.txt"
+    input_path: "work/audio/00-hook.wav"
+    output_path: "output/transcripts/00-hook.txt"
+    whisper_cli: "{{whisper_cli}}"
+    model: "{{whisper_model}}"
+
+  - id: transcribe_problem
+    kind: whisper_transcribe
+    resume_output: "output/transcripts/01-problem.txt"
+    input_path: "work/audio/01-problem.wav"
+    output_path: "output/transcripts/01-problem.txt"
+    whisper_cli: "{{whisper_cli}}"
+    model: "{{whisper_model}}"
+
+  - id: transcribe_solution
+    kind: whisper_transcribe
+    resume_output: "output/transcripts/02-solution.txt"
+    input_path: "work/audio/02-solution.wav"
+    output_path: "output/transcripts/02-solution.txt"
+    whisper_cli: "{{whisper_cli}}"
+    model: "{{whisper_model}}"
+
+  - id: transcribe_project
+    kind: whisper_transcribe
+    resume_output: "output/transcripts/03-project.txt"
+    input_path: "work/audio/03-project.wav"
+    output_path: "output/transcripts/03-project.txt"
+    whisper_cli: "{{whisper_cli}}"
+    model: "{{whisper_model}}"
+
+  - id: transcribe_workflow
+    kind: whisper_transcribe
+    resume_output: "output/transcripts/04-workflow.txt"
+    input_path: "work/audio/04-workflow.wav"
+    output_path: "output/transcripts/04-workflow.txt"
+    whisper_cli: "{{whisper_cli}}"
+    model: "{{whisper_model}}"
+
+  - id: transcribe_steps
+    kind: whisper_transcribe
+    resume_output: "output/transcripts/05-steps.txt"
+    input_path: "work/audio/05-steps.wav"
+    output_path: "output/transcripts/05-steps.txt"
+    whisper_cli: "{{whisper_cli}}"
+    model: "{{whisper_model}}"
+
+  - id: transcribe_running
+    kind: whisper_transcribe
+    resume_output: "output/transcripts/06-running.txt"
+    input_path: "work/audio/06-running.wav"
+    output_path: "output/transcripts/06-running.txt"
+    whisper_cli: "{{whisper_cli}}"
+    model: "{{whisper_model}}"
+
+  - id: transcribe_resume
+    kind: whisper_transcribe
+    resume_output: "output/transcripts/07-resume.txt"
+    input_path: "work/audio/07-resume.wav"
+    output_path: "output/transcripts/07-resume.txt"
+    whisper_cli: "{{whisper_cli}}"
+    model: "{{whisper_model}}"
+
+  - id: transcribe_meta
+    kind: whisper_transcribe
+    resume_output: "output/transcripts/08-meta.txt"
+    input_path: "work/audio/08-meta.wav"
+    output_path: "output/transcripts/08-meta.txt"
+    whisper_cli: "{{whisper_cli}}"
+    model: "{{whisper_model}}"
+
+  - id: transcribe_cta
+    kind: whisper_transcribe
+    resume_output: "output/transcripts/09-cta.txt"
+    input_path: "work/audio/09-cta.wav"
+    output_path: "output/transcripts/09-cta.txt"
+    whisper_cli: "{{whisper_cli}}"
+    model: "{{whisper_model}}"
 
   # ============================================
   # Image Generation (Flux backgrounds)
@@ -351,8 +433,72 @@ steps:
       - "-o"
       - "assets/music-outro.wav"
 
-  # Build video preview
-  - id: build_video
+  # ============================================
+  # Build Video Clips (compositing slides + audio)
+  # ============================================
+  - id: build_clips
     kind: run_command
-    program: "./scripts/build-video.sh"
-    capture_path: "output/build.log"
+    program: "./scripts/build-clips.sh"
+    capture_path: "output/build-clips.log"
+
+  # ============================================
+  # Normalize Audio Volumes
+  # Speech clips: -25 dB, Title clip (with music): -32 dB
+  # ============================================
+  - id: normalize_hook
+    kind: normalize_volume
+    clip_path: "work/clips/00-hook.mp4"
+    target_db: -25
+
+  - id: normalize_problem
+    kind: normalize_volume
+    clip_path: "work/clips/01-problem.mp4"
+    target_db: -25
+
+  - id: normalize_solution
+    kind: normalize_volume
+    clip_path: "work/clips/02-solution.mp4"
+    target_db: -25
+
+  - id: normalize_project
+    kind: normalize_volume
+    clip_path: "work/clips/03-project.mp4"
+    target_db: -25
+
+  - id: normalize_workflow
+    kind: normalize_volume
+    clip_path: "work/clips/04-workflow.mp4"
+    target_db: -25
+
+  - id: normalize_steps
+    kind: normalize_volume
+    clip_path: "work/clips/05-steps.mp4"
+    target_db: -25
+
+  - id: normalize_running
+    kind: normalize_volume
+    clip_path: "work/clips/06-running.mp4"
+    target_db: -25
+
+  - id: normalize_resume
+    kind: normalize_volume
+    clip_path: "work/clips/07-resume.mp4"
+    target_db: -25
+
+  - id: normalize_meta
+    kind: normalize_volume
+    clip_path: "work/clips/08-meta.mp4"
+    target_db: -25
+
+  - id: normalize_cta
+    kind: normalize_volume
+    clip_path: "work/clips/09-cta.mp4"
+    target_db: -25
+
+  # ============================================
+  # Final Assembly (concat + music mix)
+  # ============================================
+  - id: build_final
+    kind: run_command
+    program: "./scripts/build-final.sh"
+    capture_path: "output/build-final.log"

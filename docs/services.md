@@ -11,6 +11,7 @@ This document describes the external services VWF integrates with for asset gene
 | SVD-XT | Image-to-Video | 8100 | svd_xt.safetensors |
 | Wan 2.2 | Text-to-Video | 6000 | wan2.2_ti2v_5B_fp16.safetensors |
 | midi-cli-rs | Music Generation | N/A (local) | VintageDreamsWaves-v2.sf2 |
+| whisper.cpp | Transcription | N/A (local) | ggml-base.en.bin |
 
 ## VoxCPM (Text-to-Speech)
 
@@ -245,26 +246,114 @@ Local MIDI-based music generation using FluidSynth for audio synthesis.
 | dramatic | Intense, building tension |
 | mysterious | Ethereal, uncertain, atmospheric |
 
+## whisper.cpp (Transcription)
+
+Local speech-to-text transcription using whisper.cpp. Used for verifying TTS output and generating subtitles.
+
+**Binary**: `/opt/homebrew/bin/whisper-cli`
+
+**Model**: `ggml-base.en.bin` (English, ~142MB)
+
+**Step Type**: `whisper_transcribe`
+
+```yaml
+- id: transcribe_intro
+  kind: whisper_transcribe
+  resume_output: "output/transcripts/intro.txt"
+  input_path: "work/audio/intro.wav"
+  output_path: "output/transcripts/intro.txt"
+  whisper_cli: "{{whisper_cli}}"
+  model: "{{whisper_model}}"
+  language: "en"
+  format: "txt"
+```
+
+| Parameter | Required | Description |
+|-----------|----------|-------------|
+| `input_path` | Yes | Path to input audio file (WAV, MP3, etc.) |
+| `output_path` | Yes | Path to output transcript file |
+| `whisper_cli` | No | Path to whisper-cli binary (default: /opt/homebrew/bin/whisper-cli) |
+| `model` | No | Path to whisper model file (default: ~/.whisper-models/ggml-base.en.bin) |
+| `language` | No | Language code (default: "en") |
+| `format` | No | Output format: "txt", "srt", "vtt" (default: "txt") |
+
+**Available Models**:
+
+| Model | Size | Speed | Accuracy |
+|-------|------|-------|----------|
+| ggml-tiny.en.bin | 75MB | Fastest | Lower |
+| ggml-base.en.bin | 142MB | Fast | Good |
+| ggml-small.en.bin | 466MB | Medium | Better |
+| ggml-medium.en.bin | 1.5GB | Slow | Best |
+
+**Use Cases**:
+- Verify TTS output matches input script
+- Generate subtitles/captions (SRT/VTT format)
+- Create searchable transcripts
+- Quality control for audio content
+
+## normalize_volume (Audio Processing)
+
+Local audio normalization step that adjusts clip volumes to target dB levels.
+
+**Dependencies**: ffmpeg (with volumedetect filter)
+
+**Step Type**: `normalize_volume`
+
+```yaml
+# Normalize narration to -25 dB
+- id: normalize_intro
+  kind: normalize_volume
+  clip_path: "work/clips/intro.mp4"
+  target_db: -25
+
+# Normalize music to -32 dB (7 dB quieter)
+- id: normalize_title
+  kind: normalize_volume
+  clip_path: "work/clips/title.mp4"
+  target_db: -32
+```
+
+| Parameter | Required | Description |
+|-----------|----------|-------------|
+| `clip_path` | Yes | Path to clip to normalize (modified in place) |
+| `target_db` | No | Target mean volume in dB (default: -25) |
+
+**Standard Volume Levels**:
+
+| Audio Type | Target | Description |
+|------------|--------|-------------|
+| Narration/Speech | -25 dB | Primary spoken content |
+| Background Music | -32 dB | 7 dB quieter than speech |
+
+**Why Post-Process Normalization?**
+
+Applying volume adjustment during clip creation (via ffmpeg -af) often produces inconsistent results due to AAC encoding variations. The proven approach is:
+
+1. Create clips with native audio levels
+2. Run `normalize_volume` on each clip (post-processing)
+3. Then concatenate the normalized clips
+
+This ensures consistent audio levels across all clips in the final video.
+
 ## Network Configuration
 
-All GPU services run on a local network server (`192.168.1.64`). The TTS service runs on `curiosity` (a separate host).
+All GPU services run on a local network server (`192.168.1.64`, hostname: `curiosity`).
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│  GPU Server (192.168.1.64)                              │
+│  GPU Server (192.168.1.64 / curiosity)                  │
 │  ├── :8570  FLUX.1 schnell (text-to-image)              │
 │  ├── :8100  SVD-XT (image-to-video)                     │
-│  └── :6000  Wan 2.2 (text-to-video)                     │
-└─────────────────────────────────────────────────────────┘
-
-┌─────────────────────────────────────────────────────────┐
-│  TTS Server (curiosity)                                 │
+│  ├── :6000  Wan 2.2 (text-to-video)                     │
 │  └── :7860  VoxCPM (voice cloning TTS)                  │
 └─────────────────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────────┐
 │  Local (workflow host)                                  │
-│  └── midi-cli-rs (music generation, no network)         │
+│  ├── midi-cli-rs (music generation)                     │
+│  ├── whisper-cli (transcription)                        │
+│  └── ffmpeg (normalize_volume, video processing)        │
 └─────────────────────────────────────────────────────────┘
 ```
 
