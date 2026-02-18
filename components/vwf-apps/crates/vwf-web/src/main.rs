@@ -84,21 +84,19 @@ fn app() -> Html {
         let reader_handle = _file_reader.clone();
         Callback::from(move |e: Event| {
             let input: HtmlInputElement = e.target_unchecked_into();
-            if let Some(files) = input.files() {
-                if let Some(file) = files.get(0) {
-                    let file = File::from(file);
-                    let report = report.clone();
-                    let reader = gloo::file::callbacks::read_as_text(&file, move |res| {
-                        if let Ok(text) = res {
-                            if let Ok(parsed) = serde_json::from_str::<RunReport>(&text) {
-                                report.set(Some(parsed));
-                            } else {
-                                gloo::dialogs::alert("Failed to parse run.json");
-                            }
+            if let Some(file) = input.files().and_then(|f| f.get(0)) {
+                let file = File::from(file);
+                let report = report.clone();
+                let reader = gloo::file::callbacks::read_as_text(&file, move |res| {
+                    if let Ok(text) = res {
+                        if let Ok(parsed) = serde_json::from_str::<RunReport>(&text) {
+                            report.set(Some(parsed));
+                        } else {
+                            gloo::dialogs::alert("Failed to parse run.json");
                         }
-                    });
-                    reader_handle.set(Some(reader));
-                }
+                    }
+                });
+                reader_handle.set(Some(reader));
             }
         })
     };
