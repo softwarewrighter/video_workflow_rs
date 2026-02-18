@@ -31,36 +31,41 @@ ffmpeg -i input.wav -i background.png output.mp4  # DO NOT DO THIS
 
 ## Commands
 
+Use the scripts in `scripts/` instead of running cargo directly:
+
 ```bash
-# Build
-cargo build
+# Build all components
+./scripts/build.sh
 
-# Test all crates
-cargo test
-
-# Test single crate
-cargo test -p vwf-core
+# Test all crates + Python hygiene
+./scripts/test.sh
 
 # Lint (zero warnings required)
-cargo clippy --all-targets --all-features -- -D warnings
+./scripts/lint.sh
 
-# Format
-cargo fmt --all
+# Format code
+./scripts/fmt.sh
 
-# Run workflow (real execution)
-cargo run -p vwf-cli -- run examples/workflows/shorts_narration.yaml --workdir work/demo
+# Run workflow with resume (skips completed steps)
+./scripts/run.sh projects/self/workflow.yaml --resume --allow bash --allow ffmpeg
 
 # Dry run (preview only)
-cargo run -p vwf-cli -- run examples/workflows/shorts_narration.yaml --workdir work/demo --dry-run
+./scripts/run.sh projects/self/workflow.yaml --dry-run
 
 # Run with variable override
-cargo run -p vwf-cli -- run workflow.yaml --workdir work --var project_name=Demo
-
-# Allow specific commands
-cargo run -p vwf-cli -- run workflow.yaml --workdir work --allow ffmpeg --allow vhs
+./scripts/run.sh workflow.yaml --var project_name=Demo
 
 # Debug workflow parsing
-cargo run -p vwf-cli -- show examples/workflows/shorts_narration.yaml
+./scripts/show.sh examples/workflows/shorts_narration.yaml
+
+# Check service availability
+cd components/vwf-apps && cargo run -p vwf-cli -- services ../../projects/self/workflow.yaml
+
+# Serve web UI (status viewer)
+./scripts/serve-web.sh
+
+# Setup Python environment
+./scripts/setup-python.sh
 ```
 
 ## Architecture

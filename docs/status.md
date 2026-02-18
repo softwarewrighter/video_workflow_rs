@@ -1,10 +1,10 @@
 # Project Status
 
-## Current State: Full Media Generation Pipeline
+## Current State: Full Production Pipeline with DAG Execution
 
-All components pass sw-checklist (0 failures). Full video pipeline working: script generation, TTS voice cloning, video assembly. GPU services available for text-to-image, image-to-video, and text-to-video generation.
+All components pass tests. Full video pipeline working with DAG-based execution: script generation, LLM integration (Ollama), TTS voice cloning, image/video generation, and web status viewer. Steps run based on dependency satisfaction, with clear blocked step reporting.
 
-## Last Updated: 2026-02-16
+## Last Updated: 2026-02-18
 
 ## Milestone Progress
 
@@ -12,106 +12,119 @@ All components pass sw-checklist (0 failures). Full video pipeline working: scri
 |-----------|--------|----------|
 | M1: Workflow Runner | Complete | 100% |
 | M2: Shell Step | Complete | 100% |
-| M3: LLM Adapter | Partial | 30% (mock only) |
-| M4: Web UI | Skeleton | 15% (footer added) |
+| M3: LLM Adapter (Ollama) | Complete | 100% |
+| M4: Web UI | Functional | 60% (status viewer + editor) |
 | M5: Component Restructure | Complete | 100% |
 | M6: sw-checklist Compliance | Complete | 100% |
 | M7: Sample Video Pipeline | Complete | 100% |
 | M8: GPU Queue + Resume | Complete | 100% |
+| M9: DAG Execution | Complete | 100% |
+| M10: Service Health Check | Complete | 100% |
 
 ## Quick Start
 
 ```bash
-# Generate a YouTube Short (vertical 1080x1920, ~30 sec)
-./scripts/demo-short.sh
+# Build all components
+./scripts/build.sh
 
-# Generate an explainer video (landscape 1920x1080, ~32 sec)
-./scripts/demo-explainer.sh
+# Run tests
+./scripts/test.sh
+
+# Run a workflow with resume (skips completed steps)
+./scripts/run.sh projects/self/workflow.yaml --resume --allow bash --allow ffmpeg
+
+# Check service availability
+cd components/vwf-apps && cargo run -p vwf-cli -- services ../../projects/self/workflow.yaml
+
+# Serve web UI
+./scripts/serve-web.sh
 ```
-
-## Video Formats
-
-| Format | Dimensions | Orientation | Duration |
-|--------|-----------|-------------|----------|
-| **YouTube Short** | 1080x1920 | Vertical (9:16) | < 60 sec (max 3 min) |
-| **Explainer** | 1920x1080 | Landscape (16:9) | 1.5-30 min (ideal 5-10) |
 
 ## New Features
 
-### GPU Queue (vwf-queue)
+### DAG-Based Execution
 
-Semaphore-based queue for serializing GPU-bound tasks:
-
-```rust
-let queue = GpuQueue::new(1, 2);  // TTS=1, Lipsync=2
-let result = queue.run_tts(async { ... }).await;
-```
-
-### TTS Step (tts_generate)
-
-Voice cloning via VoxCPM Gradio API:
+Steps declare dependencies with `depends_on` and run when dependencies are satisfied:
 
 ```yaml
-- id: tts_narration
-  kind: tts_generate
-  output_path: work/audio/narration.wav
-  script_path: work/scripts/narration.txt
-  reference_audio: /path/to/reference.wav
-  reference_text: "Transcript of reference audio..."
-  server: http://curiosity:7860
+steps:
+  - id: setup_dirs
+    kind: ensure_dirs
+    dirs: ["work/audio", "work/videos"]
+
+  - id: generate_script
+    kind: write_file
+    depends_on: [setup_dirs]
+    path: "work/scripts/intro.txt"
+    content: "Welcome to the demo."
+
+  - id: tts_narration
+    kind: tts_generate
+    depends_on: [generate_script]
+    # ...
 ```
 
-### Resume Support (--resume)
+Features:
+- **Cycle detection** before execution
+- **Blocked step tracking** when dependencies fail
+- **Clear status reporting**: OK, Skipped, Failed, Blocked
 
-Skip steps whose outputs already exist:
+### Web Status Viewer
+
+Load `run.json` files in the web UI to view execution status:
 
 ```bash
-vwf run workflow.yaml --workdir work --resume
+./scripts/serve-web.sh
+# Open http://localhost:8090, click Status tab, load run.json
 ```
 
-Steps declare `resume_output` for completion checking. Media files validated via ffprobe duration.
+Shows:
+- Summary badges (OK/Skipped/Failed/Blocked counts)
+- Step table with color-coded status
+- Error messages for failed steps
+
+### LLM Integration (Ollama)
+
+Real LLM generation via local Ollama:
+
+```yaml
+- id: generate_prompt
+  kind: llm_generate
+  system_prompt: "You are a helpful assistant."
+  user_prompt: "Write a greeting."
+  output_path: "work/prompts/greeting.txt"
+```
+
+Run with: `--llm-model qwen2.5-coder:14b`
+
+### Service Health Check
+
+Check availability of required services:
+
+```bash
+vwf services projects/self/workflow.yaml
+```
+
+Output shows which services are running/offline and how to start them.
 
 ## Component Structure
 
 ```
 components/
-|-- vwf-foundation/   # 4 crates, 10 tests
+|-- vwf-foundation/   # 4 crates
 |   |-- vwf-types
-|   |-- vwf-runtime   # + output_is_valid()
+|   |-- vwf-runtime   # FsRuntime, OllamaClient
 |   |-- vwf-dag
-|   +-- vwf-queue     # NEW: GPU semaphores
-|-- vwf-engine/       # 4 crates, 12 tests
-|   |-- vwf-config    # + output_path, TtsGenerate
-|   |-- vwf-render
-|   |-- vwf-steps     # + tts_generate
-|   +-- vwf-core      # + RunOptions, resume
+|   +-- vwf-queue     # GPU semaphores
+|-- vwf-engine/       # 4 crates
+|   |-- vwf-config    # StepKind, depends_on
+|   |-- vwf-render    # Template {{vars}}
+|   |-- vwf-steps     # 15 step implementations
+|   +-- vwf-core      # DAG engine, reports
 +-- vwf-apps/         # 2 crates
-    |-- vwf-cli       # + --resume flag
-    +-- vwf-web
+    |-- vwf-cli       # run, show, generate, services
+    +-- vwf-web       # Yew WASM UI
 ```
-
-## Test Projects
-
-### sample-short (YouTube Short)
-
-**Location:** `test-projects/sample-short/`
-**Format:** 1080x1920 vertical (9:16)
-**Duration:** ~30 seconds
-
-3-section structure: Hook, Content, CTA. Uses ImageMagick for vertical slides.
-
-### sample-video (Explainer)
-
-**Location:** `test-projects/sample-video/`
-**Format:** 1920x1080 landscape (16:9)
-**Duration:** ~32 seconds
-
-5-section structure: Hook, Problem, Solution, Benefit, CTA. Uses vid-slide for slides.
-
-**Common Scripts (in each project):**
-- `scripts/generate-tts.sh` - Generate voice-cloned audio
-- `scripts/verify-tts.sh` - Verify with Whisper
-- `scripts/build-video.sh` - Assemble final video
 
 ## Step Kinds
 
@@ -119,111 +132,52 @@ components/
 |------|-------------|
 | `ensure_dirs` | Create directories |
 | `write_file` | Write templated content |
-| `split_sections` | Split LLM output by headings |
-| `run_command` | Execute shell command |
-| `llm_generate` | Generate text via LLM |
+| `split_sections` | Split text by delimiter |
+| `run_command` | Execute shell command (requires --allow) |
+| `llm_generate` | Generate text via Ollama |
+| `llm_audit` | Audit assets with vision LLM |
 | `tts_generate` | Voice clone via VoxCPM |
+| `whisper_transcribe` | Transcribe audio via Whisper |
 | `text_to_image` | Generate image via FLUX |
+| `image_to_video` | Animate image via SVD-XT |
+| `text_to_video` | Generate video via Wan 2.2 |
+| `normalize_volume` | Normalize audio to target dB |
+| `audio_mix` | Mix overlay audio onto video |
+| `video_concat` | Concatenate video clips |
+| `create_slide` | Generate title/text slides |
 
 ## GPU Services (Remote ComfyUI)
 
-Three GPU services share a single NVIDIA RTX 5060 Ti 16GB. Run one at a time.
+| Service | Port | Model | Use Case |
+|---------|------|-------|----------|
+| **FLUX** | 8570 | flux1-schnell-fp8 | Text to Image |
+| **SVD** | 8100 | svd_xt | Image to Video |
+| **Wan 2.2** | 6000 | wan2.2_ti2v_5B | Text to Video |
 
-| Service | Port | Model | Use Case | Gen Time |
-|---------|------|-------|----------|----------|
-| **FLUX** | 8570 | flux1-schnell-fp8 | Text → Image | ~12s |
-| **SVD** | 8100 | svd_xt | Image → Video | ~70s (14 frames) |
-| **Wan 2.2** | 6000 | wan2.2_ti2v_5B | Text → Video | ~13min (81 frames) |
+## Development Scripts
 
-### Client Scripts
-
-```bash
-# Text-to-image (FLUX)
-python scripts/flux_client.py -p "prompt" -o image.png --orientation portrait
-
-# Image-to-video (SVD) - best for natural motion (water, fire, foliage)
-python scripts/svd_client.py -i image.jpg -o video.mp4 --motion 100 --frames 30
-
-# Text-to-video (Wan 2.2) - true text-to-video generation
-python scripts/wan22_client.py -p "prompt" -o video.mp4 --orientation landscape
-
-# Demo: Generate images in all orientations
-./scripts/demo-flux.sh
-```
-
-### SVD Best Practices
-
-SVD works best with natural/organic motion. Avoid complex physics or geometry.
-
-| Works Well | Avoid |
-|------------|-------|
-| Water, waves, ripples | Forward camera travel |
-| Fire, smoke, candles | Architectural scenes |
-| Foliage, grass, wind | Complex object physics |
-| Clouds, sky, aurora | Rotating camera |
-| Subtle zoom/parallax | Action sequences |
-
-## Music Generation (midi-cli-rs)
-
-Generate incidental music for intros/outros:
-
-```bash
-midi-cli-rs preset --mood upbeat --duration 5 -o intro.wav
-midi-cli-rs preset --mood calm --duration 5 -o outro.wav
-midi-cli-rs preset --mood suspense --duration 5 -o dramatic.wav
-midi-cli-rs preset --mood ambient --duration 5 -o background.wav
-midi-cli-rs preset --mood eerie --duration 5 -o creepy.wav
-
-# Reproducible with seed
-midi-cli-rs preset -m upbeat -d 5 --seed 42 -o intro.wav
-```
-
-## Recent Changes
-
-- **Text-to-Image:** FLUX integration via ComfyUI (flux_client.py, text_to_image step)
-- **Image-to-Video:** SVD integration via ComfyUI (svd_client.py)
-- **Text-to-Video:** Wan 2.2 integration via ComfyUI (wan22_client.py)
-- **Music Generation:** midi-cli-rs integration for incidental music
-- **GPU Queue:** Semaphore-based task serialization for TTS/lipsync
-- **TTS Step:** tts_generate step kind with VoxCPM integration
-- **Resume Support:** --resume flag skips completed steps
-- **Output Validation:** Media duration checking via ffprobe
-- **Demo Scripts:** demo-flux.sh, generate-tts.sh, verify-tts.sh, build-video.sh
-
-## Dependency Graph
-
-```
-vwf-types (L0)
-    |
-    v
-vwf-runtime + vwf-dag + vwf-queue (L1)
-    |
-    v
-vwf-config + vwf-render (L2)
-    |
-    v
-vwf-steps (L3)
-    |
-    v
-vwf-core (L4)
-    |
-    v
-vwf-cli + vwf-web (L5)
-```
+| Script | Description |
+|--------|-------------|
+| `./scripts/build.sh` | Build all components |
+| `./scripts/test.sh` | Run all tests + Python hygiene |
+| `./scripts/lint.sh` | Run clippy (zero warnings) |
+| `./scripts/fmt.sh` | Format code |
+| `./scripts/run.sh` | Run a workflow |
+| `./scripts/show.sh` | Debug workflow parsing |
+| `./scripts/serve-web.sh` | Serve web UI |
+| `./scripts/setup-python.sh` | Set up Python venv |
 
 ## Known Issues
 
-1. vwf-web path dependencies need verification for WASM builds
-2. Real LLM adapter not yet implemented (using mock)
-3. Lipsync step not yet implemented (queue ready)
-4. GPU services share one GPU — run one at a time to avoid OOM
-5. SVD struggles with geometric scenes and complex camera motion
+1. GPU services share one GPU - run one at a time to avoid OOM
+2. SVD struggles with geometric scenes and complex camera motion
+3. TTS requires VoxCPM server running on curiosity
+4. Some ComfyUI workflows may need model downloads on first run
 
 ## Next Steps
 
-1. **Real LLM Integration** - Claude API adapter
-2. **Lipsync Step** - MuseTalk integration using lipsync queue
-3. **Avatar Compositing** - vid-composite integration
-4. **Image-to-Video Step** - Native svd_generate workflow step
-5. **Text-to-Video Step** - Native wan22_generate workflow step
-6. **Music Step** - Native midi_generate workflow step
+1. **Self-Explainer Video** - Complete dogfooding demo
+2. **Real-time Log Streaming** - WebSocket logs in web UI
+3. **Service Health Panel** - Live status in web UI
+4. **LLM Context Documents** - Better `vwf generate` prompts
+5. **Lipsync Step** - MuseTalk integration

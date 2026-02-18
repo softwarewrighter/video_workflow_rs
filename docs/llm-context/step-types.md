@@ -448,3 +448,44 @@ steps:
     reference_audio: "{{voice_ref}}"
     # ...
 ```
+
+### Dependencies (DAG Execution)
+Use `depends_on` to declare step dependencies:
+
+```yaml
+steps:
+  - id: setup_dirs
+    kind: ensure_dirs
+    dirs: ["work/audio", "work/videos"]
+
+  - id: write_script
+    kind: write_file
+    depends_on: [setup_dirs]
+    path: "work/scripts/intro.txt"
+    content: "Welcome..."
+
+  - id: tts_intro
+    kind: tts_generate
+    depends_on: [write_script]
+    script_path: "work/scripts/intro.txt"
+    # ...
+
+  - id: generate_image
+    kind: text_to_image
+    depends_on: [setup_dirs]  # Can run in parallel with tts_intro
+    # ...
+```
+
+**DAG Execution Features:**
+- Steps run when all dependencies are satisfied
+- Failed steps don't block unrelated work
+- Blocked steps are clearly reported with reasons
+- Cycle detection runs before execution
+
+**Status Types:**
+| Status | Meaning |
+|--------|---------|
+| OK | Step completed successfully |
+| Skipped | Output exists and --resume was used |
+| Failed | Step execution error |
+| Blocked | Dependency failed, step not attempted |
