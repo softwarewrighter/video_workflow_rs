@@ -12,6 +12,7 @@ This document describes the external services VWF integrates with for asset gene
 | Wan 2.2 | Text-to-Video | 6000 | wan2.2_ti2v_5B_fp16.safetensors |
 | midi-cli-rs | Music Generation | N/A (local) | VintageDreamsWaves-v2.sf2 |
 | whisper.cpp | Transcription | N/A (local) | ggml-base.en.bin |
+| Ollama | LLM Text Generation | 11434 | qwen2.5-coder:14b |
 
 ## VoxCPM (Text-to-Speech)
 
@@ -336,6 +337,61 @@ Applying volume adjustment during clip creation (via ffmpeg -af) often produces 
 
 This ensures consistent audio levels across all clips in the final video.
 
+## Ollama (LLM Text Generation)
+
+Local LLM inference using Ollama. Used for generating scripts, prompts, and other text content.
+
+**Server**: `http://localhost:11434`
+
+**Model**: `qwen2.5-coder:14b` (recommended for creative/technical tasks)
+
+**Step Type**: `llm_generate`
+
+```yaml
+# First, write the request prompt
+- id: write_prompt_request
+  kind: write_file
+  path: "work/llm-prompts/image-request.txt"
+  content: |
+    Generate a creative image prompt for a tech visualization.
+    Theme: Workflow automation
+    Style: Dark, cinematic, cyan accents
+
+# Then, call the LLM
+- id: llm_generate_prompt
+  kind: llm_generate
+  resume_output: "work/llm-outputs/image-prompt.txt"
+  system: "You are a creative prompt engineer. Output only the prompt, no explanations."
+  user_prompt_path: "work/llm-prompts/image-request.txt"
+  output_path: "work/llm-outputs/image-prompt.txt"
+  provider: "ollama"
+```
+
+| Parameter | Required | Description |
+|-----------|----------|-------------|
+| `system` | Yes | System prompt defining the LLM's role |
+| `user_prompt_path` | Yes | Path to file containing user prompt |
+| `output_path` | Yes | Path for LLM response output |
+| `provider` | Yes | LLM provider (use "ollama") |
+
+**CLI Usage**:
+
+```bash
+# Run workflow with Ollama LLM
+vwf run workflow.yaml --workdir . --llm-model qwen2.5-coder:14b
+
+# Available models (check with: ollama list)
+# - qwen2.5-coder:14b (9GB, best for creative/technical)
+# - gemma2:9b (5.4GB, good general purpose)
+# - llama3.1:8b (4.9GB, fast and capable)
+```
+
+**Use Cases**:
+- Generate image prompts for text-to-image
+- Write narration scripts
+- Create video descriptions
+- Generate metadata and titles
+
 ## Network Configuration
 
 All GPU services run on a local network server (`192.168.1.64`, hostname: `curiosity`).
@@ -351,6 +407,7 @@ All GPU services run on a local network server (`192.168.1.64`, hostname: `curio
 
 ┌─────────────────────────────────────────────────────────┐
 │  Local (workflow host)                                  │
+│  ├── :11434  Ollama (LLM text generation)               │
 │  ├── midi-cli-rs (music generation)                     │
 │  ├── whisper-cli (transcription)                        │
 │  └── ffmpeg (normalize_volume, video processing)        │

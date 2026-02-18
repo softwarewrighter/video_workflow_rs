@@ -5,7 +5,7 @@ use std::path::Path;
 
 use anyhow::{Context, Result};
 
-use vwf_core::{DryRunRuntime, FsRuntime, LlmClient, MockLlmClient, RunOptions, Runner, RunReport, WorkflowConfig};
+use vwf_core::{DryRunRuntime, FsRuntime, LlmClient, MockLlmClient, OllamaClient, RunOptions, Runner, RunReport, WorkflowConfig};
 
 pub fn show(workflow: &Path) -> Result<()> {
     let text = std::fs::read_to_string(workflow).with_context(|| format!("read {}", workflow.display()))?;
@@ -14,13 +14,14 @@ pub fn show(workflow: &Path) -> Result<()> {
     Ok(())
 }
 
-pub fn execute(workflow: &Path, workdir: &Path, vars: Vec<(String, String)>, dry_run: bool, resume: bool, allow: Vec<String>, mock_llm: Option<String>) -> Result<()> {
+pub fn execute(workflow: &Path, workdir: &Path, vars: Vec<(String, String)>, dry_run: bool, resume: bool, allow: Vec<String>, mock_llm: Option<String>, llm_model: Option<String>) -> Result<()> {
     let text = std::fs::read_to_string(workflow).with_context(|| format!("read {}", workflow.display()))?;
     let cfg = WorkflowConfig::from_yaml(&text)?;
     let extra_vars: BTreeMap<_, _> = vars.into_iter().collect();
-    let llm: Box<dyn LlmClient> = match mock_llm {
-        Some(s) => Box::new(MockLlmClient::canned(s)),
-        None => Box::new(MockLlmClient::echo()),
+    let llm: Box<dyn LlmClient> = match (mock_llm, llm_model) {
+        (Some(s), _) => Box::new(MockLlmClient::canned(s)),
+        (None, Some(model)) => Box::new(OllamaClient::new(model)),
+        (None, None) => Box::new(MockLlmClient::echo()),
     };
     let opts = RunOptions { resume };
     if dry_run { run_dry(workdir, llm, &cfg, extra_vars) } else { run_real(workdir, llm, &cfg, extra_vars, allow, opts) }

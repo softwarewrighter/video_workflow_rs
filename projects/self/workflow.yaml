@@ -12,6 +12,7 @@ description: >
   - Text-to-Video: Wan 2.2 (wan2.2_ti2v_5B_fp16.safetensors) @ 192.168.1.64:6000
   - Music: midi-cli-rs with FluidSynth (VintageDreamsWaves-v2.sf2)
   - Transcription: whisper.cpp (ggml-base.en.bin) local
+  - LLM: Ollama with qwen2.5-coder:14b local
 
 vars:
   project_name: "VWF Self-Explainer"
@@ -40,6 +41,8 @@ steps:
       - "work/images"
       - "work/videos"
       - "work/clips"
+      - "work/llm-prompts"
+      - "work/llm-outputs"
       - "output"
       - "output/transcripts"
 
@@ -67,7 +70,37 @@ steps:
       - 09-cta: Call to action
 
   # ============================================
-  # TTS Audio Generation (run first - TTS server usually available)
+  # LLM Generation (demonstrate llm_generate step)
+  # Uses local Ollama with qwen2.5-coder:14b
+  # ============================================
+  - id: write_llm_prompt
+    kind: write_file
+    path: "work/llm-prompts/meta-image-request.txt"
+    content: |
+      Generate a creative image prompt for FLUX.1 (text-to-image AI).
+
+      Context: This is for a slide in an explainer video about VWF (Video Workflow Framework).
+      The slide topic is "meta" - revealing that THIS VIDEO was made using VWF itself.
+
+      Requirements:
+      - Style: Dark tech aesthetic, professional, cinematic
+      - Theme: Self-reference, recursion, "meta" concept
+      - Should evoke: A video that creates itself, infinite loop, self-awareness
+      - Colors: Cyan, blue, dark backgrounds
+      - NO text in the image
+
+      Output ONLY the image prompt, nothing else. Keep it under 100 words.
+
+  - id: llm_meta_prompt
+    kind: llm_generate
+    resume_output: "work/llm-outputs/meta-image-prompt.txt"
+    system: "You are a creative prompt engineer specializing in AI image generation. Generate concise, evocative prompts for FLUX.1 text-to-image model. Focus on visual elements, lighting, mood, and style. Never include explanations - output only the prompt."
+    user_prompt_path: "work/llm-prompts/meta-image-request.txt"
+    output_path: "work/llm-outputs/meta-image-prompt.txt"
+    provider: "ollama"
+
+  # ============================================
+  # TTS Audio Generation
   # ============================================
   - id: tts_hook
     kind: tts_generate

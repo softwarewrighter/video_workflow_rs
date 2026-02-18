@@ -49,6 +49,8 @@ struct RunArgs {
     #[arg(long)] resume: bool,
     #[arg(long = "allow", num_args = 0..)] allow: Vec<String>,
     #[arg(long)] mock_llm_canned: Option<String>,
+    /// Ollama model for LLM generation (e.g., "qwen2.5-coder:14b", "gemma2:9b")
+    #[arg(long)] llm_model: Option<String>,
 }
 
 fn version_string() -> &'static str {
@@ -64,6 +66,6 @@ fn main() -> Result<()> {
     let cli = Cli::parse();
     match cli.cmd {
         Cmd::Show { workflow } => run::show(&workflow),
-        Cmd::Run(args) => run::execute(&args.workflow, &args.workdir, args.vars, args.dry_run, args.resume, args.allow, args.mock_llm_canned),
+        Cmd::Run(args) => run::execute(&args.workflow, &args.workdir, args.vars, args.dry_run, args.resume, args.allow, args.mock_llm_canned, args.llm_model),
     }
 }

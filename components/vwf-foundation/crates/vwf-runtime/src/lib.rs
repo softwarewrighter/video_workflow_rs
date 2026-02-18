@@ -3,12 +3,14 @@
 mod dry_run;
 mod fs;
 mod mock;
+mod ollama;
 mod traits;
 mod validate;
 
 pub use dry_run::DryRunRuntime;
 pub use fs::FsRuntime;
 pub use mock::MockLlmClient;
+pub use ollama::OllamaClient;
 pub use traits::{CmdOut, LlmClient, LlmReq, Runtime};
 pub use validate::output_is_valid;
 
