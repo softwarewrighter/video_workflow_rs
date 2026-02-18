@@ -18,6 +18,35 @@ Guidelines for creating effective video production workflows.
 - **Channels:** Stereo (2 channels)
 - **Format:** AAC for video, WAV for intermediates
 
+### Volume Normalization
+
+Use `normalize_volume` on all clips before concatenation:
+
+```yaml
+- id: clip_hook
+  kind: run_command
+  depends_on: [tts_hook, img_hook]
+  program: ffmpeg
+  args: ["-y", "-loop", "1", "-i", "work/images/hook.png", "-i", "work/audio/hook.wav", "-c:v", "libx264", "-tune", "stillimage", "-c:a", "aac", "-shortest", "work/clips/hook.mp4"]
+
+- id: normalize_hook
+  kind: normalize_volume
+  depends_on: [clip_hook]
+  clip_path: "work/clips/hook.mp4"
+
+# Concat depends on all normalized clips
+- id: concat_final
+  kind: video_concat
+  depends_on: [normalize_hook, normalize_solution, normalize_cta]
+  clips:
+    - "work/clips/hook.mp4"
+    - "work/clips/solution.mp4"
+    - "work/clips/cta.mp4"
+  output_path: "output/final.mp4"
+```
+
+This ensures consistent volume across the final video.
+
 ### Music Placement Rules
 
 1. **Never overlap music with narration at equal volume**
@@ -150,6 +179,48 @@ project/
 
 ---
 
+## DAG Execution
+
+### Use depends_on for Parallelism
+
+VWF executes steps as a directed acyclic graph (DAG). Steps without dependencies
+run in parallel. Use `depends_on` to define ordering:
+
+```yaml
+# These run in parallel (no dependencies on each other)
+- id: tts_hook
+  kind: tts_generate
+  depends_on: [script_hook]  # Only waits for script_hook
+  # ...
+
+- id: img_hook
+  kind: text_to_image
+  depends_on: [setup_dirs]   # Only waits for setup_dirs
+  # ...
+
+# This waits for both parallel steps
+- id: clip_hook
+  kind: run_command
+  depends_on: [tts_hook, img_hook]  # Needs both
+  # ...
+```
+
+### Blocked Step Tracking
+
+If a dependency fails, all downstream steps are marked `blocked`:
+
+```
+✓ setup_dirs (completed)
+✗ tts_hook (failed: service unavailable)
+⊘ clip_hook (blocked: dependency tts_hook failed)
+⊘ normalize_hook (blocked: dependency clip_hook blocked)
+```
+
+To fix: resolve the failed step, then re-run with `--resume`. Completed steps
+are skipped, and blocked steps will execute once their dependencies succeed.
+
+---
+
 ## Incremental Development
 
 ### Use resume_output
@@ -194,14 +265,23 @@ Always specify `resume_output` for expensive steps:
 
 Before running a workflow:
 
-1. **Check required services are running:**
+1. **Use `vwf services` to check all required services:**
+   ```bash
+   vwf services workflow.yaml
+   # Output:
+   # Required services for this workflow:
+   #   ✓ Ollama (llm_generate): http://localhost:11434 [RUNNING]
+   #   ✗ VoxCPM (tts_generate): http://curiosity:7860 [NOT RUNNING]
+   #   ✗ FLUX.1 (text_to_image): http://192.168.1.64:8570 [NOT RUNNING]
+   #
+   # Start VoxCPM: ssh curiosity 'docker start voxcpm'
+   # Start FLUX.1: ssh 192.168.1.64 'cd flux && ./start.sh'
+   ```
+
+2. **Manual health checks if needed:**
    ```bash
    curl -s http://curiosity:7860/api/predict  # VoxCPM
    curl -s http://192.168.1.64:8570/system_stats  # FLUX.1
-   ```
-
-2. **Verify model availability:**
-   ```bash
    ollama list  # Check LLM models
    ```
 
@@ -211,10 +291,37 @@ Before running a workflow:
 
 If a step fails:
 
-1. Check service health
-2. Review step parameters
+1. Check service health with `vwf services workflow.yaml`
+2. Review step parameters in workflow.yaml
 3. Check disk space and permissions
 4. Re-run with `--resume` (will skip completed steps)
+
+### Debugging with run.json
+
+Every workflow execution produces `run.json` in the workdir. Use it to diagnose issues:
+
+```json
+{
+  "steps": [
+    {
+      "id": "tts_hook",
+      "kind": "tts_generate",
+      "status": "failed",
+      "error": "Connection refused: http://curiosity:7860",
+      "started_at": "2026-02-18T10:30:00Z",
+      "finished_at": "2026-02-18T10:30:02Z"
+    },
+    {
+      "id": "clip_hook",
+      "kind": "run_command",
+      "status": "blocked",
+      "blocked_by": ["tts_hook"]
+    }
+  ]
+}
+```
+
+The web UI can load `run.json` to visualize step status and blocked dependencies.
 
 ### Timeout Considerations
 
@@ -318,4 +425,55 @@ steps:
     kind: tts_generate
     server: "{{tts_server}}"
     reference_audio: "{{voice_ref}}"
+```
+
+### 6. Missing depends_on creates race conditions
+**Wrong:**
+```yaml
+- id: script_hook
+  kind: write_file
+  path: "work/scripts/hook.txt"
+  content: "Hello world"
+
+- id: tts_hook
+  kind: tts_generate
+  script_path: "work/scripts/hook.txt"  # May run before script exists!
+```
+
+**Right:**
+```yaml
+- id: script_hook
+  kind: write_file
+  path: "work/scripts/hook.txt"
+  content: "Hello world"
+
+- id: tts_hook
+  kind: tts_generate
+  depends_on: [script_hook]  # Ensures script exists first
+  script_path: "work/scripts/hook.txt"
+```
+
+### 7. Unnecessary sequential dependencies
+**Wrong:**
+```yaml
+# Forces sequential execution when parallel is fine
+- id: img_hook
+  kind: text_to_image
+  depends_on: [tts_hook]  # Why wait for TTS?
+```
+
+**Right:**
+```yaml
+# Both can run in parallel since they're independent
+- id: tts_hook
+  kind: tts_generate
+  depends_on: [script_hook]
+
+- id: img_hook
+  kind: text_to_image
+  depends_on: [setup_dirs]  # Only needs setup_dirs
+
+- id: clip_hook
+  kind: run_command
+  depends_on: [tts_hook, img_hook]  # Wait for both here
 ```
