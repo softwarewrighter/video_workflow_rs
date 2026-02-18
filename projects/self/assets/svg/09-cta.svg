@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a1a2e"/>
+      <stop offset="100%" style="stop-color:#16213e"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1920" height="1080" fill="url(#bgGrad)"/>
+
+  <!-- VWF Logo/Title -->
+  <text x="100" y="280" font-family="Arial, sans-serif" font-size="120"
+        font-weight="bold" fill="#00d4ff" text-anchor="start">
+    VWF
+  </text>
+  <text x="100" y="380" font-family="Arial, sans-serif" font-size="56"
+        fill="#ffffff" text-anchor="start">
+    Video Workflow Framework
+  </text>
+
+  <!-- Tagline -->
+  <text x="100" y="520" font-family="Arial, sans-serif" font-size="48"
+        fill="#ffd93d" text-anchor="start">
+    Stop fighting agent drift.
+  </text>
+  <text x="100" y="590" font-family="Arial, sans-serif" font-size="48"
+        fill="#4ade80" text-anchor="start">
+    Start shipping videos.
+  </text>
+
+  <!-- CTA -->
+  <rect x="80" y="660" width="500" height="80" rx="12" fill="#00d4ff" fill-opacity="0.9"/>
+  <text x="330" y="715" font-family="Arial, sans-serif" font-size="40"
+        font-weight="bold" fill="#0f0f23" text-anchor="middle">
+    Link in description
+  </text>
+</svg>

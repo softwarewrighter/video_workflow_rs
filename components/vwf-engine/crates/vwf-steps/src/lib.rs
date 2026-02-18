@@ -2,11 +2,13 @@
 
 mod context;
 mod ensure_dirs;
+mod image_to_video;
 mod llm_generate;
 mod normalize_volume;
 mod run_command;
 mod split_sections;
 mod text_to_image;
+mod text_to_video;
 mod tts_generate;
 mod write_file;
 
@@ -32,6 +34,8 @@ fn dispatch(ctx: &mut StepCtx<'_>, kind: &StepKind, payload: &serde_json::Value)
         StepKind::LlmGenerate => llm_generate::execute(ctx, payload),
         StepKind::TtsGenerate => tts_generate::execute(ctx, payload),
         StepKind::TextToImage => text_to_image::execute(ctx, payload),
+        StepKind::ImageToVideo => image_to_video::execute(ctx, payload),
+        StepKind::TextToVideo => text_to_video::execute(ctx, payload),
         StepKind::NormalizeVolume => normalize_volume::execute(ctx, payload),
     }
 }

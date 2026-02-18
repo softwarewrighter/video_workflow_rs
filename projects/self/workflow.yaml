@@ -1,15 +1,14 @@
 version: 1
 name: "VWF Self-Explainer Video"
 description: >
-  Meta explainer video: VWF explaining itself.
-  Landscape 1920x1080, ~60 seconds total.
-  Sections: intro, workflows, dag, placeholders, checkpoints, incremental, cta.
+  Detailed tutorial video: VWF explaining itself.
+  Landscape 1920x1080, ~3 minutes.
+  10 slides covering problem, solution, usage, and meta reveal.
 
 vars:
   project_name: "VWF Self-Explainer"
   topic: "Video Workflow Framework"
-  duration_secs: "60"
-  style: "straightforward, professional"
+  style: "tutorial, professional"
   audience: "developers interested in video automation"
   # TTS voice cloning settings
   python_path: "/Users/mike/github/softwarewrighter/video_workflow_rs/projects/self/.venv/bin/python"
@@ -28,6 +27,7 @@ steps:
       - "work/scripts"
       - "work/audio"
       - "work/images"
+      - "work/videos"
       - "work/clips"
       - "output"
 
@@ -36,163 +36,112 @@ steps:
     kind: write_file
     path: "output/manifest.txt"
     content: |
-      VWF Self-Explainer Video Production
-      ====================================
+      VWF Self-Explainer Video - Detailed Tutorial
+      =============================================
       Project: {{project_name}}
-      Topic: {{topic}}
       Format: Landscape 1920x1080 (16:9)
-      Duration: ~{{duration_secs}} seconds
+      Duration: ~3 minutes
 
-      Structure:
-      - 00-intro (~5s) - "Five things you need to know about VWF..."
-      - 01-workflows (~8s) - "Workflows are data..."
-      - 02-dag (~8s) - "Dependency graph..."
-      - 03-placeholders (~8s) - "Placeholders keep you moving..."
-      - 04-checkpoints (~8s) - "Checkpoints for human review..."
-      - 05-incremental (~8s) - "Incremental builds..."
-      - 06-cta (~5s) - "Stop fighting. Start shipping."
+      Structure (10 slides):
+      - 00-hook: The problem hook
+      - 01-problem: Agent drift explained
+      - 02-solution: VWF introduction
+      - 03-project: Project structure
+      - 04-workflow: workflow.yaml walkthrough
+      - 05-steps: Step types overview
+      - 06-running: How to run
+      - 07-resume: Incremental builds
+      - 08-meta: "This video was made with VWF"
+      - 09-cta: Call to action
 
-      Narration Scripts:
-      - work/scripts/00-intro.txt
-      - work/scripts/01-workflows.txt
-      - work/scripts/02-dag.txt
-      - work/scripts/03-placeholders.txt
-      - work/scripts/04-checkpoints.txt
-      - work/scripts/05-incremental.txt
-      - work/scripts/06-cta.txt
-
-      Build:
-      - scripts/build-video.sh - Assembles preview video
-      - output/preview.mp4 - Final preview output
-
-  # Image Generation (Flux)
-  - id: img_intro
-    kind: text_to_image
-    resume_output: "work/images/00-intro-bg.png"
-    prompt: "Abstract digital workflow visualization, glowing blue data streams flowing through geometric pipeline nodes, dark tech background with cyan and gold accents, futuristic automation concept art, clean professional style"
-    output_path: "work/images/00-intro-bg.png"
-    orientation: "landscape"
-    seed: 42001
-    server: "http://192.168.1.64:8570"
-    python_path: "{{python_path}}"
-    python_path: "{{python_path}}"
-
-  - id: img_workflows
-    kind: text_to_image
-    resume_output: "work/images/01-workflows-bg.png"
-    prompt: "YAML code floating in 3D space, structured data blocks glowing blue and gold, dark background with soft light rays, clean tech visualization, configuration files as holographic displays"
-    output_path: "work/images/01-workflows-bg.png"
-    orientation: "landscape"
-    seed: 42002
-    server: "http://192.168.1.64:8570"
-    python_path: "{{python_path}}"
-
-  - id: img_dag
-    kind: text_to_image
-    resume_output: "work/images/02-dag-bg.png"
-    prompt: "Directed acyclic graph visualization, glowing nodes connected by flowing energy lines, parallel processing paths branching and merging, dark tech background, cyan and green node colors, network topology art"
-    output_path: "work/images/02-dag-bg.png"
-    orientation: "landscape"
-    seed: 42003
-    server: "http://192.168.1.64:8570"
-    python_path: "{{python_path}}"
-
-  - id: img_placeholders
-    kind: text_to_image
-    resume_output: "work/images/03-placeholders-bg.png"
-    prompt: "Blueprint wireframe style visualization, dotted outlines transforming into solid shapes, placeholder boxes becoming filled content, construction progress concept, blue and orange accents on dark background"
-    output_path: "work/images/03-placeholders-bg.png"
-    orientation: "landscape"
-    seed: 42004
-    server: "http://192.168.1.64:8570"
-    python_path: "{{python_path}}"
-
-  - id: img_checkpoints
-    kind: text_to_image
-    resume_output: "work/images/04-checkpoints-bg.png"
-    prompt: "Quality gate checkpoint visualization, glowing approval stamps, verification shields, pipeline stages with review gates between them, professional tech style, gold and green checkmark accents on dark background"
-    output_path: "work/images/04-checkpoints-bg.png"
-    orientation: "landscape"
-    seed: 42005
-    server: "http://192.168.1.64:8570"
-    python_path: "{{python_path}}"
-
-  - id: img_incremental
-    kind: text_to_image
-    resume_output: "work/images/05-incremental-bg.png"
-    prompt: "Cache and delta visualization, some blocks glowing bright while others are faded cached, incremental build concept, efficiency arrows, speed lines, cyan and gold on dark tech background"
-    output_path: "work/images/05-incremental-bg.png"
-    orientation: "landscape"
-    seed: 42006
-    server: "http://192.168.1.64:8570"
-    python_path: "{{python_path}}"
-
-  - id: img_cta
-    kind: text_to_image
-    resume_output: "work/images/06-cta-bg.png"
-    prompt: "Call to action tech visualization, forward arrow motion, launch and ship concept, glowing runway leading to horizon, energy and momentum, cyan blue and gold accents, professional dark background"
-    output_path: "work/images/06-cta-bg.png"
-    orientation: "landscape"
-    seed: 42007
-    server: "http://192.168.1.64:8570"
-    python_path: "{{python_path}}"
-
-  # TTS Audio Generation
-  - id: tts_intro
+  # ============================================
+  # TTS Audio Generation (run first - TTS server usually available)
+  # ============================================
+  - id: tts_hook
     kind: tts_generate
-    resume_output: "work/audio/00-intro.wav"
-    script_path: "work/scripts/00-intro.txt"
-    output_path: "work/audio/00-intro.wav"
+    resume_output: "work/audio/00-hook.wav"
+    script_path: "work/scripts/00-hook.txt"
+    output_path: "work/audio/00-hook.wav"
     server: "{{tts_server}}"
     reference_audio: "{{reference_audio}}"
     reference_text: "{{reference_text}}"
     python_path: "{{python_path}}"
 
-  - id: tts_workflows
+  - id: tts_problem
     kind: tts_generate
-    resume_output: "work/audio/01-workflows.wav"
-    script_path: "work/scripts/01-workflows.txt"
-    output_path: "work/audio/01-workflows.wav"
+    resume_output: "work/audio/01-problem.wav"
+    script_path: "work/scripts/01-problem.txt"
+    output_path: "work/audio/01-problem.wav"
     server: "{{tts_server}}"
     reference_audio: "{{reference_audio}}"
     reference_text: "{{reference_text}}"
     python_path: "{{python_path}}"
 
-  - id: tts_dag
+  - id: tts_solution
     kind: tts_generate
-    resume_output: "work/audio/02-dag.wav"
-    script_path: "work/scripts/02-dag.txt"
-    output_path: "work/audio/02-dag.wav"
+    resume_output: "work/audio/02-solution.wav"
+    script_path: "work/scripts/02-solution.txt"
+    output_path: "work/audio/02-solution.wav"
     server: "{{tts_server}}"
     reference_audio: "{{reference_audio}}"
     reference_text: "{{reference_text}}"
     python_path: "{{python_path}}"
 
-  - id: tts_placeholders
+  - id: tts_project
     kind: tts_generate
-    resume_output: "work/audio/03-placeholders.wav"
-    script_path: "work/scripts/03-placeholders.txt"
-    output_path: "work/audio/03-placeholders.wav"
+    resume_output: "work/audio/03-project.wav"
+    script_path: "work/scripts/03-project.txt"
+    output_path: "work/audio/03-project.wav"
     server: "{{tts_server}}"
     reference_audio: "{{reference_audio}}"
     reference_text: "{{reference_text}}"
     python_path: "{{python_path}}"
 
-  - id: tts_checkpoints
+  - id: tts_workflow
     kind: tts_generate
-    resume_output: "work/audio/04-checkpoints.wav"
-    script_path: "work/scripts/04-checkpoints.txt"
-    output_path: "work/audio/04-checkpoints.wav"
+    resume_output: "work/audio/04-workflow.wav"
+    script_path: "work/scripts/04-workflow.txt"
+    output_path: "work/audio/04-workflow.wav"
     server: "{{tts_server}}"
     reference_audio: "{{reference_audio}}"
     reference_text: "{{reference_text}}"
     python_path: "{{python_path}}"
 
-  - id: tts_incremental
+  - id: tts_steps
     kind: tts_generate
-    resume_output: "work/audio/05-incremental.wav"
-    script_path: "work/scripts/05-incremental.txt"
-    output_path: "work/audio/05-incremental.wav"
+    resume_output: "work/audio/05-steps.wav"
+    script_path: "work/scripts/05-steps.txt"
+    output_path: "work/audio/05-steps.wav"
+    server: "{{tts_server}}"
+    reference_audio: "{{reference_audio}}"
+    reference_text: "{{reference_text}}"
+    python_path: "{{python_path}}"
+
+  - id: tts_running
+    kind: tts_generate
+    resume_output: "work/audio/06-running.wav"
+    script_path: "work/scripts/06-running.txt"
+    output_path: "work/audio/06-running.wav"
+    server: "{{tts_server}}"
+    reference_audio: "{{reference_audio}}"
+    reference_text: "{{reference_text}}"
+    python_path: "{{python_path}}"
+
+  - id: tts_resume
+    kind: tts_generate
+    resume_output: "work/audio/07-resume.wav"
+    script_path: "work/scripts/07-resume.txt"
+    output_path: "work/audio/07-resume.wav"
+    server: "{{tts_server}}"
+    reference_audio: "{{reference_audio}}"
+    reference_text: "{{reference_text}}"
+    python_path: "{{python_path}}"
+
+  - id: tts_meta
+    kind: tts_generate
+    resume_output: "work/audio/08-meta.wav"
+    script_path: "work/scripts/08-meta.txt"
+    output_path: "work/audio/08-meta.wav"
     server: "{{tts_server}}"
     reference_audio: "{{reference_audio}}"
     reference_text: "{{reference_text}}"
@@ -200,9 +149,9 @@ steps:
 
   - id: tts_cta
     kind: tts_generate
-    resume_output: "work/audio/06-cta.wav"
-    script_path: "work/scripts/06-cta.txt"
-    output_path: "work/audio/06-cta.wav"
+    resume_output: "work/audio/09-cta.wav"
+    script_path: "work/scripts/09-cta.txt"
+    output_path: "work/audio/09-cta.wav"
     server: "{{tts_server}}"
     reference_audio: "{{reference_audio}}"
     reference_text: "{{reference_text}}"
@@ -214,6 +163,136 @@ steps:
     program: "./scripts/verify-tts.sh"
     capture_path: "output/verify-tts.log"
 
+  # ============================================
+  # Image Generation (Flux backgrounds)
+  # ============================================
+  - id: img_hook
+    kind: text_to_image
+    resume_output: "work/images/00-hook-bg.png"
+    prompt: "Frustrated developer at computer, glitchy digital interface, error messages floating, red warning lights, dark moody tech atmosphere, photorealistic"
+    output_path: "work/images/00-hook-bg.png"
+    orientation: "landscape"
+    seed: 43001
+    server: "http://192.168.1.64:8570"
+    python_path: "{{python_path}}"
+
+  - id: img_problem
+    kind: text_to_image
+    resume_output: "work/images/01-problem-bg.png"
+    prompt: "Abstract visualization of chaos and confusion, tangled wires and broken connections, fragmented data streams, dark red and orange warning colors, tech dystopia"
+    output_path: "work/images/01-problem-bg.png"
+    orientation: "landscape"
+    seed: 43002
+    server: "http://192.168.1.64:8570"
+    python_path: "{{python_path}}"
+
+  - id: img_solution
+    kind: text_to_image
+    resume_output: "work/images/02-solution-bg.png"
+    prompt: "Clean organized workflow diagram, glowing blue nodes connected by smooth lines, structured pipeline visualization, dark tech background with cyan accents, order from chaos"
+    output_path: "work/images/02-solution-bg.png"
+    orientation: "landscape"
+    seed: 43003
+    server: "http://192.168.1.64:8570"
+    python_path: "{{python_path}}"
+
+  - id: img_project
+    kind: text_to_image
+    resume_output: "work/images/03-project-bg.png"
+    prompt: "File folder hierarchy visualization, organized directory tree glowing in blue, clean structured file system, dark background with soft backlighting, minimalist tech aesthetic"
+    output_path: "work/images/03-project-bg.png"
+    orientation: "landscape"
+    seed: 43004
+    server: "http://192.168.1.64:8570"
+    python_path: "{{python_path}}"
+
+  - id: img_workflow
+    kind: text_to_image
+    resume_output: "work/images/04-workflow-bg.png"
+    prompt: "YAML code floating in 3D space, structured data blocks glowing blue and gold, configuration file as holographic display, dark background with soft light rays"
+    output_path: "work/images/04-workflow-bg.png"
+    orientation: "landscape"
+    seed: 43005
+    server: "http://192.168.1.64:8570"
+    python_path: "{{python_path}}"
+
+  - id: img_steps
+    kind: text_to_image
+    resume_output: "work/images/05-steps-bg.png"
+    prompt: "Modular building blocks connecting together, glowing puzzle pieces forming a pipeline, each block a different color representing different functions, dark tech background"
+    output_path: "work/images/05-steps-bg.png"
+    orientation: "landscape"
+    seed: 43006
+    server: "http://192.168.1.64:8570"
+    python_path: "{{python_path}}"
+
+  - id: img_running
+    kind: text_to_image
+    resume_output: "work/images/06-running-bg.png"
+    prompt: "Terminal command line interface glowing green on dark background, code execution visualization, matrix-style digital rain, professional coding environment"
+    output_path: "work/images/06-running-bg.png"
+    orientation: "landscape"
+    seed: 43007
+    server: "http://192.168.1.64:8570"
+    python_path: "{{python_path}}"
+
+  - id: img_resume
+    kind: text_to_image
+    resume_output: "work/images/07-resume-bg.png"
+    prompt: "Cache and delta visualization, some blocks glowing bright while others are faded cached, incremental build concept, efficiency arrows, speed lines, cyan and gold"
+    output_path: "work/images/07-resume-bg.png"
+    orientation: "landscape"
+    seed: 43008
+    server: "http://192.168.1.64:8570"
+    python_path: "{{python_path}}"
+
+  - id: img_meta
+    kind: text_to_image
+    resume_output: "work/images/08-meta-bg.png"
+    prompt: "Infinite mirror recursion effect, video playing within video, meta self-reference visualization, glowing frames within frames, dark background with cyan highlights"
+    output_path: "work/images/08-meta-bg.png"
+    orientation: "landscape"
+    seed: 43009
+    server: "http://192.168.1.64:8570"
+    python_path: "{{python_path}}"
+
+  - id: img_cta
+    kind: text_to_image
+    resume_output: "work/images/09-cta-bg.png"
+    prompt: "Call to action tech visualization, forward arrow motion, launch and ship concept, glowing runway leading to horizon, energy and momentum, cyan blue and gold accents"
+    output_path: "work/images/09-cta-bg.png"
+    orientation: "landscape"
+    seed: 43010
+    server: "http://192.168.1.64:8570"
+    python_path: "{{python_path}}"
+
+  # ============================================
+  # Video Generation (SVD-XT image-to-video)
+  # ============================================
+  - id: vid_meta
+    kind: image_to_video
+    resume_output: "work/videos/08-meta-animated.mp4"
+    input_path: "work/images/08-meta-bg.png"
+    output_path: "work/videos/08-meta-animated.mp4"
+    frames: 14
+    fps: 6
+    motion: 150
+    seed: 44001
+    server: "http://192.168.1.64:8100"
+    python_path: "{{python_path}}"
+
+  - id: vid_cta
+    kind: image_to_video
+    resume_output: "work/videos/09-cta-animated.mp4"
+    input_path: "work/images/09-cta-bg.png"
+    output_path: "work/videos/09-cta-animated.mp4"
+    frames: 14
+    fps: 6
+    motion: 127
+    seed: 44002
+    server: "http://192.168.1.64:8100"
+    python_path: "{{python_path}}"
+
   # Generate background music using midi-cli-rs
   - id: music_intro
     kind: run_command
@@ -224,7 +303,7 @@ steps:
       - "--mood"
       - "upbeat"
       - "--duration"
-      - "8"
+      - "12"
       - "--seed"
       - "2026"
       - "--soundfont"
@@ -241,7 +320,7 @@ steps:
       - "--mood"
       - "calm"
       - "--duration"
-      - "10"
+      - "15"
       - "--seed"
       - "2026"
       - "--soundfont"

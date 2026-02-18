@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a1a2e"/>
+      <stop offset="100%" style="stop-color:#16213e"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1920" height="1080" fill="url(#bgGrad)"/>
+
+  <!-- Title -->
+  <text x="100" y="140" font-family="Arial, sans-serif" font-size="56"
+        font-weight="bold" fill="#00d4ff" text-anchor="start">
+    Incremental Builds
+  </text>
+
+  <!-- Visual: steps with checkmarks -->
+  <rect x="80" y="200" width="1000" height="380" rx="16" fill="#0f0f23" fill-opacity="0.95"/>
+
+  <text font-family="monospace" font-size="32">
+    <tspan x="120" y="270" fill="#888888">✓ tts_intro</tspan>
+    <tspan x="500" fill="#4ade80">SKIPPED (cached)</tspan>
+    <tspan x="120" y="330" fill="#888888">✓ tts_outro</tspan>
+    <tspan x="500" fill="#4ade80">SKIPPED (cached)</tspan>
+    <tspan x="120" y="390" fill="#ffffff">● img_background</tspan>
+    <tspan x="500" fill="#ffd93d">RUNNING...</tspan>
+    <tspan x="120" y="450" fill="#888888">○ build_video</tspan>
+    <tspan x="500" fill="#888888">PENDING</tspan>
+    <tspan x="120" y="510" fill="#888888">○ final_render</tspan>
+    <tspan x="500" fill="#888888">PENDING</tspan>
+  </text>
+
+  <!-- Key point -->
+  <text x="100" y="660" font-family="Arial, sans-serif" font-size="44"
+        fill="#ffd93d" text-anchor="start">
+    Change one thing → Only affected steps re-run
+  </text>
+</svg>

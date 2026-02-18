@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a1a2e"/>
+      <stop offset="100%" style="stop-color:#16213e"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1920" height="1080" fill="url(#bgGrad)"/>
+
+  <!-- VWF Title -->
+  <text x="100" y="200" font-family="Arial, sans-serif" font-size="96"
+        font-weight="bold" fill="#00d4ff" text-anchor="start">
+    VWF
+  </text>
+  <text x="100" y="280" font-family="Arial, sans-serif" font-size="48"
+        fill="#888888" text-anchor="start">
+    Video Workflow Framework
+  </text>
+
+  <!-- Core concept -->
+  <rect x="80" y="340" width="1000" height="140" rx="16" fill="#0f0f23" fill-opacity="0.92"/>
+  <text x="100" y="400" font-family="monospace" font-size="36"
+        fill="#4ade80" text-anchor="start">
+    workflow.yaml  →  Engine  →  Video
+  </text>
+  <text x="100" y="455" font-family="Arial, sans-serif" font-size="32"
+        fill="#888888" text-anchor="start">
+    Agent writes once. Engine runs forever.
+  </text>
+
+  <!-- Key point -->
+  <text x="100" y="580" font-family="Arial, sans-serif" font-size="56"
+        font-weight="bold" fill="#ffffff" text-anchor="start">
+    Your workflow lives in YAML,
+  </text>
+  <text x="100" y="660" font-family="Arial, sans-serif" font-size="56"
+        font-weight="bold" fill="#ffd93d" text-anchor="start">
+    not in the agent's memory.
+  </text>
+</svg>

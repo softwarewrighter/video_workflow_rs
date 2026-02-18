@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a1a2e"/>
+      <stop offset="100%" style="stop-color:#16213e"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1920" height="1080" fill="url(#bgGrad)"/>
+
+  <!-- Title -->
+  <text x="100" y="180" font-family="Arial, sans-serif" font-size="64"
+        font-weight="bold" fill="#ff6b6b" text-anchor="start">
+    Agent Drift
+  </text>
+
+  <!-- Problem list -->
+  <text x="100" y="320" font-family="Arial, sans-serif" font-size="48"
+        fill="#ffffff" text-anchor="start">
+    <tspan x="100" dy="0">❌  Loses context mid-task</tspan>
+    <tspan x="100" dy="80">❌  Hallucinates parameters</tspan>
+    <tspan x="100" dy="80">❌  Skips steps it ran before</tspan>
+    <tspan x="100" dy="80">❌  Every rebuild is a gamble</tspan>
+  </text>
+
+  <!-- Bottom message -->
+  <rect x="80" y="680" width="900" height="80" rx="12" fill="#0f0f23" fill-opacity="0.92"/>
+  <text x="530" y="735" font-family="Arial, sans-serif" font-size="40"
+        fill="#ffd93d" text-anchor="middle">
+    More time correcting than creating
+  </text>
+</svg>
