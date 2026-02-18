@@ -16,6 +16,9 @@ vars:
   tts_server: "http://curiosity:7860"
   reference_audio: "/Users/mike/github/softwarewrighter/video-publishing/reference/voice/mike-medium-ref-1.wav"
   reference_text: "In this session, I'm going to write a small command line tool and explain the decision making process as I go. I'll begin with a basic skeleton, argument parsing, a configuration loader, and a minimal main function. Once everything compiles, I'll run it with a few sample inputs to confirm the behavior. After that, I'll be fine the internal design. I'll reorganize the functions, extract shared logic, and add error messages that actually help the user understand what went wrong. None of this is complicated, but it's the kind of work that separates a rough prototype from a tool someone can rely on. As we move forward, I'll highlight why I chose certain patterns, some decisions, optimize clarity, while others optimize performance or extensibility. The important thing is to understand the trade-offs well enough that the code feels intentional instead of accidental."
+  # Music generation
+  midi_cli: "/Users/mike/github/softwarewrighter/midi-cli-rs/target/release/midi-cli-rs"
+  soundfont: "/opt/homebrew/Cellar/fluid-synth/2.5.2/share/fluid-synth/sf2/VintageDreamsWaves-v2.sf2"
 
 steps:
   # Setup directories
@@ -210,6 +213,41 @@ steps:
     kind: run_command
     program: "./scripts/verify-tts.sh"
     capture_path: "output/verify-tts.log"
+
+  # Generate background music using midi-cli-rs
+  - id: music_intro
+    kind: run_command
+    resume_output: "assets/music-intro.wav"
+    program: "{{midi_cli}}"
+    args:
+      - "preset"
+      - "--mood"
+      - "upbeat"
+      - "--duration"
+      - "8"
+      - "--seed"
+      - "2026"
+      - "--soundfont"
+      - "{{soundfont}}"
+      - "-o"
+      - "assets/music-intro.wav"
+
+  - id: music_outro
+    kind: run_command
+    resume_output: "assets/music-outro.wav"
+    program: "{{midi_cli}}"
+    args:
+      - "preset"
+      - "--mood"
+      - "calm"
+      - "--duration"
+      - "10"
+      - "--seed"
+      - "2026"
+      - "--soundfont"
+      - "{{soundfont}}"
+      - "-o"
+      - "assets/music-outro.wav"
 
   # Build video preview
   - id: build_video

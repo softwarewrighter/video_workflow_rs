@@ -126,12 +126,50 @@ ffmpeg -y -f concat -safe 0 -i "$CLIPS_DIR/concat.txt" \
     -c:a aac -ar ${TARGET_AUDIO_RATE} -ac ${TARGET_AUDIO_CHANNELS} -b:a 192k \
     "$OUTPUT_DIR/preview.mp4" 2>/dev/null
 
+# ============================================
+# Step 4: Mix in background music
+# ============================================
+echo "Step 4: Mixing background music..."
+
+MUSIC_INTRO="$ASSETS_DIR/music-intro.wav"
+MUSIC_OUTRO="$ASSETS_DIR/music-outro.wav"
+
+if [ -f "$MUSIC_INTRO" ] && [ -f "$MUSIC_OUTRO" ]; then
+    # Get video duration
+    VIDEO_DUR=$(ffprobe -i "$OUTPUT_DIR/preview.mp4" -show_entries format=duration -v quiet -of csv="p=0")
+    VIDEO_DUR_INT=${VIDEO_DUR%.*}
+
+    # Music volume: -32dB (lower than narration at -25dB)
+    # Intro music: fade out over 3 seconds starting at 8s
+    # Outro music: start near end, fade in over 2 seconds
+    OUTRO_START=$((VIDEO_DUR_INT - 12))
+
+    ffmpeg -y -i "$OUTPUT_DIR/preview.mp4" \
+        -i "$MUSIC_INTRO" \
+        -i "$MUSIC_OUTRO" \
+        -filter_complex "
+            [1:a]volume=-12dB,afade=t=out:st=8:d=3[intro_music];
+            [2:a]volume=-12dB,adelay=${OUTRO_START}000|${OUTRO_START}000,afade=t=in:st=${OUTRO_START}:d=2[outro_music];
+            [0:a][intro_music][outro_music]amix=inputs=3:duration=first:normalize=0[aout]
+        " \
+        -map 0:v -map "[aout]" \
+        -c:v copy -c:a aac -ar ${TARGET_AUDIO_RATE} -ac ${TARGET_AUDIO_CHANNELS} -b:a 192k \
+        "$OUTPUT_DIR/final.mp4" 2>/dev/null
+
+    echo "  Added intro music (fade out at 8s)"
+    echo "  Added outro music (fade in at ${OUTRO_START}s)"
+    FINAL_OUTPUT="$OUTPUT_DIR/final.mp4"
+else
+    echo "  Skipping music (files not found)"
+    FINAL_OUTPUT="$OUTPUT_DIR/preview.mp4"
+fi
+
 echo ""
 echo "=== Build Complete ==="
-echo "Output: $OUTPUT_DIR/preview.mp4"
+echo "Output: $FINAL_OUTPUT"
 
 # Show duration and dimensions
-dur=$(ffprobe -i "$OUTPUT_DIR/preview.mp4" -show_entries format=duration -v quiet -of csv="p=0")
-dims=$(ffprobe -i "$OUTPUT_DIR/preview.mp4" -v error -select_streams v:0 -show_entries stream=width,height -of csv=p=0)
+dur=$(ffprobe -i "$FINAL_OUTPUT" -show_entries format=duration -v quiet -of csv="p=0")
+dims=$(ffprobe -i "$FINAL_OUTPUT" -v error -select_streams v:0 -show_entries stream=width,height -of csv=p=0)
 printf "Duration: %.1f seconds\n" "$dur"
 echo "Dimensions: $dims (landscape 16:9)"

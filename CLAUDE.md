@@ -6,6 +6,29 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 VWF (Video Workflow Framework) is a Rust-based workflow engine that eliminates "agent drift" in video production. The core principle: **workflows are data (YAML), runner is code**. All side effects go through traits for testability.
 
+## CRITICAL: Dogfooding Required
+
+**NEVER run ad hoc commands to produce video assets.** All video production work MUST go through the workflow engine:
+
+1. **Use `workflow.yaml`** - Every operation (TTS, image generation, music, video assembly) must be a workflow step
+2. **No manual ffmpeg/convert/etc.** - If you need a capability, add it to the workflow
+3. **Missing capability?** - Implement it as a new step type in `vwf-steps`, test it, then use it
+4. **Incremental builds** - Use `--resume` flag; steps with `resume_output` skip if output exists
+
+```bash
+# CORRECT: Run workflow with --resume for incremental builds
+cargo run -p vwf-cli -- run projects/self/workflow.yaml --workdir projects/self --resume --allow bash --allow ffmpeg
+
+# WRONG: Running ffmpeg directly
+ffmpeg -i input.wav -i background.png output.mp4  # DO NOT DO THIS
+```
+
+**Why this matters:**
+- Workflows are reproducible and auditable (`run.json` records every step)
+- Incremental builds save time (only re-run changed steps)
+- No "agent drift" - the workflow is the source of truth
+- We eat our own dogfood - if VWF can't do it, we fix VWF
+
 ## Commands
 
 ```bash
@@ -44,9 +67,20 @@ cargo run -p vwf-cli -- show examples/workflows/shorts_narration.yaml
 
 ### Workspace Structure
 
-- **vwf-core**: Engine + config parsing + step implementations + Runtime trait
+Two Cargo workspaces under `components/`:
+
+**`components/vwf-engine/`** - Core library crates:
+- **vwf-config**: YAML parsing, StepKind enum, WorkflowConfig
+- **vwf-steps**: Step implementations (tts_generate, text_to_image, etc.)
+
+**`components/vwf-apps/`** - Application crates:
 - **vwf-cli**: Command-line interface (`vwf run`, `vwf show`)
 - **vwf-web**: Yew/WASM UI skeleton (future)
+
+Run CLI from vwf-apps workspace:
+```bash
+cd components/vwf-apps && cargo run -p vwf-cli -- run ../../projects/self/workflow.yaml --workdir ../../projects/self
+```
 
 ### Core Abstractions
 
@@ -58,7 +92,7 @@ cargo run -p vwf-cli -- show examples/workflows/shorts_narration.yaml
 
 **WorkflowConfig** (`config.rs`): Parsed from YAML with versioning, vars, and ordered steps.
 
-**StepKind enum**: `ensure_dirs`, `write_file`, `split_sections`, `run_command`, `llm_generate`
+**StepKind enum**: `ensure_dirs`, `write_file`, `split_sections`, `run_command`, `llm_generate`, `tts_generate`, `text_to_image`, `normalize_volume`
 
 ### Data Flow
 
@@ -70,11 +104,11 @@ cargo run -p vwf-cli -- show examples/workflows/shorts_narration.yaml
 
 ### Key Files
 
-- `crates/vwf-core/src/engine.rs`: Runner and RunReport
-- `crates/vwf-core/src/steps.rs`: Step implementations with payload deserialization
-- `crates/vwf-core/src/runtime.rs`: Runtime/LlmClient traits and implementations
-- `crates/vwf-core/src/render.rs`: `{{var}}` template substitution
-- `crates/vwf-cli/src/main.rs`: CLI entry point with clap
+- `components/vwf-engine/crates/vwf-config/src/step.rs`: StepKind enum and step config
+- `components/vwf-engine/crates/vwf-steps/src/`: Step implementations (one file per step type)
+- `components/vwf-apps/crates/vwf-cli/src/main.rs`: CLI entry point with clap
+- `projects/*/workflow.yaml`: Video project workflow definitions
+- `docs/narration-style.md`: TTS narration guidelines (avoid acronyms, use phonetic spelling)
 
 ## TDD Approach
 
@@ -107,6 +141,33 @@ Errors must include step ID:
 ## Command Safety
 
 `run_command` requires explicit `--allow <program>` flags. Without allowlist, commands fail with remediation message.
+
+## Adding New Step Types
+
+When a workflow capability is missing, implement it as a new step type:
+
+1. **Add variant to StepKind** in `vwf-config/src/step.rs`
+2. **Create implementation** in `vwf-steps/src/<step_name>.rs`
+3. **Register in lib.rs** - add to `vwf-steps/src/lib.rs` module list and match arm
+4. **Test it** - write unit tests for the new step
+5. **Use it** - add to workflow.yaml and run with `--resume`
+
+Example step implementation pattern:
+```rust
+#[derive(Deserialize)]
+struct Payload {
+    input_path: String,
+    output_path: String,
+}
+
+pub fn execute(ctx: &mut StepContext) -> Result<()> {
+    let p: Payload = serde_json::from_value(ctx.step.payload.clone())?;
+    let input = ctx.render(&p.input_path)?;
+    let output = ctx.render(&p.output_path)?;
+    // ... implementation
+    Ok(())
+}
+```
 
 ## Python Package Management
 
