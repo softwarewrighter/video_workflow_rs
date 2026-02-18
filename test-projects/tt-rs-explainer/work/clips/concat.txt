@@ -1,7 +1,0 @@
-file '00-title.mp4'
-file '01-hook.mp4'
-file '02-intro-demo.mp4'
-file '03-demo.mp4'
-file '03-cta.mp4'
-file '99a-epilog.mp4'
-file '99b-epilog-ext.mp4'

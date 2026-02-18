@@ -1,1 +1,0 @@
-Safe to parallelize, it runs them together. Must be sequential, it waits.

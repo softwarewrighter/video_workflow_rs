@@ -1,0 +1,91 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a1a2e"/>
+      <stop offset="100%" style="stop-color:#16213e"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1920" height="1080" fill="url(#bgGrad)"/>
+
+  <!-- Main Headline -->
+  <rect x="160" y="50" width="1600" height="180" rx="16" fill="#0f0f23" fill-opacity="0.92"/>
+  <text x="960" y="120" font-family="Arial, sans-serif" font-size="96"
+        font-weight="bold" fill="#00d4ff" text-anchor="middle">
+    tt-rs
+  </text>
+  <text x="960" y="195" font-family="Arial, sans-serif" font-size="56"
+        fill="#ffd93d" text-anchor="middle">
+    ToonTalk Reimagined in Rust + WebAssembly
+  </text>
+
+  <!-- History Box: The Original -->
+  <rect x="100" y="270" width="800" height="160" rx="16"
+        fill="#0f0f23" fill-opacity="0.92" stroke="#ff6b6b" stroke-width="6"/>
+
+  <text x="150" y="330" font-family="Arial, sans-serif" font-size="44"
+        font-weight="bold" fill="#ff6b6b">
+    The Original (1995)
+  </text>
+  <text x="150" y="390" font-family="Arial, sans-serif" font-size="36" fill="#eee">
+    Ken Kahn's C++ desktop app for Windows
+  </text>
+
+  <!-- History Box: JS Reborn -->
+  <rect x="100" y="460" width="800" height="160" rx="16"
+        fill="#0f0f23" fill-opacity="0.92" stroke="#a855f7" stroke-width="6"/>
+
+  <text x="150" y="520" font-family="Arial, sans-serif" font-size="44"
+        font-weight="bold" fill="#a855f7">
+    JS Reborn (2014)
+  </text>
+  <text x="150" y="580" font-family="Arial, sans-serif" font-size="36" fill="#eee">
+    ToonTalk Reborn - JavaScript in browser
+  </text>
+
+  <!-- Modern Box: tt-rs -->
+  <rect x="100" y="650" width="800" height="160" rx="16"
+        fill="#0f0f23" fill-opacity="0.92" stroke="#4ade80" stroke-width="6"/>
+
+  <text x="150" y="710" font-family="Arial, sans-serif" font-size="44"
+        font-weight="bold" fill="#4ade80">
+    tt-rs (2025)
+  </text>
+  <text x="150" y="770" font-family="Arial, sans-serif" font-size="36" fill="#eee">
+    Rust + WebAssembly reimplementation
+  </text>
+
+  <!-- Tech Stack (right side, avoiding avatar zone) -->
+  <rect x="960" y="270" width="440" height="540" rx="16"
+        fill="#0f0f23" fill-opacity="0.92" stroke="#ffd93d" stroke-width="6"/>
+
+  <text x="1010" y="335" font-family="Arial, sans-serif" font-size="44"
+        font-weight="bold" fill="#ffd93d">
+    tt-rs Stack
+  </text>
+
+  <text x="1010" y="400" font-family="Courier, monospace" font-size="32" fill="#4ade80">
+    Rust
+  </text>
+  <text x="1010" y="455" font-family="Courier, monospace" font-size="32" fill="#4ade80">
+    WebAssembly
+  </text>
+  <text x="1010" y="510" font-family="Courier, monospace" font-size="32" fill="#4ade80">
+    Yew Framework
+  </text>
+  <text x="1010" y="565" font-family="Courier, monospace" font-size="32" fill="#4ade80">
+    wasm-bindgen
+  </text>
+  <text x="1010" y="620" font-family="Courier, monospace" font-size="32" fill="#00d4ff">
+    web-sys
+  </text>
+  <text x="1010" y="675" font-family="Courier, monospace" font-size="32" fill="#00d4ff">
+    gloo
+  </text>
+  <text x="1010" y="750" font-family="Courier, monospace" font-size="32" fill="#ffd93d">
+    GitHub Pages
+  </text>
+
+  <!-- Avatar safe zone: keep x=1400-1920, y=800-1080 clear -->
+</svg>
