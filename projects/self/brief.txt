@@ -1,0 +1,341 @@
+# VWF Self-Explainer Video Brief
+
+## Overview
+A comprehensive explainer video (15-25 minutes) demonstrating the Video Workflow Framework (VWF) in full detail. This video is produced using VWF itself - true dogfooding.
+
+## Target Audience
+- Developers interested in AI-powered video automation
+- Content creators looking to streamline video production
+- Rust programmers interested in workflow engines
+- DevOps engineers who want reproducible media pipelines
+
+## Key Messages
+1. VWF eliminates "agent drift" - workflows are data (YAML), not code
+2. Orchestrates multiple AI services: TTS, text-to-image, image-to-video, text-to-video
+3. Incremental builds with --resume flag save time on re-runs
+4. Self-auditing capability with vision models validates produced assets
+5. Fully open source and extensible
+
+---
+
+## Video Structure
+
+### Part 1: Introduction (3-4 minutes)
+
+#### Segment 1: Title (5 seconds)
+- Type: music_only
+- Visual: AI-generated "dog eating dogfood" title animation via Wan 2.2
+- Music: 06-ambient-seed2026.wav (atmospheric)
+
+#### Segment 2: Hook (30 seconds)
+- Type: narration_only
+- Content: "What if you could describe a video in plain text, and an AI would
+  build it for you? No timeline editors. No render queues. Just write what you
+  want, run one command, and get a finished video. That's exactly what
+  Vee Double-You Eff does. And the video you're watching right now was
+  produced entirely by this framework."
+
+#### Segment 3: Problem Statement (90 seconds)
+- Type: narration_only
+- Content: Explain the pain points of traditional video production:
+  - Manual editing in timeline software is time-consuming
+  - Asset management becomes chaotic (versions, naming, organization)
+  - Repetitive tasks can't be easily automated
+  - AI tools exist but require manual orchestration
+  - "Agent drift" - AI assistants lose context or make inconsistent decisions
+  - No reproducibility - can't easily recreate or modify a video
+
+#### Segment 4: Solution Overview (60 seconds)
+- Type: narration_only
+- Content: Introduce Vee Double-You Eff as a Rust-based workflow engine:
+  - YAML workflow defines every step declaratively
+  - Engine executes steps in order with dependency tracking
+  - All side effects go through traits for testability
+  - Incremental builds - only re-run what changed
+  - Full audit trail in run.json manifest
+
+---
+
+### Part 2: Architecture Deep Dive (4-5 minutes)
+
+#### Segment 5: Core Concepts (90 seconds)
+- Type: narration_only
+- Visual: Architecture diagram
+- Content: Explain the three-layer architecture:
+  - vwf-config: YAML parsing, step types, validation
+  - vwf-steps: Step implementations (one file per step)
+  - vwf-core: Runner, runtime traits, manifest generation
+  - vwf-cli: Command-line interface
+  - vwf-web: Future Yew/WASM UI
+
+#### Segment 6: Step Types Overview (120 seconds)
+- Type: narration_only
+- Visual: Step type diagram or list
+- Content: Walk through all available step types:
+  - ensure_dirs: Create directory structure
+  - write_file: Write text content to files
+  - split_sections: Break text files into segments
+  - run_command: Execute shell commands (with allowlist)
+  - llm_generate: Generate text via Ollama
+  - tts_generate: Voice cloning via VoxCPM
+  - text_to_image: Image generation via FLUX.1
+  - image_to_video: Animation via SVD-XT
+  - text_to_video: Video generation via Wan 2.2
+  - normalize_volume: Audio normalization via ffmpeg
+  - audio_mix: Mix background music with narration
+  - video_concat: Concatenate video clips
+  - create_slide: Generate title/text slides
+  - whisper_transcribe: Transcribe audio to text
+  - llm_audit: Validate assets with vision models
+
+#### Segment 7: Service Architecture (90 seconds)
+- Type: narration_only
+- Visual: Network diagram showing services
+- Content: Explain the distributed service setup:
+  - Ollama (localhost:11434): Local LLM for text generation and vision
+  - VoxCPM (curiosity:7860): Voice cloning TTS on separate machine
+  - FLUX.1 (gpu-server:8570): Text-to-image via ComfyUI
+  - SVD-XT (gpu-server:8100): Image-to-video via ComfyUI
+  - Wan 2.2 (gpu-server:6000): Text-to-video via ComfyUI
+  - All services are containerized with Docker
+
+---
+
+### Part 3: Project Setup Tutorial (5-6 minutes)
+
+#### Segment 8: Repository Structure (60 seconds)
+- Type: narration_only
+- Visual: Directory tree
+- Content: Explain the codebase layout:
+  - components/vwf-engine: Core library crates
+  - components/vwf-apps: CLI and web applications
+  - docs/: Documentation and LLM context
+  - projects/: Video project directories
+  - examples/: Example workflows
+
+#### Segment 9: Creating a New Project (90 seconds)
+- Type: narration_only
+- Visual: Terminal demonstration
+- Content: Step-by-step project creation:
+  - Create project directory
+  - Write brief.txt describing the video
+  - Use vwf generate to create initial workflow.yaml
+  - Review and customize the generated workflow
+  - Add voice reference audio for TTS
+
+#### Segment 10: Workflow YAML Structure (120 seconds)
+- Type: narration_only
+- Visual: YAML file with annotations
+- Content: Detailed walkthrough of workflow.yaml:
+  - version and name fields
+  - vars section for reusable values
+  - segments for audio organization (music_only, narration_only, mixed)
+  - steps array with id, kind, and parameters
+  - resume_output for incremental builds
+  - Template variables with double curly braces
+
+#### Segment 11: Voice Reference Setup (60 seconds)
+- Type: narration_only
+- Content: How to prepare voice cloning:
+  - Record 20-60 seconds of clean speech
+  - Provide accurate transcript as reference_text
+  - Place in assets/ directory
+  - Reference via template variable
+
+---
+
+### Part 4: Running Workflows (4-5 minutes)
+
+#### Segment 12: Basic Execution (90 seconds)
+- Type: narration_only
+- Visual: Terminal with vwf run output
+- Content: Running a workflow:
+  - vwf run workflow.yaml --workdir . --dry-run (preview mode)
+  - vwf run workflow.yaml --workdir . (real execution)
+  - Understanding step output and timing
+  - The run.json manifest
+
+#### Segment 13: Command Safety (60 seconds)
+- Type: narration_only
+- Content: Explain the --allow flag system:
+  - run_command steps require explicit permission
+  - Use --allow ffmpeg --allow vhs to permit specific programs
+  - Security benefits of explicit allowlists
+  - Error messages guide you to add needed flags
+
+#### Segment 14: Resume Mode (90 seconds)
+- Type: narration_only
+- Visual: Terminal showing skipped steps
+- Content: Incremental builds with --resume:
+  - Steps with resume_output skip if output exists
+  - Useful after interruptions or crashes
+  - Only re-run changed or failed steps
+  - Massive time savings on large workflows
+
+#### Segment 15: Variable Overrides (60 seconds)
+- Type: narration_only
+- Content: Runtime customization:
+  - --var project_name=Demo overrides workflow vars
+  - Useful for batch processing multiple projects
+  - Template rendering happens at execution time
+
+---
+
+### Part 5: AI Services In Detail (4-5 minutes)
+
+#### Segment 16: Text-to-Speech with VoxCPM (90 seconds)
+- Type: narration_only
+- Visual: TTS generation demo
+- Content: Voice cloning explained:
+  - VoxCPM uses reference audio for voice matching
+  - Narration style guidelines (acronyms, pacing)
+  - Common issues: dropouts, pronunciation errors
+  - Using whisper_transcribe to verify output
+
+#### Segment 17: Image Generation with FLUX.1 (90 seconds)
+- Type: narration_only
+- Visual: Image generation examples
+- Content: Text-to-image workflow:
+  - FLUX.1 schnell for fast generation
+  - Prompt engineering best practices
+  - Orientation options (portrait, landscape, square)
+  - Seed values for reproducibility
+
+#### Segment 18: Video Generation (90 seconds)
+- Type: narration_only
+- Visual: Video generation examples
+- Content: Two approaches to video:
+  - SVD-XT: Animate still images (image_to_video)
+  - Wan 2.2: Generate from text prompts (text_to_video)
+  - Frame counts, motion intensity, CFG scale
+  - When to use each approach
+
+#### Segment 19: Local LLM with Ollama (60 seconds)
+- Type: narration_only
+- Content: Using Ollama for:
+  - llm_generate: Script writing, prompt engineering
+  - llm_audit: Vision-based asset validation
+  - Available models: qwen2.5-coder, llava, llama3.2-vision
+  - All processing stays local
+
+---
+
+### Part 6: Advanced Features (3-4 minutes)
+
+#### Segment 20: Audio Processing (90 seconds)
+- Type: narration_only
+- Content: Professional audio handling:
+  - normalize_volume: Target -25 dB for narration
+  - audio_mix: Overlay music at -32 dB
+  - Proper segment organization prevents overlap
+  - fade_out for smooth music endings
+
+#### Segment 21: Video Assembly (60 seconds)
+- Type: narration_only
+- Content: Final video production:
+  - create_slide for titles and text cards
+  - video_concat to join all segments
+  - reencode option for mixed codecs
+  - Output to final delivery format
+
+#### Segment 22: Quality Assurance with llm_audit (90 seconds)
+- Type: narration_only
+- Content: Automated asset validation:
+  - Extract frames from videos at intervals
+  - Send to vision models (llava, qwen2.5vl)
+  - Detect corruption, artifacts, blank frames
+  - fail_on_issues to halt workflow on problems
+  - JSON report for human review
+
+---
+
+### Part 7: This Video's Workflow (2-3 minutes)
+
+#### Segment 23: Meta Demonstration (120 seconds)
+- Type: narration_only
+- Visual: Show actual workflow.yaml for this video
+- Content: Walk through how this video was made:
+  - Script generation via llm_generate
+  - TTS narration via VoxCPM
+  - Title animation via Wan 2.2
+  - Background music mixing
+  - Final assembly and audit
+
+#### Segment 24: Dogfooding Philosophy (60 seconds)
+- Type: narration_only
+- Content: Why we eat our own dogfood:
+  - Finds gaps in functionality
+  - Ensures real-world usability
+  - Documents by example
+  - Builds confidence in the tool
+
+---
+
+### Part 8: Conclusion (2-3 minutes)
+
+#### Segment 25: Getting Started (60 seconds)
+- Type: narration_only
+- Content: Quick start guide:
+  - Clone from GitHub
+  - Install Rust and cargo
+  - Build with cargo build
+  - Run examples to verify setup
+  - Start with a simple workflow
+
+#### Segment 26: Resources (60 seconds)
+- Type: narration_only
+- Content: Where to learn more:
+  - docs/tutorial.md for step-by-step guide
+  - docs/services.md for service setup
+  - examples/workflows/ for templates
+  - GitHub issues for support
+
+#### Segment 27: Call to Action (30 seconds)
+- Type: narration_only
+- Content: "Try Vee Double-You Eff today. Clone it from GitHub at
+  github dot com slash softwarewrighter slash video workflow underscore R-S.
+  Star it if you find it useful, and open an issue if you have questions
+  or feature requests. Thanks for watching!"
+
+#### Segment 28: Outro (10 seconds)
+- Type: music_only
+- Visual: Fade to logo/GitHub URL
+- Music: Continue 06-ambient-seed2026.wav with fade out
+
+---
+
+## Narration Rules (from docs/narration-style.md)
+- VWF -> "Vee Double-You Eff"
+- CLI -> "command line"
+- TTS -> "text-to-speech"
+- API -> "A-P-I"
+- LLM -> "large language model"
+- YAML -> "yaml" (pronounceable)
+- ffmpeg -> "eff eff em peg"
+- ComfyUI -> "Comfy U-I"
+
+## Assets Required
+- Voice reference audio for TTS cloning (assets/voice-reference.wav)
+- Background music: work/music-samples/06-ambient-seed2026.wav
+- Generated title video (text-to-video via Wan 2.2)
+- Architecture diagrams (text-to-image via FLUX.1)
+- Screen recordings or terminal output visualizations
+
+## Final Assembly
+1. Generate all narration audio segments
+2. Normalize all audio to standard levels
+3. Generate visual assets (title video, diagrams)
+4. Create segment videos (combine audio + visuals)
+5. Mix background music for intro/outro
+6. Concatenate all segments in order
+7. Run llm_audit on produced assets
+8. Export final.mp4 to output/
+
+## Quality Criteria
+- Clear narration without TTS artifacts
+- No acronym pronunciation errors
+- Music only in designated segments (no overlap with narration)
+- All AI-generated visuals pass vision model audit
+- Professional pacing (~130-150 words per minute)
+- Comprehensive coverage of all major features
+- Self-documenting through actual demonstration

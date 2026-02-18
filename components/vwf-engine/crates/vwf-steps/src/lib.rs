@@ -5,6 +5,7 @@ mod context;
 mod create_slide;
 mod ensure_dirs;
 mod image_to_video;
+mod llm_audit;
 mod llm_generate;
 mod normalize_volume;
 mod run_command;
@@ -49,5 +50,6 @@ fn dispatch(ctx: &mut StepCtx<'_>, kind: &StepKind, payload: &serde_json::Value)
         StepKind::VideoConcat => video_concat::execute(ctx, payload),
         StepKind::AudioMix => audio_mix::execute(ctx, payload),
         StepKind::CreateSlide => create_slide::execute(ctx, payload),
+        StepKind::LlmAudit => llm_audit::execute(ctx, payload),
     }
 }

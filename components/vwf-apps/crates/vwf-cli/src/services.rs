@@ -23,10 +23,10 @@ struct ServiceInfo {
 const SERVICES: &[ServiceInfo] = &[
     ServiceInfo {
         name: "Ollama",
-        description: "Local LLM (text generation)",
+        description: "Local LLM (text generation & vision audit)",
         default_url: "http://localhost:11434",
         health_path: "/api/tags",
-        step_kinds: &["llm_generate"],
+        step_kinds: &["llm_generate", "llm_audit"],
     },
     ServiceInfo {
         name: "VoxCPM",

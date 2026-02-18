@@ -31,4 +31,5 @@ pub enum StepKind {
     VideoConcat,
     AudioMix,
     CreateSlide,
+    LlmAudit,
 }

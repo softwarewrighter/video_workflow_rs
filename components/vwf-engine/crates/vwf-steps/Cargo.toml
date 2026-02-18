@@ -7,6 +7,8 @@ description = "Step implementations for VWF workflows"
 
 [dependencies]
 anyhow.workspace = true
+base64 = "0.22"
+reqwest = { version = "0.12", features = ["blocking", "json"] }
 serde.workspace = true
 serde_json.workspace = true
 rand.workspace = true

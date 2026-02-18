@@ -350,6 +350,77 @@ Splits a text file into sections by delimiter.
 
 ---
 
+## Quality Assurance Steps
+
+### llm_audit
+Audits produced assets (images/videos) using vision-capable LLMs.
+
+This step uses a recursive approach to validate video/image quality:
+1. For videos, extract frames at regular intervals
+2. Send each frame to a vision model (llava, qwen2.5vl, llama3.2-vision)
+3. Aggregate feedback and report issues
+4. Optionally fail the workflow if critical issues found
+
+**Parameters:**
+| Name | Required | Type | Description |
+|------|----------|------|-------------|
+| assets | yes | array[string] | List of image/video paths to audit |
+| audit_prompt | yes | string | Instructions for the vision model |
+| output_path | yes | string | Path for JSON audit report |
+| model | no | string | Vision model name (default: llava) |
+| server | no | string | Ollama server URL (default: http://localhost:11434) |
+| frame_count | no | integer | Frames to extract from videos (default: 5) |
+| fail_on_issues | no | boolean | Fail workflow if critical issues found (default: false) |
+| critical_keywords | no | array[string] | Words indicating critical issues |
+
+**Default Critical Keywords:**
+- error, broken, corrupt, missing, blank, black screen
+
+**Example:**
+```yaml
+- id: audit_generated_videos
+  kind: llm_audit
+  assets:
+    - "work/videos/title.mp4"
+    - "work/videos/intro.mp4"
+    - "work/images/hero.png"
+  audit_prompt: |
+    Analyze this frame for quality issues:
+    - Is the image clear and not corrupted?
+    - Are there any visual artifacts or glitches?
+    - Does the content match what would be expected for a professional video?
+    Describe any issues found. Say "OK" if the frame looks good.
+  output_path: "work/reports/audit.json"
+  model: llava
+  frame_count: 5
+  fail_on_issues: false
+```
+
+**Supported Vision Models:**
+- llava (default, fast)
+- qwen2.5vl:7b (more detailed)
+- llama3.2-vision:11b (highest quality)
+
+**Output Format:**
+```json
+{
+  "model": "llava",
+  "total_assets": 3,
+  "total_frames_analyzed": 11,
+  "findings": [
+    {
+      "asset": "work/videos/title.mp4",
+      "frame": "/tmp/vwf_audit_123/title_001.png",
+      "feedback": "The frame shows a clear animated scene...",
+      "is_critical": false
+    }
+  ],
+  "critical_issues": []
+}
+```
+
+---
+
 ## Common Patterns
 
 ### Resume/Idempotency

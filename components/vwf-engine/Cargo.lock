@@ -1433,7 +1433,9 @@ name = "vwf-steps"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "base64",
  "rand",
+ "reqwest",
  "serde",
  "serde_json",
  "vwf-config",
