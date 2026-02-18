@@ -4,4 +4,4 @@ mod step;
 mod workflow;
 
 pub use step::{StepConfig, StepKind};
-pub use workflow::WorkflowConfig;
+pub use workflow::{Segment, SegmentType, WorkflowConfig};

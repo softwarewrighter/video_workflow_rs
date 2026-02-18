@@ -58,14 +58,15 @@ pub fn execute(ctx: &mut StepCtx<'_>, payload: &Value) -> Result<()> {
     let (width, height) = match (p.width, p.height) {
         (Some(w), Some(h)) => (w, h),
         _ => match orientation.as_str() {
-            "landscape" => (1280, 720),  // 16:9 - scales 1.5x to 1920x1080
+            "landscape" => (1280, 720), // 16:9 - scales 1.5x to 1920x1080
             "square" => (1024, 1024),
-            _ => (720, 1280),  // 9:16 portrait - scales 1.5x to 1080x1920
+            _ => (720, 1280), // 9:16 portrait - scales 1.5x to 1080x1920
         },
     };
 
-    let seed = p.seed.unwrap_or_else(|| rand::random());
-    let python = p.python_path
+    let seed = p.seed.unwrap_or_else(rand::random);
+    let python = p
+        .python_path
         .map(|pp| ctx.render(&pp))
         .transpose()?
         .unwrap_or_else(|| "python3".to_string());
@@ -79,17 +80,28 @@ pub fn execute(ctx: &mut StepCtx<'_>, payload: &Value) -> Result<()> {
         .with_context(|| ctx.error_context("spawn text_to_image python"))?;
 
     if !status.success() {
-        anyhow::bail!("Image generation failed with exit code: {:?}", status.code());
+        anyhow::bail!(
+            "Image generation failed with exit code: {:?}",
+            status.code()
+        );
     }
 
     Ok(())
 }
 
-fn image_gen_script(server: &str, prompt: &str, width: u32, height: u32, seed: u64, output: &str) -> String {
+fn image_gen_script(
+    server: &str,
+    prompt: &str,
+    width: u32,
+    height: u32,
+    seed: u64,
+    output: &str,
+) -> String {
     // Escape prompt for Python string
     let prompt_escaped = prompt.replace('\\', "\\\\").replace('"', "\\\"");
 
-    format!(r#"
+    format!(
+        r#"
 import requests
 import time
 from pathlib import Path
@@ -158,7 +170,8 @@ Path(OUTPUT).parent.mkdir(parents=True, exist_ok=True)
 with open(OUTPUT, "wb") as f:
     f.write(r.content)
 print(f"Saved: {{OUTPUT}}")
-"#)
+"#
+    )
 }
 
 #[cfg(test)]

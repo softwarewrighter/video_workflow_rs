@@ -1,6 +1,8 @@
 //! Step handlers for workflow execution.
 
+mod audio_mix;
 mod context;
+mod create_slide;
 mod ensure_dirs;
 mod image_to_video;
 mod llm_generate;
@@ -10,18 +12,23 @@ mod split_sections;
 mod text_to_image;
 mod text_to_video;
 mod tts_generate;
+mod video_concat;
 mod whisper_transcribe;
 mod write_file;
 
 use anyhow::Result;
 use std::collections::BTreeMap;
 
+use context::StepCtx;
 use vwf_config::{StepConfig, StepKind};
 use vwf_runtime::Runtime;
-use context::StepCtx;
 
 /// Execute a single step with dependency injection via Runtime trait.
-pub fn execute_step(rt: &mut dyn Runtime, vars: &BTreeMap<String, String>, step: &StepConfig) -> Result<()> {
+pub fn execute_step(
+    rt: &mut dyn Runtime,
+    vars: &BTreeMap<String, String>,
+    step: &StepConfig,
+) -> Result<()> {
     let mut ctx = StepCtx::new(rt, vars, &step.id);
     dispatch(&mut ctx, &step.kind, &step.payload)
 }
@@ -39,5 +46,8 @@ fn dispatch(ctx: &mut StepCtx<'_>, kind: &StepKind, payload: &serde_json::Value)
         StepKind::TextToVideo => text_to_video::execute(ctx, payload),
         StepKind::NormalizeVolume => normalize_volume::execute(ctx, payload),
         StepKind::WhisperTranscribe => whisper_transcribe::execute(ctx, payload),
+        StepKind::VideoConcat => video_concat::execute(ctx, payload),
+        StepKind::AudioMix => audio_mix::execute(ctx, payload),
+        StepKind::CreateSlide => create_slide::execute(ctx, payload),
     }
 }

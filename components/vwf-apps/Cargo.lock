@@ -2283,6 +2283,7 @@ dependencies = [
  "anyhow",
  "chrono",
  "clap",
+ "reqwest",
  "serde_json",
  "serde_yaml",
  "tracing",

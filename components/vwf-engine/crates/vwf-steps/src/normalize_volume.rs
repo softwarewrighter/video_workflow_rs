@@ -47,13 +47,14 @@ pub fn execute(ctx: &mut StepCtx<'_>, payload: &serde_json::Value) -> Result<()>
     let clip_path = if p.clip_path.starts_with('/') {
         p.clip_path.clone()
     } else {
-        ctx.rt.workdir().join(&p.clip_path).to_string_lossy().to_string()
+        ctx.rt
+            .workdir()
+            .join(&p.clip_path)
+            .to_string_lossy()
+            .to_string()
     };
 
-    println!(
-        "Normalizing volume: {} to {} dB",
-        clip_path, p.target_db
-    );
+    println!("Normalizing volume: {} to {} dB", clip_path, p.target_db);
 
     // Check if clip exists
     if !std::path::Path::new(&clip_path).exists() {
@@ -92,10 +93,7 @@ pub fn execute(ctx: &mut StepCtx<'_>, payload: &serde_json::Value) -> Result<()>
 
     // Step 5: Verify new level
     let new_db = get_mean_volume(&clip_path)?;
-    println!(
-        "  Normalized: {:.1} dB -> {:.1} dB",
-        current_db, new_db
-    );
+    println!("  Normalized: {:.1} dB -> {:.1} dB", current_db, new_db);
 
     Ok(())
 }
@@ -103,10 +101,14 @@ pub fn execute(ctx: &mut StepCtx<'_>, payload: &serde_json::Value) -> Result<()>
 fn get_audio_property(clip_path: &str, property: &str) -> Result<String> {
     let output = Command::new("ffprobe")
         .args([
-            "-v", "error",
-            "-select_streams", "a:0",
-            "-show_entries", &format!("stream={}", property),
-            "-of", "csv=p=0",
+            "-v",
+            "error",
+            "-select_streams",
+            "a:0",
+            "-show_entries",
+            &format!("stream={}", property),
+            "-of",
+            "csv=p=0",
             clip_path,
         ])
         .output()
@@ -117,12 +119,7 @@ fn get_audio_property(clip_path: &str, property: &str) -> Result<String> {
 
 fn get_mean_volume(clip_path: &str) -> Result<f64> {
     let output = Command::new("ffmpeg")
-        .args([
-            "-i", clip_path,
-            "-af", "volumedetect",
-            "-f", "null",
-            "-",
-        ])
+        .args(["-i", clip_path, "-af", "volumedetect", "-f", "null", "-"])
         .output()
         .context("Failed to run ffmpeg volumedetect")?;
 
@@ -130,12 +127,11 @@ fn get_mean_volume(clip_path: &str) -> Result<f64> {
 
     // Parse "mean_volume: -25.1 dB"
     for line in stderr.lines() {
-        if line.contains("mean_volume:") {
-            if let Some(db_str) = line.split("mean_volume:").nth(1) {
-                let db_str = db_str.trim().replace(" dB", "");
-                return db_str.parse::<f64>()
-                    .context("Failed to parse mean_volume");
-            }
+        if line.contains("mean_volume:")
+            && let Some(db_str) = line.split("mean_volume:").nth(1)
+        {
+            let db_str = db_str.trim().replace(" dB", "");
+            return db_str.parse::<f64>().context("Failed to parse mean_volume");
         }
     }
 
@@ -147,12 +143,7 @@ fn fix_audio_format(clip_path: &str) -> Result<()> {
 
     let status = Command::new("ffmpeg")
         .args([
-            "-y",
-            "-i", clip_path,
-            "-c:v", "copy",
-            "-c:a", "aac",
-            "-ar", "44100",
-            "-ac", "2",
+            "-y", "-i", clip_path, "-c:v", "copy", "-c:a", "aac", "-ar", "44100", "-ac", "2",
             &temp_path,
         ])
         .status()
@@ -162,8 +153,7 @@ fn fix_audio_format(clip_path: &str) -> Result<()> {
         bail!("ffmpeg format fix failed");
     }
 
-    std::fs::rename(&temp_path, clip_path)
-        .context("Failed to replace original clip")?;
+    std::fs::rename(&temp_path, clip_path).context("Failed to replace original clip")?;
 
     Ok(())
 }
@@ -175,12 +165,18 @@ fn apply_volume_adjustment(clip_path: &str, adjust_db: f64) -> Result<()> {
     let status = Command::new("ffmpeg")
         .args([
             "-y",
-            "-i", clip_path,
-            "-af", &volume_filter,
-            "-c:v", "copy",
-            "-c:a", "aac",
-            "-ar", "44100",
-            "-ac", "2",
+            "-i",
+            clip_path,
+            "-af",
+            &volume_filter,
+            "-c:v",
+            "copy",
+            "-c:a",
+            "aac",
+            "-ar",
+            "44100",
+            "-ac",
+            "2",
             &temp_path,
         ])
         .status()
@@ -190,8 +186,7 @@ fn apply_volume_adjustment(clip_path: &str, adjust_db: f64) -> Result<()> {
         bail!("ffmpeg volume adjustment failed");
     }
 
-    std::fs::rename(&temp_path, clip_path)
-        .context("Failed to replace original clip")?;
+    std::fs::rename(&temp_path, clip_path).context("Failed to replace original clip")?;
 
     Ok(())
 }

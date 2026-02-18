@@ -36,11 +36,21 @@ struct Payload {
     python_path: Option<String>,
 }
 
-fn default_orientation() -> String { "landscape".to_string() }
-fn default_length() -> u32 { 81 }
-fn default_steps() -> u32 { 20 }
-fn default_cfg() -> f32 { 5.0 }
-fn default_server() -> String { "http://192.168.1.64:6000".to_string() }
+fn default_orientation() -> String {
+    "landscape".to_string()
+}
+fn default_length() -> u32 {
+    81
+}
+fn default_steps() -> u32 {
+    20
+}
+fn default_cfg() -> f32 {
+    5.0
+}
+fn default_server() -> String {
+    "http://192.168.1.64:6000".to_string()
+}
 
 pub fn execute(ctx: &mut StepCtx<'_>, payload: &Value) -> Result<()> {
     let p: Payload = serde_json::from_value(payload.clone())
@@ -53,21 +63,29 @@ pub fn execute(ctx: &mut StepCtx<'_>, payload: &Value) -> Result<()> {
 
     // Resolution presets (latent dimensions - output is 2x)
     let (width, height) = match orientation.as_str() {
-        "portrait" => (480, 832),   // Output: 960x1664
-        "square" => (640, 640),     // Output: 1280x1280
-        _ => (832, 480),            // Output: 1664x960 (landscape)
+        "portrait" => (480, 832), // Output: 960x1664
+        "square" => (640, 640),   // Output: 1280x1280
+        _ => (832, 480),          // Output: 1664x960 (landscape)
     };
 
-    let seed = p.seed.unwrap_or_else(|| rand::random());
-    let python = p.python_path
+    let seed = p.seed.unwrap_or_else(rand::random);
+    let python = p
+        .python_path
         .as_ref()
         .map(|pp| ctx.render(pp))
         .transpose()?
         .unwrap_or_else(|| "python3".to_string());
 
     let script = video_gen_script(
-        &server, &prompt, &output_path,
-        width, height, p.length, p.steps, p.cfg, seed,
+        &server,
+        &prompt,
+        &output_path,
+        width,
+        height,
+        p.length,
+        p.steps,
+        p.cfg,
+        seed,
     );
 
     let status = Command::new(&python)
@@ -76,20 +94,32 @@ pub fn execute(ctx: &mut StepCtx<'_>, payload: &Value) -> Result<()> {
         .with_context(|| ctx.error_context("spawn text_to_video python"))?;
 
     if !status.success() {
-        anyhow::bail!("Video generation failed with exit code: {:?}", status.code());
+        anyhow::bail!(
+            "Video generation failed with exit code: {:?}",
+            status.code()
+        );
     }
 
     Ok(())
 }
 
+#[allow(clippy::too_many_arguments)]
 fn video_gen_script(
-    server: &str, prompt: &str, output: &str,
-    width: u32, height: u32, length: u32, steps: u32, cfg: f32, seed: u64,
+    server: &str,
+    prompt: &str,
+    output: &str,
+    width: u32,
+    height: u32,
+    length: u32,
+    steps: u32,
+    cfg: f32,
+    seed: u64,
 ) -> String {
     let prompt_escaped = prompt.replace('\\', "\\\\").replace('"', "\\\"");
     let negative = "blurry, low quality, distorted, watermark, text, deformed";
 
-    format!(r#"
+    format!(
+        r#"
 import requests
 import time
 import sys
@@ -188,5 +218,6 @@ Path(OUTPUT).parent.mkdir(parents=True, exist_ok=True)
 with open(OUTPUT, "wb") as f:
     f.write(r.content)
 print(f"Saved: {{OUTPUT}}")
-"#)
+"#
+    )
 }

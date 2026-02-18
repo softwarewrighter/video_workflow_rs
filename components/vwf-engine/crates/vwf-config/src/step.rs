@@ -28,4 +28,7 @@ pub enum StepKind {
     TextToVideo,
     NormalizeVolume,
     WhisperTranscribe,
+    VideoConcat,
+    AudioMix,
+    CreateSlide,
 }

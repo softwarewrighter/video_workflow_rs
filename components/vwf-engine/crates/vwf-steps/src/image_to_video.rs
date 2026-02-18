@@ -33,10 +33,18 @@ struct Payload {
     python_path: Option<String>,
 }
 
-fn default_frames() -> u32 { 14 }
-fn default_fps() -> u32 { 6 }
-fn default_motion() -> u32 { 127 }
-fn default_server() -> String { "http://192.168.1.64:8100".to_string() }
+fn default_frames() -> u32 {
+    14
+}
+fn default_fps() -> u32 {
+    6
+}
+fn default_motion() -> u32 {
+    127
+}
+fn default_server() -> String {
+    "http://192.168.1.64:8100".to_string()
+}
 
 pub fn execute(ctx: &mut StepCtx<'_>, payload: &Value) -> Result<()> {
     let p: Payload = serde_json::from_value(payload.clone())
@@ -46,16 +54,22 @@ pub fn execute(ctx: &mut StepCtx<'_>, payload: &Value) -> Result<()> {
     let output_path = ctx.render(&p.output_path)?;
     let server = ctx.render(&p.server)?;
 
-    let seed = p.seed.unwrap_or_else(|| rand::random());
-    let python = p.python_path
+    let seed = p.seed.unwrap_or_else(rand::random);
+    let python = p
+        .python_path
         .as_ref()
         .map(|pp| ctx.render(pp))
         .transpose()?
         .unwrap_or_else(|| "python3".to_string());
 
     let script = video_gen_script(
-        &server, &input_path, &output_path,
-        p.frames, p.fps, p.motion, seed,
+        &server,
+        &input_path,
+        &output_path,
+        p.frames,
+        p.fps,
+        p.motion,
+        seed,
     );
 
     let status = Command::new(&python)
@@ -64,17 +78,26 @@ pub fn execute(ctx: &mut StepCtx<'_>, payload: &Value) -> Result<()> {
         .with_context(|| ctx.error_context("spawn image_to_video python"))?;
 
     if !status.success() {
-        anyhow::bail!("Video generation failed with exit code: {:?}", status.code());
+        anyhow::bail!(
+            "Video generation failed with exit code: {:?}",
+            status.code()
+        );
     }
 
     Ok(())
 }
 
 fn video_gen_script(
-    server: &str, input: &str, output: &str,
-    frames: u32, fps: u32, motion: u32, seed: u64,
+    server: &str,
+    input: &str,
+    output: &str,
+    frames: u32,
+    fps: u32,
+    motion: u32,
+    seed: u64,
 ) -> String {
-    format!(r#"
+    format!(
+        r#"
 import requests
 import time
 from pathlib import Path
@@ -176,5 +199,6 @@ Path(OUTPUT).parent.mkdir(parents=True, exist_ok=True)
 with open(OUTPUT, "wb") as f:
     f.write(r.content)
 print(f"Saved: {{OUTPUT}}")
-"#)
+"#
+    )
 }
