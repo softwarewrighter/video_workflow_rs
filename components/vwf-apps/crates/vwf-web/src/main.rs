@@ -4,7 +4,7 @@ mod components;
 mod defaults;
 mod report;
 
-use components::{RunStatusViewer, VarEditor, WorkdirInput, WorkflowEditor};
+use components::{RunStatusViewer, ServicePanel, VarEditor, WorkdirInput, WorkflowEditor};
 use gloo::file::callbacks::FileReader;
 use gloo::file::File;
 use report::RunReport;
@@ -103,6 +103,12 @@ fn app() -> Html {
         })
     };
 
+    // Extract required step kinds from the loaded report for service panel
+    let required_kinds: Vec<String> = (*run_report)
+        .as_ref()
+        .map(|r| r.steps.iter().map(|s| s.kind.to_lowercase()).collect())
+        .unwrap_or_default();
+
     html! {
         <>
             <header>
@@ -130,6 +136,7 @@ fn app() -> Html {
                         <p>{"Select a run.json file to view workflow execution status."}</p>
                         <input type="file" accept=".json" onchange={on_load_report} />
                     </div>
+                    <ServicePanel required_kinds={required_kinds.clone()} />
                     <RunStatusViewer report={(*run_report).clone()} />
                 }
             </main>
