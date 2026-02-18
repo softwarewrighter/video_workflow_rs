@@ -1,52 +1,22 @@
-# Tutorial Video Workflow (5-10 minutes)
-# For documentation, how-to guides, educational content
+# Template: Tutorial/Demo Video
+# Format: 1920x1080 (16:9 landscape)
+# Duration: 5-15 minutes
+# Structure: Intro -> Setup -> Step-by-step demo -> Summary
 
 version: 1
-name: "Setup Tutorial"
-description: "Step-by-step tutorial with narration and generated visuals"
+name: "Tutorial Video Template"
+description: "Step-by-step tutorial or demo video"
 
 vars:
-  topic: "Getting Started"
-  product: "MyTool"
-  orientation: landscape
+  project_name: "Tutorial Demo"
+  topic: "the topic being taught"
   tts_server: "http://curiosity:7860"
-  flux_server: "http://192.168.1.64:8570"
-  voice_ref: "assets/voice-reference.wav"
-  voice_text: "This is my voice reference for text to speech generation."
-
-segments:
-  - id: intro
-    segment_type: narration_only
-    description: "Introduction and overview"
-    steps: [write_intro, tts_intro, gen_intro_visual, make_intro_clip]
-
-  - id: prereqs
-    segment_type: narration_only
-    description: "Prerequisites and requirements"
-    steps: [write_prereqs, tts_prereqs, gen_prereqs_visual, make_prereqs_clip]
-
-  - id: step1
-    segment_type: narration_only
-    description: "First step - Installation"
-    steps: [write_step1, tts_step1, gen_step1_visual, make_step1_clip]
-
-  - id: step2
-    segment_type: narration_only
-    description: "Second step - Configuration"
-    steps: [write_step2, tts_step2, gen_step2_visual, make_step2_clip]
-
-  - id: step3
-    segment_type: narration_only
-    description: "Third step - First run"
-    steps: [write_step3, tts_step3, gen_step3_visual, make_step3_clip]
-
-  - id: conclusion
-    segment_type: narration_only
-    description: "Summary and next steps"
-    steps: [write_conclusion, tts_conclusion, gen_conclusion_visual, make_conclusion_clip]
+  reference_audio: "assets/voice-reference.wav"
+  reference_text: "This is my voice sample for cloning."
+  python_path: ".venv/bin/python"
 
 steps:
-  # === SETUP ===
+  # === Setup ===
   - id: setup_dirs
     kind: ensure_dirs
     dirs:
@@ -56,250 +26,325 @@ steps:
       - "work/clips"
       - "output"
 
-  # === INTRO ===
-  - id: write_intro
+  # === Intro (30s) ===
+  - id: script_intro
     kind: write_file
+    depends_on: [setup_dirs]
     path: "work/scripts/intro.txt"
     content: |
-      Welcome to this tutorial on {{topic}} with {{product}}.
-      In this video, I'll walk you through the complete setup process.
-      By the end, you'll have a fully working installation.
-      Let's get started.
+      Welcome to this tutorial on {{topic}}.
+      In this video, I will walk you through everything you need to know.
+      By the end, you will be able to do this yourself.
 
   - id: tts_intro
     kind: tts_generate
+    depends_on: [script_intro]
     resume_output: "work/audio/intro.wav"
     script_path: "work/scripts/intro.txt"
     output_path: "work/audio/intro.wav"
     server: "{{tts_server}}"
-    reference_audio: "{{voice_ref}}"
-    reference_text: "{{voice_text}}"
+    reference_audio: "{{reference_audio}}"
+    reference_text: "{{reference_text}}"
+    python_path: "{{python_path}}"
 
-  - id: gen_intro_visual
-    kind: text_to_image
+  - id: img_intro
+    kind: create_slide
+    depends_on: [setup_dirs]
     resume_output: "work/images/intro.png"
-    prompt: "Clean tutorial title card with text 'Getting Started', modern tech design, blue gradient background"
+    template: title
+    text: "{{topic}}"
+    subtext: "A Step-by-Step Guide"
     output_path: "work/images/intro.png"
-    orientation: "{{orientation}}"
-    server: "{{flux_server}}"
+    orientation: landscape
 
-  - id: make_intro_clip
+  - id: clip_intro
     kind: run_command
+    depends_on: [tts_intro, img_intro]
+    resume_output: "work/clips/intro.mp4"
     program: ffmpeg
     args: ["-y", "-loop", "1", "-i", "work/images/intro.png", "-i", "work/audio/intro.wav", "-c:v", "libx264", "-tune", "stillimage", "-c:a", "aac", "-shortest", "work/clips/intro.mp4"]
 
-  # === PREREQUISITES ===
-  - id: write_prereqs
+  # === Prerequisites (20s) ===
+  - id: script_prereqs
     kind: write_file
+    depends_on: [setup_dirs]
     path: "work/scripts/prereqs.txt"
     content: |
-      Before we begin, let's make sure you have everything you need.
-      You'll need a computer running Windows, Mac, or Linux.
-      You should have administrator access for installation.
-      And you'll need about 500 megabytes of free disk space.
-      If you have all of that, you're ready to proceed.
+      Before we begin, make sure you have the following ready.
+      First, you will need access to the required tools.
+      Second, have your project files ready.
+      Let us get started.
 
   - id: tts_prereqs
     kind: tts_generate
+    depends_on: [script_prereqs]
     resume_output: "work/audio/prereqs.wav"
     script_path: "work/scripts/prereqs.txt"
     output_path: "work/audio/prereqs.wav"
     server: "{{tts_server}}"
-    reference_audio: "{{voice_ref}}"
-    reference_text: "{{voice_text}}"
+    reference_audio: "{{reference_audio}}"
+    reference_text: "{{reference_text}}"
+    python_path: "{{python_path}}"
 
-  - id: gen_prereqs_visual
-    kind: text_to_image
+  - id: img_prereqs
+    kind: create_slide
+    depends_on: [setup_dirs]
     resume_output: "work/images/prereqs.png"
-    prompt: "Checklist graphic with checkmarks, prerequisites concept, clean documentation style, blue and white"
+    template: bullet
+    text: |
+      Required tools installed
+      Project files ready
+      Basic understanding
     output_path: "work/images/prereqs.png"
-    orientation: "{{orientation}}"
-    server: "{{flux_server}}"
+    orientation: landscape
 
-  - id: make_prereqs_clip
+  - id: clip_prereqs
     kind: run_command
+    depends_on: [tts_prereqs, img_prereqs]
+    resume_output: "work/clips/prereqs.mp4"
     program: ffmpeg
     args: ["-y", "-loop", "1", "-i", "work/images/prereqs.png", "-i", "work/audio/prereqs.wav", "-c:v", "libx264", "-tune", "stillimage", "-c:a", "aac", "-shortest", "work/clips/prereqs.mp4"]
 
-  # === STEP 1: INSTALLATION ===
-  - id: write_step1
+  # === Step 1 (60s) ===
+  - id: script_step1
     kind: write_file
+    depends_on: [setup_dirs]
     path: "work/scripts/step1.txt"
     content: |
-      Step one: Installation.
-      First, download the installer from our website.
-      Once downloaded, run the installer.
-      Follow the prompts to complete the installation.
-      The whole process takes about two minutes.
-      When it's done, you'll see a success message.
+      Step one is to set up your environment.
+      Open your terminal or command prompt.
+      Navigate to your project directory.
+      This is where all your work will happen.
 
   - id: tts_step1
     kind: tts_generate
+    depends_on: [script_step1]
     resume_output: "work/audio/step1.wav"
     script_path: "work/scripts/step1.txt"
     output_path: "work/audio/step1.wav"
     server: "{{tts_server}}"
-    reference_audio: "{{voice_ref}}"
-    reference_text: "{{voice_text}}"
+    reference_audio: "{{reference_audio}}"
+    reference_text: "{{reference_text}}"
+    python_path: "{{python_path}}"
 
-  - id: gen_step1_visual
+  - id: img_step1
     kind: text_to_image
+    depends_on: [setup_dirs]
     resume_output: "work/images/step1.png"
-    prompt: "Software installation wizard dialog box, download progress bar, clean UI mockup"
+    prompt: "Terminal window with command prompt, clean code editor, developer setup, landscape"
     output_path: "work/images/step1.png"
-    orientation: "{{orientation}}"
-    server: "{{flux_server}}"
+    orientation: landscape
+    python_path: "{{python_path}}"
 
-  - id: make_step1_clip
+  - id: clip_step1
     kind: run_command
+    depends_on: [tts_step1, img_step1]
+    resume_output: "work/clips/step1.mp4"
     program: ffmpeg
     args: ["-y", "-loop", "1", "-i", "work/images/step1.png", "-i", "work/audio/step1.wav", "-c:v", "libx264", "-tune", "stillimage", "-c:a", "aac", "-shortest", "work/clips/step1.mp4"]
 
-  # === STEP 2: CONFIGURATION ===
-  - id: write_step2
+  # === Step 2 (60s) ===
+  - id: script_step2
     kind: write_file
+    depends_on: [setup_dirs]
     path: "work/scripts/step2.txt"
     content: |
-      Step two: Configuration.
-      Open the application for the first time.
-      You'll see a setup wizard.
-      Enter your name and email address.
-      Choose your preferred settings.
-      Click save to apply the configuration.
-      The application will restart with your settings applied.
+      Step two is the main configuration.
+      Create a new file for your settings.
+      Add the required parameters as shown.
+      Save the file when you are done.
 
   - id: tts_step2
     kind: tts_generate
+    depends_on: [script_step2]
     resume_output: "work/audio/step2.wav"
     script_path: "work/scripts/step2.txt"
     output_path: "work/audio/step2.wav"
     server: "{{tts_server}}"
-    reference_audio: "{{voice_ref}}"
-    reference_text: "{{voice_text}}"
+    reference_audio: "{{reference_audio}}"
+    reference_text: "{{reference_text}}"
+    python_path: "{{python_path}}"
 
-  - id: gen_step2_visual
+  - id: img_step2
     kind: text_to_image
+    depends_on: [setup_dirs]
     resume_output: "work/images/step2.png"
-    prompt: "Settings panel with form fields, configuration interface, modern app design, clean UI"
+    prompt: "Code editor with configuration file, YAML or JSON, clean syntax highlighting, landscape"
     output_path: "work/images/step2.png"
-    orientation: "{{orientation}}"
-    server: "{{flux_server}}"
+    orientation: landscape
+    python_path: "{{python_path}}"
 
-  - id: make_step2_clip
+  - id: clip_step2
     kind: run_command
+    depends_on: [tts_step2, img_step2]
+    resume_output: "work/clips/step2.mp4"
     program: ffmpeg
     args: ["-y", "-loop", "1", "-i", "work/images/step2.png", "-i", "work/audio/step2.wav", "-c:v", "libx264", "-tune", "stillimage", "-c:a", "aac", "-shortest", "work/clips/step2.mp4"]
 
-  # === STEP 3: FIRST RUN ===
-  - id: write_step3
+  # === Step 3 (60s) ===
+  - id: script_step3
     kind: write_file
+    depends_on: [setup_dirs]
     path: "work/scripts/step3.txt"
     content: |
-      Step three: Your first run.
-      Now let's test that everything works.
-      Click the start button in the main window.
-      You should see a progress indicator.
-      After a few seconds, you'll see the results.
-      If you see the success screen, congratulations!
-      You've successfully set up {{product}}.
+      Step three is to run the process.
+      Execute the main command.
+      Watch for any output or errors.
+      If everything works, you will see the results.
 
   - id: tts_step3
     kind: tts_generate
+    depends_on: [script_step3]
     resume_output: "work/audio/step3.wav"
     script_path: "work/scripts/step3.txt"
     output_path: "work/audio/step3.wav"
     server: "{{tts_server}}"
-    reference_audio: "{{voice_ref}}"
-    reference_text: "{{voice_text}}"
+    reference_audio: "{{reference_audio}}"
+    reference_text: "{{reference_text}}"
+    python_path: "{{python_path}}"
 
-  - id: gen_step3_visual
+  - id: img_step3
     kind: text_to_image
+    depends_on: [setup_dirs]
     resume_output: "work/images/step3.png"
-    prompt: "Success screen with green checkmark, completed task notification, celebration UI design"
+    prompt: "Terminal showing successful command execution, green checkmarks, progress, landscape"
     output_path: "work/images/step3.png"
-    orientation: "{{orientation}}"
-    server: "{{flux_server}}"
+    orientation: landscape
+    python_path: "{{python_path}}"
 
-  - id: make_step3_clip
+  - id: clip_step3
     kind: run_command
+    depends_on: [tts_step3, img_step3]
+    resume_output: "work/clips/step3.mp4"
     program: ffmpeg
     args: ["-y", "-loop", "1", "-i", "work/images/step3.png", "-i", "work/audio/step3.wav", "-c:v", "libx264", "-tune", "stillimage", "-c:a", "aac", "-shortest", "work/clips/step3.mp4"]
 
-  # === CONCLUSION ===
-  - id: write_conclusion
+  # === Summary (30s) ===
+  - id: script_summary
     kind: write_file
-    path: "work/scripts/conclusion.txt"
+    depends_on: [setup_dirs]
+    path: "work/scripts/summary.txt"
     content: |
-      And that's it! You've completed the setup.
-      Let me quickly recap what we covered.
-      First, we installed the software.
-      Then, we configured your preferences.
-      Finally, we ran your first test.
-      For more tutorials, check out our documentation.
-      Thanks for watching, and happy coding!
+      That is it! You have completed the tutorial.
+      Let us recap what we covered.
+      We set up the environment, configured the settings, and ran the process.
+      You are now ready to use this in your own projects.
 
-  - id: tts_conclusion
+  - id: tts_summary
     kind: tts_generate
-    resume_output: "work/audio/conclusion.wav"
-    script_path: "work/scripts/conclusion.txt"
-    output_path: "work/audio/conclusion.wav"
+    depends_on: [script_summary]
+    resume_output: "work/audio/summary.wav"
+    script_path: "work/scripts/summary.txt"
+    output_path: "work/audio/summary.wav"
     server: "{{tts_server}}"
-    reference_audio: "{{voice_ref}}"
-    reference_text: "{{voice_text}}"
+    reference_audio: "{{reference_audio}}"
+    reference_text: "{{reference_text}}"
+    python_path: "{{python_path}}"
 
-  - id: gen_conclusion_visual
-    kind: text_to_image
-    resume_output: "work/images/conclusion.png"
-    prompt: "Thank you screen with thumbs up icon, end of tutorial graphic, friendly professional design"
-    output_path: "work/images/conclusion.png"
-    orientation: "{{orientation}}"
-    server: "{{flux_server}}"
+  - id: img_summary
+    kind: create_slide
+    depends_on: [setup_dirs]
+    resume_output: "work/images/summary.png"
+    template: bullet
+    text: |
+      Set up environment
+      Configure settings
+      Run the process
+    output_path: "work/images/summary.png"
+    orientation: landscape
 
-  - id: make_conclusion_clip
+  - id: clip_summary
     kind: run_command
+    depends_on: [tts_summary, img_summary]
+    resume_output: "work/clips/summary.mp4"
     program: ffmpeg
-    args: ["-y", "-loop", "1", "-i", "work/images/conclusion.png", "-i", "work/audio/conclusion.wav", "-c:v", "libx264", "-tune", "stillimage", "-c:a", "aac", "-shortest", "work/clips/conclusion.mp4"]
+    args: ["-y", "-loop", "1", "-i", "work/images/summary.png", "-i", "work/audio/summary.wav", "-c:v", "libx264", "-tune", "stillimage", "-c:a", "aac", "-shortest", "work/clips/summary.mp4"]
 
-  # === NORMALIZE ALL CLIPS ===
+  # === Outro (15s) ===
+  - id: script_outro
+    kind: write_file
+    depends_on: [setup_dirs]
+    path: "work/scripts/outro.txt"
+    content: |
+      Thanks for watching!
+      If you found this helpful, please like and subscribe.
+      Leave a comment if you have any questions.
+
+  - id: tts_outro
+    kind: tts_generate
+    depends_on: [script_outro]
+    resume_output: "work/audio/outro.wav"
+    script_path: "work/scripts/outro.txt"
+    output_path: "work/audio/outro.wav"
+    server: "{{tts_server}}"
+    reference_audio: "{{reference_audio}}"
+    reference_text: "{{reference_text}}"
+    python_path: "{{python_path}}"
+
+  - id: img_outro
+    kind: create_slide
+    depends_on: [setup_dirs]
+    resume_output: "work/images/outro.png"
+    template: title
+    text: "Thanks for Watching!"
+    subtext: "Like & Subscribe"
+    output_path: "work/images/outro.png"
+    orientation: landscape
+
+  - id: clip_outro
+    kind: run_command
+    depends_on: [tts_outro, img_outro]
+    resume_output: "work/clips/outro.mp4"
+    program: ffmpeg
+    args: ["-y", "-loop", "1", "-i", "work/images/outro.png", "-i", "work/audio/outro.wav", "-c:v", "libx264", "-tune", "stillimage", "-c:a", "aac", "-shortest", "work/clips/outro.mp4"]
+
+  # === Normalize ===
   - id: normalize_intro
     kind: normalize_volume
+    depends_on: [clip_intro]
     clip_path: "work/clips/intro.mp4"
-    target_db: -25
 
   - id: normalize_prereqs
     kind: normalize_volume
+    depends_on: [clip_prereqs]
     clip_path: "work/clips/prereqs.mp4"
-    target_db: -25
 
   - id: normalize_step1
     kind: normalize_volume
+    depends_on: [clip_step1]
     clip_path: "work/clips/step1.mp4"
-    target_db: -25
 
   - id: normalize_step2
     kind: normalize_volume
+    depends_on: [clip_step2]
     clip_path: "work/clips/step2.mp4"
-    target_db: -25
 
   - id: normalize_step3
     kind: normalize_volume
+    depends_on: [clip_step3]
     clip_path: "work/clips/step3.mp4"
-    target_db: -25
 
-  - id: normalize_conclusion
+  - id: normalize_summary
     kind: normalize_volume
-    clip_path: "work/clips/conclusion.mp4"
-    target_db: -25
+    depends_on: [clip_summary]
+    clip_path: "work/clips/summary.mp4"
 
-  # === FINAL ASSEMBLY ===
+  - id: normalize_outro
+    kind: normalize_volume
+    depends_on: [clip_outro]
+    clip_path: "work/clips/outro.mp4"
+
+  # === Final Assembly ===
   - id: concat_final
     kind: video_concat
+    depends_on: [normalize_intro, normalize_prereqs, normalize_step1, normalize_step2, normalize_step3, normalize_summary, normalize_outro]
     clips:
       - "work/clips/intro.mp4"
       - "work/clips/prereqs.mp4"
       - "work/clips/step1.mp4"
       - "work/clips/step2.mp4"
       - "work/clips/step3.mp4"
-      - "work/clips/conclusion.mp4"
-    output_path: "output/{{product}}_tutorial.mp4"
+      - "work/clips/summary.mp4"
+      - "work/clips/outro.mp4"
+    output_path: "output/{{project_name}}.mp4"
     reencode: true

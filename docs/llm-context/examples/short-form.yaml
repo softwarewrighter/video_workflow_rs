@@ -1,41 +1,23 @@
-# Short-Form Video Workflow (60 seconds)
-# For TikTok, YouTube Shorts, Instagram Reels
+# Template: Short-Form Video (TikTok/Reels/Shorts)
+# Format: 1080x1920 (9:16 portrait)
+# Duration: 30-60 seconds
+# Structure: Hook -> Problem -> Solution -> CTA
 
 version: 1
-name: "Short Form Explainer"
-description: "60-second vertical video with hook, content, and CTA"
+name: "Short-Form Video Template"
+description: "Vertical video for TikTok, Instagram Reels, or YouTube Shorts"
 
 vars:
-  project_name: "Demo Short"
-  orientation: portrait
+  project_name: "My Short"
+  topic: "the main topic"
+  orientation: "portrait"
   tts_server: "http://curiosity:7860"
-  flux_server: "http://192.168.1.64:8570"
-  voice_ref: "assets/voice-reference.wav"
-  voice_text: "Sample voice reference transcript goes here."
-
-segments:
-  - id: title
-    segment_type: music_only
-    description: "Opening title card with music"
-    steps: [create_title_slide, animate_title]
-
-  - id: hook
-    segment_type: narration_only
-    description: "Attention-grabbing opening hook"
-    steps: [write_hook, tts_hook, gen_hook_bg, make_hook_clip]
-
-  - id: content
-    segment_type: narration_only
-    description: "Main content and value proposition"
-    steps: [write_content, tts_content, gen_content_bg, make_content_clip]
-
-  - id: cta
-    segment_type: narration_only
-    description: "Call to action"
-    steps: [write_cta, tts_cta, gen_cta_bg, make_cta_clip]
+  reference_audio: "assets/voice-reference.wav"
+  reference_text: "This is my voice sample for cloning."
+  python_path: ".venv/bin/python"
 
 steps:
-  # === SETUP ===
+  # === Setup ===
   - id: setup_dirs
     kind: ensure_dirs
     dirs:
@@ -45,140 +27,174 @@ steps:
       - "work/clips"
       - "output"
 
-  # === TITLE SEGMENT (music_only) ===
-  - id: create_title_slide
-    kind: create_slide
-    resume_output: "work/images/title.png"
-    template: title
-    text: "{{project_name}}"
-    subtext: "Watch till the end!"
-    output_path: "work/images/title.png"
-    orientation: "{{orientation}}"
-
-  - id: animate_title
-    kind: image_to_video
-    resume_output: "work/clips/title.mp4"
-    input_path: "work/images/title.png"
-    output_path: "work/clips/title.mp4"
-    frames: 14
-    motion: 60
-
-  # === HOOK SEGMENT (narration_only) ===
-  - id: write_hook
+  # === Hook (5 seconds) - Grab attention ===
+  - id: script_hook
     kind: write_file
+    depends_on: [setup_dirs]
     path: "work/scripts/hook.txt"
     content: |
-      What if I told you there's a better way?
-      Most people struggle with this every single day.
+      Stop scrolling! Here is something you need to know about {{topic}}.
 
   - id: tts_hook
     kind: tts_generate
+    depends_on: [script_hook]
     resume_output: "work/audio/hook.wav"
     script_path: "work/scripts/hook.txt"
     output_path: "work/audio/hook.wav"
     server: "{{tts_server}}"
-    reference_audio: "{{voice_ref}}"
-    reference_text: "{{voice_text}}"
+    reference_audio: "{{reference_audio}}"
+    reference_text: "{{reference_text}}"
+    python_path: "{{python_path}}"
 
-  - id: gen_hook_bg
+  - id: img_hook
     kind: text_to_image
+    depends_on: [setup_dirs]
     resume_output: "work/images/hook.png"
-    prompt: "Person looking confused at complex interface, dramatic lighting, vertical composition"
+    prompt: "Eye-catching visual representing {{topic}}, bold colors, portrait orientation"
     output_path: "work/images/hook.png"
-    orientation: "{{orientation}}"
-    server: "{{flux_server}}"
+    orientation: portrait
+    python_path: "{{python_path}}"
 
-  - id: make_hook_clip
+  - id: clip_hook
     kind: run_command
+    depends_on: [tts_hook, img_hook]
+    resume_output: "work/clips/hook.mp4"
     program: ffmpeg
     args: ["-y", "-loop", "1", "-i", "work/images/hook.png", "-i", "work/audio/hook.wav", "-c:v", "libx264", "-tune", "stillimage", "-c:a", "aac", "-shortest", "work/clips/hook.mp4"]
 
-  # === CONTENT SEGMENT (narration_only) ===
-  - id: write_content
+  # === Problem (10 seconds) ===
+  - id: script_problem
     kind: write_file
-    path: "work/scripts/content.txt"
+    depends_on: [setup_dirs]
+    path: "work/scripts/problem.txt"
     content: |
-      Here's the solution.
-      It takes just three simple steps.
-      First, set up your configuration.
-      Second, run the automation.
-      Third, enjoy the results.
+      Most people struggle with {{topic}} because they do not know the right approach.
 
-  - id: tts_content
+  - id: tts_problem
     kind: tts_generate
-    resume_output: "work/audio/content.wav"
-    script_path: "work/scripts/content.txt"
-    output_path: "work/audio/content.wav"
+    depends_on: [script_problem]
+    resume_output: "work/audio/problem.wav"
+    script_path: "work/scripts/problem.txt"
+    output_path: "work/audio/problem.wav"
     server: "{{tts_server}}"
-    reference_audio: "{{voice_ref}}"
-    reference_text: "{{voice_text}}"
+    reference_audio: "{{reference_audio}}"
+    reference_text: "{{reference_text}}"
+    python_path: "{{python_path}}"
 
-  - id: gen_content_bg
+  - id: img_problem
     kind: text_to_image
-    resume_output: "work/images/content.png"
-    prompt: "Clean modern interface showing simple workflow, bright colors, vertical composition"
-    output_path: "work/images/content.png"
-    orientation: "{{orientation}}"
-    server: "{{flux_server}}"
+    depends_on: [setup_dirs]
+    resume_output: "work/images/problem.png"
+    prompt: "Person looking frustrated, portrait orientation, relatable"
+    output_path: "work/images/problem.png"
+    orientation: portrait
+    python_path: "{{python_path}}"
 
-  - id: make_content_clip
+  - id: clip_problem
     kind: run_command
+    depends_on: [tts_problem, img_problem]
+    resume_output: "work/clips/problem.mp4"
     program: ffmpeg
-    args: ["-y", "-loop", "1", "-i", "work/images/content.png", "-i", "work/audio/content.wav", "-c:v", "libx264", "-tune", "stillimage", "-c:a", "aac", "-shortest", "work/clips/content.mp4"]
+    args: ["-y", "-loop", "1", "-i", "work/images/problem.png", "-i", "work/audio/problem.wav", "-c:v", "libx264", "-tune", "stillimage", "-c:a", "aac", "-shortest", "work/clips/problem.mp4"]
 
-  # === CTA SEGMENT (narration_only) ===
-  - id: write_cta
+  # === Solution (10 seconds) ===
+  - id: script_solution
     kind: write_file
+    depends_on: [setup_dirs]
+    path: "work/scripts/solution.txt"
+    content: |
+      Here is the simple trick that changes everything about {{topic}}.
+
+  - id: tts_solution
+    kind: tts_generate
+    depends_on: [script_solution]
+    resume_output: "work/audio/solution.wav"
+    script_path: "work/scripts/solution.txt"
+    output_path: "work/audio/solution.wav"
+    server: "{{tts_server}}"
+    reference_audio: "{{reference_audio}}"
+    reference_text: "{{reference_text}}"
+    python_path: "{{python_path}}"
+
+  - id: img_solution
+    kind: text_to_image
+    depends_on: [setup_dirs]
+    resume_output: "work/images/solution.png"
+    prompt: "Lightbulb moment, positive insight, portrait orientation"
+    output_path: "work/images/solution.png"
+    orientation: portrait
+    python_path: "{{python_path}}"
+
+  - id: clip_solution
+    kind: run_command
+    depends_on: [tts_solution, img_solution]
+    resume_output: "work/clips/solution.mp4"
+    program: ffmpeg
+    args: ["-y", "-loop", "1", "-i", "work/images/solution.png", "-i", "work/audio/solution.wav", "-c:v", "libx264", "-tune", "stillimage", "-c:a", "aac", "-shortest", "work/clips/solution.mp4"]
+
+  # === CTA (5 seconds) ===
+  - id: script_cta
+    kind: write_file
+    depends_on: [setup_dirs]
     path: "work/scripts/cta.txt"
     content: |
-      Try it yourself today.
-      Link in bio. Follow for more tips!
+      Follow for more tips! Drop a comment if this helped.
 
   - id: tts_cta
     kind: tts_generate
+    depends_on: [script_cta]
     resume_output: "work/audio/cta.wav"
     script_path: "work/scripts/cta.txt"
     output_path: "work/audio/cta.wav"
     server: "{{tts_server}}"
-    reference_audio: "{{voice_ref}}"
-    reference_text: "{{voice_text}}"
+    reference_audio: "{{reference_audio}}"
+    reference_text: "{{reference_text}}"
+    python_path: "{{python_path}}"
 
-  - id: gen_cta_bg
-    kind: text_to_image
+  - id: img_cta
+    kind: create_slide
+    depends_on: [setup_dirs]
     resume_output: "work/images/cta.png"
-    prompt: "Call to action screen with arrow pointing down, engaging colors, vertical composition"
+    template: title
+    text: "Follow for More!"
     output_path: "work/images/cta.png"
-    orientation: "{{orientation}}"
-    server: "{{flux_server}}"
+    orientation: portrait
 
-  - id: make_cta_clip
+  - id: clip_cta
     kind: run_command
+    depends_on: [tts_cta, img_cta]
+    resume_output: "work/clips/cta.mp4"
     program: ffmpeg
     args: ["-y", "-loop", "1", "-i", "work/images/cta.png", "-i", "work/audio/cta.wav", "-c:v", "libx264", "-tune", "stillimage", "-c:a", "aac", "-shortest", "work/clips/cta.mp4"]
 
-  # === NORMALIZE AUDIO ===
+  # === Normalize and Assemble ===
   - id: normalize_hook
     kind: normalize_volume
+    depends_on: [clip_hook]
     clip_path: "work/clips/hook.mp4"
-    target_db: -25
 
-  - id: normalize_content
+  - id: normalize_problem
     kind: normalize_volume
-    clip_path: "work/clips/content.mp4"
-    target_db: -25
+    depends_on: [clip_problem]
+    clip_path: "work/clips/problem.mp4"
+
+  - id: normalize_solution
+    kind: normalize_volume
+    depends_on: [clip_solution]
+    clip_path: "work/clips/solution.mp4"
 
   - id: normalize_cta
     kind: normalize_volume
+    depends_on: [clip_cta]
     clip_path: "work/clips/cta.mp4"
-    target_db: -25
 
-  # === FINAL ASSEMBLY ===
   - id: concat_final
     kind: video_concat
+    depends_on: [normalize_hook, normalize_problem, normalize_solution, normalize_cta]
     clips:
-      - "work/clips/title.mp4"
       - "work/clips/hook.mp4"
-      - "work/clips/content.mp4"
+      - "work/clips/problem.mp4"
+      - "work/clips/solution.mp4"
       - "work/clips/cta.mp4"
     output_path: "output/{{project_name}}.mp4"
     reencode: true

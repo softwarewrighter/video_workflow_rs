@@ -1,323 +1,347 @@
-# Product Explainer Video Workflow (2-3 minutes)
-# For YouTube, landing pages, marketing
+# Template: Explainer Video
+# Format: 1920x1080 (16:9 landscape)
+# Duration: 2-5 minutes
+# Structure: Hook -> Problem -> Solution -> Features -> CTA
 
 version: 1
-name: "Product Explainer"
-description: "Professional explainer video with intro, problem, solution, demo, and CTA"
+name: "Explainer Video Template"
+description: "Landscape explainer video for YouTube or landing pages"
 
 vars:
-  product_name: "MyProduct"
-  tagline: "Simplify Your Workflow"
-  orientation: landscape
+  project_name: "Product Explainer"
+  product: "the product"
+  audience: "target audience"
   tts_server: "http://curiosity:7860"
-  flux_server: "http://192.168.1.64:8570"
-  ttv_server: "http://192.168.1.64:6000"
-  voice_ref: "assets/voice-reference.wav"
-  voice_text: "This is a sample of my voice for the text to speech system."
+  reference_audio: "assets/voice-reference.wav"
+  reference_text: "This is my voice sample for cloning."
+  python_path: ".venv/bin/python"
 
 segments:
   - id: intro
     segment_type: music_only
-    description: "Animated logo/title with background music"
-    steps: [gen_title_video, add_intro_music]
-
+    steps: [title_slide, title_video, music_intro]
   - id: hook
     segment_type: narration_only
-    description: "Problem statement to grab attention"
-    steps: [write_hook, tts_hook, gen_hook_visual, make_hook_clip]
-
+    steps: [script_hook, tts_hook, img_hook, clip_hook]
   - id: problem
     segment_type: narration_only
-    description: "Deep dive into the problem"
-    steps: [write_problem, tts_problem, gen_problem_visual, make_problem_clip]
-
+    steps: [script_problem, tts_problem, img_problem, clip_problem]
   - id: solution
     segment_type: narration_only
-    description: "Introduce the solution"
-    steps: [write_solution, tts_solution, gen_solution_visual, make_solution_clip]
-
+    steps: [script_solution, tts_solution, img_solution, clip_solution]
   - id: features
     segment_type: narration_only
-    description: "Key features and benefits"
-    steps: [write_features, tts_features, gen_features_visual, make_features_clip]
-
+    steps: [script_features, tts_features, img_features, clip_features]
   - id: cta
     segment_type: narration_only
-    description: "Call to action"
-    steps: [write_cta, tts_cta, gen_cta_visual, make_cta_clip]
-
+    steps: [script_cta, tts_cta, img_cta, clip_cta]
   - id: outro
     segment_type: music_only
-    description: "Logo with background music"
-    steps: [gen_outro_slide, animate_outro, add_outro_music]
+    steps: [outro_slide, outro_video, music_outro]
 
 steps:
-  # === SETUP ===
+  # === Setup ===
   - id: setup_dirs
     kind: ensure_dirs
     dirs:
       - "work/scripts"
       - "work/audio"
       - "work/images"
-      - "work/videos"
       - "work/clips"
       - "output"
 
-  # === GENERATE MUSIC ===
-  - id: gen_music
+  # === Intro (music only, 5s) ===
+  - id: title_slide
+    kind: create_slide
+    depends_on: [setup_dirs]
+    resume_output: "work/images/title.png"
+    template: title
+    text: "{{product}}"
+    subtext: "The smarter way to work"
+    output_path: "work/images/title.png"
+    orientation: landscape
+
+  - id: title_video
+    kind: image_to_video
+    depends_on: [title_slide]
+    resume_output: "work/clips/title.mp4"
+    input_path: "work/images/title.png"
+    output_path: "work/clips/title.mp4"
+    motion: 40
+
+  - id: music_intro
     kind: run_command
+    depends_on: [setup_dirs]
+    resume_output: "work/audio/intro_music.wav"
     program: midi-cli-rs
-    args:
-      - "--mood"
-      - "ambient"
-      - "--seed"
-      - "2026"
-      - "--duration"
-      - "180"
-      - "--soundfont"
-      - "/usr/share/soundfonts/FluidR3_GM.sf2"
-      - "--output"
-      - "work/audio/background.wav"
+    args: ["preset", "--mood", "upbeat", "--duration", "5", "-o", "work/audio/intro_music.wav"]
 
-  # === INTRO SEGMENT (music_only) ===
-  - id: gen_title_video
-    kind: text_to_video
-    resume_output: "work/videos/title.mp4"
-    prompt: "Modern tech company logo animation, professional blue and white, smooth motion, corporate style"
-    output_path: "work/videos/title.mp4"
-    orientation: "{{orientation}}"
-    length: 81
-    server: "{{ttv_server}}"
-
-  - id: add_intro_music
-    kind: audio_mix
-    base_clip: "work/videos/title.mp4"
-    overlay_audio: "work/audio/background.wav"
-    output_path: "work/clips/intro.mp4"
-    overlay_volume: -20
-    fade_out: 1.0
-
-  # === HOOK SEGMENT (narration_only) ===
-  - id: write_hook
+  # === Hook (15s) ===
+  - id: script_hook
     kind: write_file
+    depends_on: [setup_dirs]
     path: "work/scripts/hook.txt"
     content: |
-      Are you tired of spending hours on repetitive tasks?
-      What if there was a better way?
+      What if you could solve your biggest challenge in half the time?
+      For {{audience}}, that challenge is real.
+      And {{product}} was built to solve it.
 
   - id: tts_hook
     kind: tts_generate
+    depends_on: [script_hook]
     resume_output: "work/audio/hook.wav"
     script_path: "work/scripts/hook.txt"
     output_path: "work/audio/hook.wav"
     server: "{{tts_server}}"
-    reference_audio: "{{voice_ref}}"
-    reference_text: "{{voice_text}}"
+    reference_audio: "{{reference_audio}}"
+    reference_text: "{{reference_text}}"
+    python_path: "{{python_path}}"
 
-  - id: gen_hook_visual
+  - id: img_hook
     kind: text_to_image
+    depends_on: [setup_dirs]
     resume_output: "work/images/hook.png"
-    prompt: "Frustrated business person at desk with pile of papers, dramatic lighting, professional photography"
+    prompt: "Professional person having an insight, modern office, warm lighting, landscape"
     output_path: "work/images/hook.png"
-    orientation: "{{orientation}}"
-    server: "{{flux_server}}"
+    orientation: landscape
+    python_path: "{{python_path}}"
 
-  - id: make_hook_clip
+  - id: clip_hook
     kind: run_command
+    depends_on: [tts_hook, img_hook]
+    resume_output: "work/clips/hook.mp4"
     program: ffmpeg
     args: ["-y", "-loop", "1", "-i", "work/images/hook.png", "-i", "work/audio/hook.wav", "-c:v", "libx264", "-tune", "stillimage", "-c:a", "aac", "-shortest", "work/clips/hook.mp4"]
 
-  # === PROBLEM SEGMENT (narration_only) ===
-  - id: write_problem
+  # === Problem (20s) ===
+  - id: script_problem
     kind: write_file
+    depends_on: [setup_dirs]
     path: "work/scripts/problem.txt"
     content: |
-      Every day, professionals waste valuable time on manual processes.
-      Data entry, file management, repetitive approvals.
-      These tasks add up to hours lost every week.
-      Hours you could spend on work that actually matters.
+      Traditional approaches to this problem are slow, complex, and frustrating.
+      You spend hours on tasks that should take minutes.
+      And the tools you have just were not designed for the way you work.
 
   - id: tts_problem
     kind: tts_generate
+    depends_on: [script_problem]
     resume_output: "work/audio/problem.wav"
     script_path: "work/scripts/problem.txt"
     output_path: "work/audio/problem.wav"
     server: "{{tts_server}}"
-    reference_audio: "{{voice_ref}}"
-    reference_text: "{{voice_text}}"
+    reference_audio: "{{reference_audio}}"
+    reference_text: "{{reference_text}}"
+    python_path: "{{python_path}}"
 
-  - id: gen_problem_visual
+  - id: img_problem
     kind: text_to_image
+    depends_on: [setup_dirs]
     resume_output: "work/images/problem.png"
-    prompt: "Clock melting like Dali painting with scattered papers, time management concept, surreal business art"
+    prompt: "Frustrated professional at desk, cluttered workspace, stress, landscape"
     output_path: "work/images/problem.png"
-    orientation: "{{orientation}}"
-    server: "{{flux_server}}"
+    orientation: landscape
+    python_path: "{{python_path}}"
 
-  - id: make_problem_clip
+  - id: clip_problem
     kind: run_command
+    depends_on: [tts_problem, img_problem]
+    resume_output: "work/clips/problem.mp4"
     program: ffmpeg
     args: ["-y", "-loop", "1", "-i", "work/images/problem.png", "-i", "work/audio/problem.wav", "-c:v", "libx264", "-tune", "stillimage", "-c:a", "aac", "-shortest", "work/clips/problem.mp4"]
 
-  # === SOLUTION SEGMENT (narration_only) ===
-  - id: write_solution
+  # === Solution (20s) ===
+  - id: script_solution
     kind: write_file
+    depends_on: [setup_dirs]
     path: "work/scripts/solution.txt"
     content: |
-      Introducing {{product_name}}.
-      {{tagline}}.
-      With {{product_name}}, you can automate the tasks that slow you down.
-      Set it up once, and let it work for you.
+      {{product}} changes everything.
+      It is built from the ground up for {{audience}}.
+      Simple to use. Powerful results. No complexity.
 
   - id: tts_solution
     kind: tts_generate
+    depends_on: [script_solution]
     resume_output: "work/audio/solution.wav"
     script_path: "work/scripts/solution.txt"
     output_path: "work/audio/solution.wav"
     server: "{{tts_server}}"
-    reference_audio: "{{voice_ref}}"
-    reference_text: "{{voice_text}}"
+    reference_audio: "{{reference_audio}}"
+    reference_text: "{{reference_text}}"
+    python_path: "{{python_path}}"
 
-  - id: gen_solution_visual
+  - id: img_solution
     kind: text_to_image
+    depends_on: [setup_dirs]
     resume_output: "work/images/solution.png"
-    prompt: "Modern clean software dashboard with automation workflows, bright UI design, professional screenshot style"
+    prompt: "Clean modern software interface, happy user, bright lighting, landscape"
     output_path: "work/images/solution.png"
-    orientation: "{{orientation}}"
-    server: "{{flux_server}}"
+    orientation: landscape
+    python_path: "{{python_path}}"
 
-  - id: make_solution_clip
+  - id: clip_solution
     kind: run_command
+    depends_on: [tts_solution, img_solution]
+    resume_output: "work/clips/solution.mp4"
     program: ffmpeg
     args: ["-y", "-loop", "1", "-i", "work/images/solution.png", "-i", "work/audio/solution.wav", "-c:v", "libx264", "-tune", "stillimage", "-c:a", "aac", "-shortest", "work/clips/solution.mp4"]
 
-  # === FEATURES SEGMENT (narration_only) ===
-  - id: write_features
+  # === Features (30s) ===
+  - id: script_features
     kind: write_file
+    depends_on: [setup_dirs]
     path: "work/scripts/features.txt"
     content: |
-      Here's what makes {{product_name}} different.
-      First, it's incredibly easy to set up. No coding required.
-      Second, it integrates with all the tools you already use.
-      And third, it learns from your workflows and gets smarter over time.
-      The result? You save hours every single week.
+      With {{product}}, you get three key capabilities.
+      First, automated workflows that save you hours every week.
+      Second, intelligent insights that help you make better decisions.
+      Third, seamless integration with tools you already use.
 
   - id: tts_features
     kind: tts_generate
+    depends_on: [script_features]
     resume_output: "work/audio/features.wav"
     script_path: "work/scripts/features.txt"
     output_path: "work/audio/features.wav"
     server: "{{tts_server}}"
-    reference_audio: "{{voice_ref}}"
-    reference_text: "{{voice_text}}"
+    reference_audio: "{{reference_audio}}"
+    reference_text: "{{reference_text}}"
+    python_path: "{{python_path}}"
 
-  - id: gen_features_visual
+  - id: img_features
     kind: text_to_image
+    depends_on: [setup_dirs]
     resume_output: "work/images/features.png"
-    prompt: "Isometric illustration of connected software systems, integration diagram, modern tech aesthetic"
+    prompt: "Three icons representing automation, insights, integration, clean modern design, landscape"
     output_path: "work/images/features.png"
-    orientation: "{{orientation}}"
-    server: "{{flux_server}}"
+    orientation: landscape
+    python_path: "{{python_path}}"
 
-  - id: make_features_clip
+  - id: clip_features
     kind: run_command
+    depends_on: [tts_features, img_features]
+    resume_output: "work/clips/features.mp4"
     program: ffmpeg
     args: ["-y", "-loop", "1", "-i", "work/images/features.png", "-i", "work/audio/features.wav", "-c:v", "libx264", "-tune", "stillimage", "-c:a", "aac", "-shortest", "work/clips/features.mp4"]
 
-  # === CTA SEGMENT (narration_only) ===
-  - id: write_cta
+  # === CTA (10s) ===
+  - id: script_cta
     kind: write_file
+    depends_on: [setup_dirs]
     path: "work/scripts/cta.txt"
     content: |
-      Ready to reclaim your time?
-      Start your free trial of {{product_name}} today.
-      Visit our website to get started.
-      Your future self will thank you.
+      Ready to transform the way you work?
+      Try {{product}} free for fourteen days.
+      Visit our website to get started today.
 
   - id: tts_cta
     kind: tts_generate
+    depends_on: [script_cta]
     resume_output: "work/audio/cta.wav"
     script_path: "work/scripts/cta.txt"
     output_path: "work/audio/cta.wav"
     server: "{{tts_server}}"
-    reference_audio: "{{voice_ref}}"
-    reference_text: "{{voice_text}}"
+    reference_audio: "{{reference_audio}}"
+    reference_text: "{{reference_text}}"
+    python_path: "{{python_path}}"
 
-  - id: gen_cta_visual
-    kind: text_to_image
+  - id: img_cta
+    kind: create_slide
+    depends_on: [setup_dirs]
     resume_output: "work/images/cta.png"
-    prompt: "Happy professional at clean desk with laptop, productive workspace, warm lighting, lifestyle photography"
+    template: title
+    text: "Start Free Trial"
+    subtext: "14 days, no credit card required"
     output_path: "work/images/cta.png"
-    orientation: "{{orientation}}"
-    server: "{{flux_server}}"
+    orientation: landscape
 
-  - id: make_cta_clip
+  - id: clip_cta
     kind: run_command
+    depends_on: [tts_cta, img_cta]
+    resume_output: "work/clips/cta.mp4"
     program: ffmpeg
     args: ["-y", "-loop", "1", "-i", "work/images/cta.png", "-i", "work/audio/cta.wav", "-c:v", "libx264", "-tune", "stillimage", "-c:a", "aac", "-shortest", "work/clips/cta.mp4"]
 
-  # === OUTRO SEGMENT (music_only) ===
-  - id: gen_outro_slide
+  # === Outro (music only, 5s) ===
+  - id: outro_slide
     kind: create_slide
+    depends_on: [setup_dirs]
     resume_output: "work/images/outro.png"
     template: title
-    text: "{{product_name}}"
-    subtext: "{{tagline}}"
+    text: "{{product}}"
+    subtext: "Work smarter"
     output_path: "work/images/outro.png"
-    orientation: "{{orientation}}"
+    orientation: landscape
 
-  - id: animate_outro
+  - id: outro_video
     kind: image_to_video
-    resume_output: "work/videos/outro.mp4"
+    depends_on: [outro_slide]
+    resume_output: "work/clips/outro.mp4"
     input_path: "work/images/outro.png"
-    output_path: "work/videos/outro.mp4"
-    frames: 14
+    output_path: "work/clips/outro.mp4"
     motion: 40
 
-  - id: add_outro_music
-    kind: audio_mix
-    base_clip: "work/videos/outro.mp4"
-    overlay_audio: "work/audio/background.wav"
-    output_path: "work/clips/outro.mp4"
-    overlay_volume: -20
-    fade_out: 2.0
+  - id: music_outro
+    kind: run_command
+    depends_on: [setup_dirs]
+    resume_output: "work/audio/outro_music.wav"
+    program: midi-cli-rs
+    args: ["preset", "--mood", "calm", "--duration", "5", "-o", "work/audio/outro_music.wav"]
 
-  # === NORMALIZE AUDIO ===
+  # === Normalize and Mix ===
   - id: normalize_hook
     kind: normalize_volume
+    depends_on: [clip_hook]
     clip_path: "work/clips/hook.mp4"
-    target_db: -25
 
   - id: normalize_problem
     kind: normalize_volume
+    depends_on: [clip_problem]
     clip_path: "work/clips/problem.mp4"
-    target_db: -25
 
   - id: normalize_solution
     kind: normalize_volume
+    depends_on: [clip_solution]
     clip_path: "work/clips/solution.mp4"
-    target_db: -25
 
   - id: normalize_features
     kind: normalize_volume
+    depends_on: [clip_features]
     clip_path: "work/clips/features.mp4"
-    target_db: -25
 
   - id: normalize_cta
     kind: normalize_volume
+    depends_on: [clip_cta]
     clip_path: "work/clips/cta.mp4"
-    target_db: -25
 
-  # === FINAL ASSEMBLY ===
+  - id: mix_title_music
+    kind: audio_mix
+    depends_on: [title_video, music_intro]
+    base_clip: "work/clips/title.mp4"
+    overlay_audio: "work/audio/intro_music.wav"
+    output_path: "work/clips/title-mixed.mp4"
+    overlay_volume: -20
+
+  - id: mix_outro_music
+    kind: audio_mix
+    depends_on: [outro_video, music_outro]
+    base_clip: "work/clips/outro.mp4"
+    overlay_audio: "work/audio/outro_music.wav"
+    output_path: "work/clips/outro-mixed.mp4"
+    overlay_volume: -20
+
+  # === Final Assembly ===
   - id: concat_final
     kind: video_concat
+    depends_on: [mix_title_music, normalize_hook, normalize_problem, normalize_solution, normalize_features, normalize_cta, mix_outro_music]
     clips:
-      - "work/clips/intro.mp4"
+      - "work/clips/title-mixed.mp4"
       - "work/clips/hook.mp4"
       - "work/clips/problem.mp4"
       - "work/clips/solution.mp4"
       - "work/clips/features.mp4"
       - "work/clips/cta.mp4"
-      - "work/clips/outro.mp4"
-    output_path: "output/{{product_name}}_explainer.mp4"
+      - "work/clips/outro-mixed.mp4"
+    output_path: "output/{{project_name}}.mp4"
     reencode: true
