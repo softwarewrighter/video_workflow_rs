@@ -182,6 +182,44 @@ Generates images using FLUX.1 schnell via ComfyUI.
 | `seed` | No | Random seed for reproducibility |
 | `server` | No | ComfyUI server URL (default: http://192.168.1.64:8570) |
 
+### normalize_volume
+
+Normalizes audio volume of video/audio clips to a target dB level.
+
+**IMPORTANT**: This step should be used AFTER clip creation, not during. Applying
+volume adjustment during clip creation (via ffmpeg -af) produces inconsistent
+results due to AAC encoding variations. The proven approach is:
+
+1. Create clips with native audio levels
+2. Run normalize_volume on each clip (post-processing)
+3. Then concatenate the normalized clips
+
+```yaml
+# Normalize narration to -25 dB (speech)
+- id: normalize_hook
+  kind: normalize_volume
+  clip_path: "work/clips/01-hook.mp4"
+  target_db: -25
+
+# Normalize music to -32 dB (7 dB quieter than speech)
+- id: normalize_title
+  kind: normalize_volume
+  clip_path: "work/clips/00-title.mp4"
+  target_db: -32
+```
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| `clip_path` | Yes | Path to clip to normalize (modified in place) |
+| `target_db` | No | Target mean volume in dB (default: -25) |
+
+**Standard Volume Levels** (based on epilog.mp4 reference):
+
+| Audio Type | Target Mean | Description |
+|------------|-------------|-------------|
+| Narration/Speech | -25 dB | Primary spoken content |
+| Background Music | -32 dB | 7 dB quieter than narration |
+
 ## Standalone GPU Tools
 
 Beyond workflow steps, these Python scripts provide direct access to GPU services.
@@ -300,6 +338,49 @@ VWF supports two video formats:
 |--------|-----------|-------------|----------|
 | **YouTube Short** | 1080x1920 | Vertical (9:16) | < 60 sec (max 3 min) |
 | **Explainer** | 1920x1080 | Landscape (16:9) | 1.5-30 min (ideal 5-10) |
+
+## Audio Standards
+
+**IMPORTANT**: These are measured standards based on the reference epilog.mp4 clip. Do not guess or estimate audio levels - always measure with ffmpeg volumedetect and calculate adjustments.
+
+### Target Volume Levels
+
+| Audio Type | Target Mean | Description |
+|------------|-------------|-------------|
+| **Narration** | -25 dB | Primary spoken content, matches reference epilog |
+| **Background Music** | -32 dB | 7 dB quieter than narration, unobtrusive |
+
+### Format Requirements for Concatenation
+
+All clips must be normalized before concatenation to prevent audio artifacts:
+
+| Property | Standard | Notes |
+|----------|----------|-------|
+| Sample Rate | 44100 Hz | CD quality, universal compatibility |
+| Channels | 2 (stereo) | Required for consistent concat |
+| Codec | AAC | Efficient, widely supported |
+| Bitrate | 192 kbps | Good quality for final output |
+
+### Volume Measurement
+
+```bash
+# Measure current mean volume
+ffmpeg -i input.wav -af "volumedetect" -f null - 2>&1 | grep mean_volume
+
+# Calculate adjustment needed
+# adjustment = target - current
+# Example: target -25 dB, current -21 dB → adjustment = -4 dB
+
+# Apply volume adjustment
+ffmpeg -i input.wav -af "volume=-4dB" -c:a aac -ar 44100 -ac 2 output.m4a
+```
+
+### Reference Files
+
+The epilog.mp4 asset serves as the volume reference for all projects:
+- Mean volume: -25.1 dB
+- Contains music and narration properly balanced
+- All new clips should match this level
 
 ## Example Workflows
 

@@ -5,6 +5,13 @@ description: >
   Landscape 1920x1080, ~3 minutes.
   10 slides covering problem, solution, usage, and meta reveal.
 
+  Services used:
+  - TTS: VoxCPM (voice cloning) @ curiosity:7860
+  - Text-to-Image: FLUX.1 schnell (flux1-schnell-fp8.safetensors) @ 192.168.1.64:8570
+  - Image-to-Video: SVD-XT (svd_xt.safetensors) @ 192.168.1.64:8100
+  - Text-to-Video: Wan 2.2 (wan2.2_ti2v_5B_fp16.safetensors) @ 192.168.1.64:6000
+  - Music: midi-cli-rs with FluidSynth (VintageDreamsWaves-v2.sf2)
+
 vars:
   project_name: "VWF Self-Explainer"
   topic: "Video Workflow Framework"
@@ -291,6 +298,22 @@ steps:
     motion: 127
     seed: 44002
     server: "http://192.168.1.64:8100"
+    python_path: "{{python_path}}"
+
+  # ============================================
+  # Text-to-Video Generation (Wan 2.2)
+  # ============================================
+  - id: vid_hook
+    kind: text_to_video
+    resume_output: "work/videos/00-hook-animated.mp4"
+    prompt: "Digital workflow visualization, glowing blue data streams flowing through geometric nodes, particles connecting and transforming, dark tech background, cinematic smooth camera movement"
+    output_path: "work/videos/00-hook-animated.mp4"
+    orientation: "landscape"
+    length: 49
+    steps: 20
+    cfg: 5.0
+    seed: 45001
+    server: "http://192.168.1.64:6000"
     python_path: "{{python_path}}"
 
   # Generate background music using midi-cli-rs
