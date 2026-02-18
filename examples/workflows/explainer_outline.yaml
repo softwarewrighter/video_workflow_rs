@@ -16,6 +16,7 @@ steps:
 
   - id: write_madlib
     kind: write_file
+    depends_on: [ensure_dirs]
     path: "work/madlib.txt"
     content: |
       Topic: {{topic}}
@@ -31,6 +32,8 @@ steps:
 
   - id: llm_outline
     kind: llm_generate
+    depends_on: [write_madlib]
+    resume_output: "work/outline.txt"
     system: "You are an explainer-video outline engine. Output plain text with headings."
     user_prompt_path: "work/madlib.txt"
     output_path: "work/outline.txt"
