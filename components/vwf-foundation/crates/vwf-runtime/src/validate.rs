@@ -29,7 +29,14 @@ fn video_valid(path: &Path) -> bool {
 
 fn media_duration(path: &Path) -> Option<f64> {
     let output = Command::new("ffprobe")
-        .args(["-v", "quiet", "-show_entries", "format=duration", "-of", "csv=p=0"])
+        .args([
+            "-v",
+            "quiet",
+            "-show_entries",
+            "format=duration",
+            "-of",
+            "csv=p=0",
+        ])
         .arg(path)
         .output()
         .ok()?;

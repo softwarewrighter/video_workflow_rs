@@ -11,7 +11,9 @@ pub struct MockLlmClient {
 
 impl MockLlmClient {
     pub fn canned(s: impl Into<String>) -> Self {
-        Self { canned: Some(s.into()) }
+        Self {
+            canned: Some(s.into()),
+        }
     }
 
     pub fn echo() -> Self {
@@ -21,6 +23,9 @@ impl MockLlmClient {
 
 impl LlmClient for MockLlmClient {
     fn generate(&mut self, req: LlmReq) -> Result<String> {
-        Ok(self.canned.clone().unwrap_or_else(|| format!("SYSTEM:\n{}\n\nUSER:\n{}", req.system, req.user)))
+        Ok(self
+            .canned
+            .clone()
+            .unwrap_or_else(|| format!("SYSTEM:\n{}\n\nUSER:\n{}", req.system, req.user)))
     }
 }

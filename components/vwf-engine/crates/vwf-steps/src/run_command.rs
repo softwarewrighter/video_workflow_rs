@@ -44,21 +44,25 @@ fn render_cwd(ctx: &StepCtx<'_>, cwd: &Option<String>) -> Result<Option<String>>
 
 fn write_capture(ctx: &mut StepCtx<'_>, path: &str, out: &CmdOut) -> Result<()> {
     let path = ctx.render(path)?;
-    let content = format!("status: {}\n\nstdout:\n{}\n\nstderr:\n{}\n", out.status, out.stdout, out.stderr);
+    let content = format!(
+        "status: {}\n\nstdout:\n{}\n\nstderr:\n{}\n",
+        out.status, out.stdout, out.stderr
+    );
     ctx.rt.write_text(&path, &content)
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use vwf_runtime::{DryRunRuntime, MockLlmClient};
     use std::collections::BTreeMap;
+    use vwf_runtime::{DryRunRuntime, MockLlmClient};
 
     #[test]
     fn captures_command_output() {
         let mut rt = DryRunRuntime::new("/tmp", Box::new(MockLlmClient::echo()));
         let vars = BTreeMap::new();
-        let payload = serde_json::json!({"program": "echo", "args": ["hi"], "capture_path": "out.txt"});
+        let payload =
+            serde_json::json!({"program": "echo", "args": ["hi"], "capture_path": "out.txt"});
         let mut ctx = StepCtx::new(&mut rt, &vars, "test");
         execute(&mut ctx, &payload).unwrap();
         assert!(!rt.planned_writes.is_empty());

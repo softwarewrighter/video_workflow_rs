@@ -13,7 +13,11 @@ pub struct StepCtx<'a> {
 }
 
 impl<'a> StepCtx<'a> {
-    pub fn new(rt: &'a mut dyn Runtime, vars: &'a BTreeMap<String, String>, step_id: &'a str) -> Self {
+    pub fn new(
+        rt: &'a mut dyn Runtime,
+        vars: &'a BTreeMap<String, String>,
+        step_id: &'a str,
+    ) -> Self {
         Self { rt, vars, step_id }
     }
 

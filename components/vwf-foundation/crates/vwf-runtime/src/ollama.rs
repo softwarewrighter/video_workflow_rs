@@ -45,8 +45,14 @@ impl LlmClient for OllamaClient {
         println!("LLM Generate via Ollama:");
         println!("  Server: {}", self.server);
         println!("  Model: {}", self.model);
-        println!("  System: {}...", req.system.chars().take(50).collect::<String>());
-        println!("  Prompt: {}...", req.user.chars().take(50).collect::<String>());
+        println!(
+            "  System: {}...",
+            req.system.chars().take(50).collect::<String>()
+        );
+        println!(
+            "  Prompt: {}...",
+            req.user.chars().take(50).collect::<String>()
+        );
 
         // Make HTTP request to Ollama
         let client = reqwest::blocking::Client::new();
@@ -63,7 +69,8 @@ impl LlmClient for OllamaClient {
             anyhow::bail!("Ollama request failed ({}): {}", status, body);
         }
 
-        let result: serde_json::Value = response.json().context("Failed to parse Ollama response")?;
+        let result: serde_json::Value =
+            response.json().context("Failed to parse Ollama response")?;
 
         let text = result["response"]
             .as_str()

@@ -75,10 +75,13 @@ mod tests {
                     m.fetch_max(current, Ordering::SeqCst);
                     tokio::time::sleep(Duration::from_millis(10)).await;
                     c.fetch_sub(1, Ordering::SeqCst);
-                }).await;
+                })
+                .await;
             }));
         }
-        for h in handles { h.await.unwrap(); }
+        for h in handles {
+            h.await.unwrap();
+        }
         assert_eq!(max_concurrent.load(Ordering::SeqCst), 1);
     }
 }

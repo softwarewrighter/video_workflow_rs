@@ -12,7 +12,9 @@ pub struct StateStore {
 
 impl StateStore {
     pub fn new(workdir: impl AsRef<Path>) -> Self {
-        Self { path: workdir.as_ref().join("state.json") }
+        Self {
+            path: workdir.as_ref().join("state.json"),
+        }
     }
 
     pub fn load(&self) -> Result<Option<WorkflowState>> {

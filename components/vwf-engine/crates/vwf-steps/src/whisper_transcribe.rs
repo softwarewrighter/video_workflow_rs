@@ -67,13 +67,21 @@ pub fn execute(ctx: &mut StepCtx<'_>, payload: &serde_json::Value) -> Result<()>
     let input_abs = if input_path.starts_with('/') {
         input_path.clone()
     } else {
-        ctx.rt.workdir().join(&input_path).to_string_lossy().to_string()
+        ctx.rt
+            .workdir()
+            .join(&input_path)
+            .to_string_lossy()
+            .to_string()
     };
 
     let output_abs = if output_path.starts_with('/') {
         output_path.clone()
     } else {
-        ctx.rt.workdir().join(&output_path).to_string_lossy().to_string()
+        ctx.rt
+            .workdir()
+            .join(&output_path)
+            .to_string_lossy()
+            .to_string()
     };
 
     // Check input exists
@@ -95,10 +103,14 @@ pub fn execute(ctx: &mut StepCtx<'_>, payload: &serde_json::Value) -> Result<()>
     let convert_status = Command::new("ffmpeg")
         .args([
             "-y",
-            "-i", &input_abs,
-            "-ar", "16000",
-            "-ac", "1",
-            "-c:a", "pcm_s16le",
+            "-i",
+            &input_abs,
+            "-ar",
+            "16000",
+            "-ac",
+            "1",
+            "-c:a",
+            "pcm_s16le",
             &temp_wav,
         ])
         .output()
@@ -112,9 +124,7 @@ pub fn execute(ctx: &mut StepCtx<'_>, payload: &serde_json::Value) -> Result<()>
     // Run whisper transcription
     let whisper_output = Command::new(&whisper_cli)
         .args([
-            "-m", &model,
-            "-f", &temp_wav,
-            "-l", &language,
+            "-m", &model, "-f", &temp_wav, "-l", &language,
             "-nt", // no timestamps for plain text
         ])
         .output()
@@ -149,11 +159,15 @@ pub fn execute(ctx: &mut StepCtx<'_>, payload: &serde_json::Value) -> Result<()>
             // For SRT/VTT, run whisper again with timestamps
             let whisper_output = Command::new(&whisper_cli)
                 .args([
-                    "-m", &model,
-                    "-f", &input_abs,
-                    "-l", &language,
+                    "-m",
+                    &model,
+                    "-f",
+                    &input_abs,
+                    "-l",
+                    &language,
                     if format == "srt" { "-osrt" } else { "-ovtt" },
-                    "-of", &output_abs.replace(&format!(".{}", format), ""),
+                    "-of",
+                    &output_abs.replace(&format!(".{}", format), ""),
                 ])
                 .output()
                 .with_context(|| ctx.error_context("whisper subtitle generation"))?;
@@ -167,7 +181,10 @@ pub fn execute(ctx: &mut StepCtx<'_>, payload: &serde_json::Value) -> Result<()>
     }
 
     println!("  Output: {}", output_abs);
-    println!("  Transcript: {}...", &transcript.chars().take(60).collect::<String>());
+    println!(
+        "  Transcript: {}...",
+        &transcript.chars().take(60).collect::<String>()
+    );
 
     Ok(())
 }

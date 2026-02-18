@@ -84,7 +84,7 @@ struct RunArgs {
 fn version_string() -> &'static str {
     concat!(
         env!("CARGO_PKG_VERSION"),
-        "\nCopyright: 2025 Software Wrighter LLC",
+        "\nCopyright: 2026 Software Wrighter LLC",
         "\nLicense: MIT",
         "\nRepository: github.com/softwarewrighter/video_workflow_rs",
         "\nBuild Host: ",

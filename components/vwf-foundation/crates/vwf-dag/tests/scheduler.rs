@@ -5,16 +5,26 @@ use vwf_dag::{Artifact, InputSpec, OutputSpec, Scheduler, Task, TaskStatus, Work
 fn create_test_state() -> WorkflowState {
     let mut state = WorkflowState::new("test", 1);
     let mut task_a = Task::new("task_a", "test");
-    task_a.outputs.push(OutputSpec { artifact: "artifact_a".to_string(), primary: true });
+    task_a.outputs.push(OutputSpec {
+        artifact: "artifact_a".to_string(),
+        primary: true,
+    });
     state.add_task(task_a);
 
     let mut task_b = Task::new("task_b", "test");
-    task_b.inputs.push(InputSpec::Required { artifact: "artifact_a".to_string() });
-    task_b.outputs.push(OutputSpec { artifact: "artifact_b".to_string(), primary: true });
+    task_b.inputs.push(InputSpec::Required {
+        artifact: "artifact_a".to_string(),
+    });
+    task_b.outputs.push(OutputSpec {
+        artifact: "artifact_b".to_string(),
+        primary: true,
+    });
     state.add_task(task_b);
 
     let mut task_c = Task::new("task_c", "test");
-    task_c.inputs.push(InputSpec::Required { artifact: "artifact_b".to_string() });
+    task_c.inputs.push(InputSpec::Required {
+        artifact: "artifact_b".to_string(),
+    });
     state.add_task(task_c);
     state
 }
@@ -75,7 +85,10 @@ fn invalidation_cascade() {
     state.get_task_mut("task_c").unwrap().status = TaskStatus::Complete;
 
     Scheduler::invalidate_downstream(&mut state, "artifact_a");
-    assert_eq!(state.get_artifact("artifact_b").unwrap().status, vwf_dag::ArtifactStatus::Invalidated);
+    assert_eq!(
+        state.get_artifact("artifact_b").unwrap().status,
+        vwf_dag::ArtifactStatus::Invalidated
+    );
     assert!(!state.get_task("task_b").unwrap().is_complete());
     assert!(!state.get_task("task_c").unwrap().is_complete());
 }

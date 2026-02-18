@@ -14,6 +14,8 @@ fn replaces_vars() {
 #[test]
 fn missing_var_errors() {
     let vars = BTreeMap::new();
-    let err = render_template("hi {{who}}", &vars).unwrap_err().to_string();
+    let err = render_template("hi {{who}}", &vars)
+        .unwrap_err()
+        .to_string();
     assert!(err.contains("Missing template var"));
 }

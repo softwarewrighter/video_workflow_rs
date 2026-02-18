@@ -92,7 +92,37 @@ cd components/vwf-apps && cargo run -p vwf-cli -- run ../../projects/self/workfl
 
 **WorkflowConfig** (`config.rs`): Parsed from YAML with versioning, vars, and ordered steps.
 
-**StepKind enum**: `ensure_dirs`, `write_file`, `split_sections`, `run_command`, `llm_generate`, `tts_generate`, `text_to_image`, `normalize_volume`
+**StepKind enum**: `ensure_dirs`, `write_file`, `split_sections`, `run_command`, `llm_generate`, `tts_generate`, `text_to_image`, `image_to_video`, `text_to_video`, `normalize_volume`, `whisper_transcribe`, `video_concat`, `audio_mix`, `create_slide`, `llm_audit`
+
+### DAG Execution
+
+The workflow engine uses DAG-based execution with the `depends_on` field:
+
+- **Steps run as soon as dependencies are satisfied** - no artificial sequencing
+- **Failed steps don't block unrelated work** - only steps that depend on failed steps are blocked
+- **Clear status reporting** - shows ok, skipped, failed, and blocked steps with reasons
+- **Cycle detection** - validates the DAG before execution to catch circular dependencies
+- **Resume support** - use `--resume` to skip completed steps and continue from failures
+
+Example workflow with dependencies:
+```yaml
+steps:
+  - id: setup_dirs
+    kind: ensure_dirs
+    dirs: ["work/scripts", "work/audio"]
+
+  - id: write_script
+    kind: write_file
+    depends_on: [setup_dirs]
+    path: "work/scripts/narration.txt"
+    content: "Hello world"
+
+  - id: generate_audio
+    kind: tts_generate
+    depends_on: [write_script]  # Waits for script to be written
+    script_path: "work/scripts/narration.txt"
+    output_path: "work/audio/narration.wav"
+```
 
 ### Data Flow
 
@@ -174,17 +204,31 @@ pub fn execute(ctx: &mut StepContext) -> Result<()> {
 **NEVER run `pip` or `pip3` directly.** Always use a virtual environment with `uv`:
 
 ```bash
-# Create virtual environment
+# Create virtual environment (run from repo root)
 uv venv
 
 # Activate the environment
 source .venv/bin/activate
 
-# Install packages using uv pip
-uv pip install requests
-
-# Or install from requirements
+# Install all workflow dependencies
 uv pip install -r requirements.txt
+
+# Verify installation
+python -c "import requests; from gradio_client import Client; print('OK')"
+```
+
+**Key requirements:**
+- `gradio-client` - for TTS generation via VoxCPM
+- `requests` - for text-to-image via ComfyUI/FLUX.1
+- `pillow` - for image processing
+
+**Workflow Configuration:**
+Steps that use Python (tts_generate, text_to_image, llm_audit) accept a `python_path` parameter.
+Set this in your workflow vars to use the venv:
+
+```yaml
+vars:
+  python_path: "/path/to/repo/.venv/bin/python"
 ```
 
 This ensures reproducible environments and avoids polluting the system Python installation.

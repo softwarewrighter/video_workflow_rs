@@ -24,7 +24,11 @@ pub fn execute(ctx: &mut StepCtx<'_>, payload: &Value) -> Result<()> {
     let user = read_user_prompt(ctx, &p.user_prompt_path)?;
     let user = inject_mock_response(user, p.mock_response);
     let provider = ctx.render(&p.provider)?;
-    let req = LlmReq { system, user, provider };
+    let req = LlmReq {
+        system,
+        user,
+        provider,
+    };
     let resp = ctx.rt.llm().generate(req)?;
     let output_path = ctx.render(&p.output_path)?;
     ctx.rt.write_text(&output_path, &resp)
@@ -45,13 +49,14 @@ fn inject_mock_response(user: String, mock: Option<String>) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use vwf_runtime::{DryRunRuntime, MockLlmClient};
     use std::collections::BTreeMap;
+    use vwf_runtime::{DryRunRuntime, MockLlmClient};
 
     #[test]
     fn generates_llm_output() {
         let mut rt = DryRunRuntime::new("/tmp", Box::new(MockLlmClient::canned("response")));
-        rt.planned_writes.push(("prompt.txt".into(), "user prompt".into()));
+        rt.planned_writes
+            .push(("prompt.txt".into(), "user prompt".into()));
         let vars = BTreeMap::new();
         let payload = serde_json::json!({
             "system": "sys",
@@ -61,6 +66,10 @@ mod tests {
         });
         let mut ctx = StepCtx::new(&mut rt, &vars, "test");
         execute(&mut ctx, &payload).unwrap();
-        assert!(rt.planned_writes.iter().any(|(p, c)| p == "out.txt" && c == "response"));
+        assert!(
+            rt.planned_writes
+                .iter()
+                .any(|(p, c)| p == "out.txt" && c == "response")
+        );
     }
 }

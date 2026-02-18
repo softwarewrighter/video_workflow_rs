@@ -53,12 +53,19 @@ pub fn execute(ctx: &mut StepCtx<'_>, payload: &Value) -> Result<()> {
     let abs_output = if output_path.starts_with('/') {
         output_path.clone()
     } else {
-        ctx.rt.workdir().join(&output_path).to_string_lossy().to_string()
+        ctx.rt
+            .workdir()
+            .join(&output_path)
+            .to_string_lossy()
+            .to_string()
     };
 
     // Call TTS via Python gradio_client
     let status = Command::new(&python_path)
-        .args(["-c", &tts_script(&server, &ref_audio, &ref_text, &script_text, &abs_output)])
+        .args([
+            "-c",
+            &tts_script(&server, &ref_audio, &ref_text, &script_text, &abs_output),
+        ])
         .status()
         .with_context(|| ctx.error_context("spawn tts python"))?;
 
@@ -70,7 +77,8 @@ pub fn execute(ctx: &mut StepCtx<'_>, payload: &Value) -> Result<()> {
 }
 
 fn tts_script(server: &str, ref_audio: &str, ref_text: &str, text: &str, output: &str) -> String {
-    format!(r#"
+    format!(
+        r#"
 from gradio_client import Client, handle_file
 from pathlib import Path
 import shutil
@@ -88,7 +96,8 @@ result = client.predict(
 Path("{output}").parent.mkdir(parents=True, exist_ok=True)
 shutil.copy(result, "{output}")
 print(f"Generated: {output}")
-"#)
+"#
+    )
 }
 
 #[cfg(test)]
@@ -97,7 +106,13 @@ mod tests {
 
     #[test]
     fn generates_tts_script() {
-        let script = tts_script("http://localhost:7860", "/ref.wav", "hello", "world", "/out.wav");
+        let script = tts_script(
+            "http://localhost:7860",
+            "/ref.wav",
+            "hello",
+            "world",
+            "/out.wav",
+        );
         assert!(script.contains("Client(\"http://localhost:7860\")"));
         assert!(script.contains("text_input=\"\"\"world\"\"\""));
     }

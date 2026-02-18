@@ -8,9 +8,10 @@ vars:
   itv_server: "http://192.168.1.64:8100"
   ttv_server: "http://192.168.1.64:6000"
   ollama_server: "http://localhost:11434"
-  voice_ref: "assets/voice-reference.wav"
-  voice_ref_text: "This is a sample of my voice for cloning purposes."
-  music_file: "assets/background-music.wav"
+  python_path: "/Users/mike/github/softwarewrighter/video_workflow_rs/.venv/bin/python"
+  voice_ref: "/Users/mike/github/softwarewrighter/video-publishing/reference/voice/mike-medium-ref-1.wav"
+  voice_ref_text: "In this session, I'm going to write a small command line tool and explain the decision making process as I go. I'll begin with a basic skeleton, argument parsing, a configuration loader, and a minimal main function. Once everything compiles, I'll run it with a few sample inputs to confirm the behavior. After that, I'll be fine the internal design. I'll reorganize the functions, extract shared logic, and add error messages that actually help the user understand what went wrong. None of this is complicated, but it's the kind of work that separates a rough prototype from a tool someone can rely on. As we move forward, I'll highlight why I chose certain patterns, some decisions, optimize clarity, while others optimize performance or extensibility. The important thing is to understand the trade-offs well enough that the code feels intentional instead of accidental."
+  music_file: "work/music-samples/06-ambient-seed2026.wav"
 
 segments:
   - id: introduction
@@ -170,12 +171,14 @@ steps:
   # ========== Scripts ==========
   - id: script_hook
     kind: write_file
+    depends_on: [setup_dirs]
     path: "work/scripts/01-hook.txt"
     content: |
       What if you could describe a video in plain text, and an AI would build it for you? No timeline editors. No render queues. Just write what you want, run one command, and get a finished video. That's exactly what Vee Double-You Eff does. And the video you're watching right now was produced entirely by this framework.
 
   - id: script_problem
     kind: write_file
+    depends_on: [setup_dirs]
     path: "work/scripts/02-problem.txt"
     content: |
       So, let's talk about the problems in traditional video production. Imagine spending hours meticulously arranging clips on a timeline editor. It's time-consuming and requires manual attention to every detail. Now, think about managing assets—versions, naming conventions, organization—that can quickly become chaotic.
@@ -188,6 +191,7 @@ steps:
 
   - id: script_solution
     kind: write_file
+    depends_on: [setup_dirs]
     path: "work/scripts/03-solution.txt"
     content: |
       Let's dive into the solution that addresses these challenges: Vee Double-You Eff, a Rust-based workflow engine for AI-powered video automation.
@@ -212,6 +216,7 @@ steps:
 
   - id: script_architecture
     kind: write_file
+    depends_on: [setup_dirs]
     path: "work/scripts/04-architecture.txt"
     content: |
       In today's video, we'll dive into the architecture of Vee Double-You Eff, exploring its core concepts and how they come together to create a powerful workflow engine.
@@ -228,6 +233,7 @@ steps:
 
   - id: script_step_types
     kind: write_file
+    depends_on: [setup_dirs]
     path: "work/scripts/05-step_types.txt"
     content: |
       Welcome to the Step Types Overview segment of our Vee Double-You Eff video explainer.
@@ -268,6 +274,7 @@ steps:
 
   - id: script_service_architecture
     kind: write_file
+    depends_on: [setup_dirs]
     path: "work/scripts/06-service_architecture.txt"
     content: |
       Now, let's dive into how Vee Double-You Eff orchestrates its services. Imagine a network of interconnected tools, each specialized for a particular task in video production.
@@ -284,12 +291,14 @@ steps:
 
   - id: script_setup_repository
     kind: write_file
+    depends_on: [setup_dirs]
     path: "work/scripts/07-setup_repository.txt"
     content: |
       Now let's take a look at the repository structure of Vee Double-You Eff. The codebase is organized into several key directories. In the components/vwf-engine folder, you'll find the core library crates that make up the framework. Over in components/vwf-apps, you'll see the CLI and web applications. The docs directory contains all the documentation and LLM context needed to get started. Projects are stored in the projects/ directory, where each video project has its own folder. And finally, examples/ holds a variety of sample workflows to help you understand how things work. This organized structure makes it easy to navigate and contribute to the Vee Double-You Eff codebase.
 
   - id: script_setup_new_project
     kind: write_file
+    depends_on: [setup_dirs]
     path: "work/scripts/08-setup_new_project.txt"
     content: |
       Alright, let's dive into creating a new project with Vee Double-You Eff.
@@ -321,13 +330,14 @@ steps:
       One important step is setting up voice cloning for text-to-speech. Record 20-60 seconds of clean speech and provide an accurate transcript as `reference_text`. Place this audio file in the `assets/` directory. Then reference it in your workflow.yaml like this:
       
       ```yaml
-      voice_reference: "{{ assets/voice-reference.wav }}"
+      voice_ref: "assets/voice-reference.wav"
       ```
       
       That's it! You've set up a new project with Vee Double-You Eff. The next steps will involve running the workflow and customizing it further based on your requirements.
 
   - id: script_workflow_yaml
     kind: write_file
+    depends_on: [setup_dirs]
     path: "work/scripts/09-workflow_yaml.txt"
     content: |
       Alright, let's dive into the heart of Vee Double-You Eff: the workflow.yaml file. This is where everything comes together.
@@ -356,6 +366,7 @@ steps:
 
   - id: script_voice_reference
     kind: write_file
+    depends_on: [setup_dirs]
     path: "work/scripts/10-voice_reference.txt"
     content: |
       Alright, let's talk about voice cloning with VoxCPM for our TTS process.
@@ -366,12 +377,13 @@ steps:
       
       Now, place this reference audio file in your project's assets/ directory. Make sure it’s named something descriptive, like "voice-reference.wav."
       
-      Finally, you’ll want to reference this voice audio in your workflow.yaml file using a template variable. For example, you might use {{ voice_reference }} where you need the path to the audio.
+      Finally, you'll want to reference this voice audio in your workflow.yaml file using a template variable. For example, you might use double curly braces voice_ref double curly braces where you need the path to the audio.
       
       That’s it! With these steps, VoxCPM will clone your voice for text-to-speech, ensuring that the narration sounds just like you.
 
   - id: script_basic_execution
     kind: write_file
+    depends_on: [setup_dirs]
     path: "work/scripts/11-basic_execution.txt"
     content: |
       Running a workflow with Vee Double-You Eff is straightforward. First, you preview your workflow using the --dry-run flag. This lets you see what steps will be executed without actually running them. The command looks like this: `vwf run workflow.yaml --workdir . --dry-run`.
@@ -382,6 +394,7 @@ steps:
 
   - id: script_command_safety
     kind: write_file
+    depends_on: [setup_dirs]
     path: "work/scripts/12-command_safety.txt"
     content: |
       In today's segment, let's talk about command safety in Vee Double-You Eff.
@@ -402,12 +415,14 @@ steps:
 
   - id: script_resume_mode
     kind: write_file
+    depends_on: [setup_dirs]
     path: "work/scripts/13-resume_mode.txt"
     content: |
       Incremental builds with the --resume flag save you time on re-runs. When you execute a workflow, each step is checked against its resume_output. If the output already exists, that step is skipped. This means only changed or failed steps are re-run after interruptions or crashes. It's especially useful for large workflows, significantly speeding up the process. Just use vwf run with the --resume option to take advantage of this feature and streamline your workflow execution.
 
   - id: script_variable_overrides
     kind: write_file
+    depends_on: [setup_dirs]
     path: "work/scripts/14-variable_overrides.txt"
     content: |
       Runtime customization with variable overrides:
@@ -423,6 +438,7 @@ steps:
 
   - id: script_tts_voxcpm
     kind: write_file
+    depends_on: [setup_dirs]
     path: "work/scripts/15-tts_voxcpm.txt"
     content: |
       Voice cloning explained:
@@ -433,6 +449,7 @@ steps:
 
   - id: script_image_generation_flux1
     kind: write_file
+    depends_on: [setup_dirs]
     path: "work/scripts/16-image_generation_flux1.txt"
     content: |
       Welcome to our segment on image generation with FLUX.1.
@@ -455,6 +472,7 @@ steps:
 
   - id: script_video_generation
     kind: write_file
+    depends_on: [setup_dirs]
     path: "work/scripts/17-video_generation.txt"
     content: |
       Now let's dive into video generation with Wan 2.2. Imagine creating a video just by describing it in plain text. That's exactly what we're doing here.
@@ -492,12 +510,14 @@ steps:
 
   - id: script_local_llm_ollama
     kind: write_file
+    depends_on: [setup_dirs]
     path: "work/scripts/18-local_llm_ollama.txt"
     content: |
       Using Ollama for local large language model processing is a game-changer. With llm_generate, you can script writing and prompt engineering right in your workflow. For vision-based asset validation, llm_audit extracts frames from videos and sends them to vision models like llava or qwen2.5vl. All processing stays local, ensuring privacy and security. Available models include qwen2.5-coder, llava, and llama3.2-vision. This integration makes Vee Double-You Eff incredibly powerful and flexible for a wide range of video production needs.
 
   - id: script_audio_processing
     kind: write_file
+    depends_on: [setup_dirs]
     path: "work/scripts/19-audio_processing.txt"
     content: |
       Alright, let's dive into audio processing.
@@ -516,12 +536,14 @@ steps:
 
   - id: script_video_assembly
     kind: write_file
+    depends_on: [setup_dirs]
     path: "work/scripts/20-video_assembly.txt"
     content: |
       In final video production, we bring everything together. The `create_slide` step generates titles and text cards. Then, `video_concat` joins all segments into one cohesive piece. For mixed codecs, the `reencode` option ensures compatibility. Finally, export your video to the desired delivery format. This streamlined process guarantees a polished, professional final product ready for sharing.
 
   - id: script_qa_llm_audit
     kind: write_file
+    depends_on: [setup_dirs]
     path: "work/scripts/21-qa_llm_audit.txt"
     content: |
       In this segment, we dive into one of Vee Double-You Eff's most powerful features: quality assurance with llm_audit. This step ensures that every asset produced by the framework is top-notch.
@@ -538,6 +560,7 @@ steps:
 
   - id: script_meta_demonstration
     kind: write_file
+    depends_on: [setup_dirs]
     path: "work/scripts/22-meta_demonstration.txt"
     content: |
       Now, let's dive into how this video was actually created using Vee Double-You Eff itself. Imagine you're looking at a YAML file on your screen. That's exactly what we have here.
@@ -558,12 +581,14 @@ steps:
 
   - id: script_dogfooding_philosophy
     kind: write_file
+    depends_on: [setup_dirs]
     path: "work/scripts/23-dogfooding_philosophy.txt"
     content: |
       Eating our own dogfood means using Vee Double-You Eff to create this video. It finds gaps in functionality, ensures real-world usability, and documents by example. Plus, it builds confidence in the tool. We used llm_generate for script writing, VoxCPM for TTS, Wan 2.2 for title animation, and more. This hands-on approach shows you exactly how Vee Double-You Eff works in practice.
 
   - id: script_getting_started
     kind: write_file
+    depends_on: [setup_dirs]
     path: "work/scripts/24-getting_started.txt"
     content: |
       Alright, let's get started! 
@@ -588,12 +613,14 @@ steps:
 
   - id: script_resources
     kind: write_file
+    depends_on: [setup_dirs]
     path: "work/scripts/25-resources.txt"
     content: |
       So where can you learn more about Vee Double-You Eff? Start with the tutorial in docs/tutorial.md for step-by-step guidance. For service setup details, check out docs/services.md. Explore example workflows in examples/workflows/ to see how others have used the framework. If you run into issues or want new features, head over to GitHub and open an issue. Whether you're a developer, content creator, or Rust programmer, Vee Double-You Eff has something for everyone. Thanks for watching!
 
   - id: script_call_to_action
     kind: write_file
+    depends_on: [setup_dirs]
     path: "work/scripts/26-call_to_action.txt"
     content: |
       Try Vee Double-You Eff today. Clone it from GitHub at github dot com slash softwarewrighter slash video workflow underscore R-S. Star it if you find it useful, and open an issue if you have questions or feature requests. Thanks for watching!
@@ -601,241 +628,294 @@ steps:
   # ========== TTS Generation ==========
   - id: tts_hook
     kind: tts_generate
+    depends_on: [script_hook]
     resume_output: "work/audio/01-hook.wav"
     script_path: "work/scripts/01-hook.txt"
     output_path: "work/audio/01-hook.wav"
     server: "{{tts_server}}"
     reference_audio: "{{voice_ref}}"
     reference_text: "{{voice_ref_text}}"
+    python_path: "{{python_path}}"
 
   - id: tts_problem
     kind: tts_generate
+    depends_on: [script_problem]
     resume_output: "work/audio/02-problem.wav"
     script_path: "work/scripts/02-problem.txt"
     output_path: "work/audio/02-problem.wav"
     server: "{{tts_server}}"
     reference_audio: "{{voice_ref}}"
     reference_text: "{{voice_ref_text}}"
+    python_path: "{{python_path}}"
 
   - id: tts_solution
     kind: tts_generate
+    depends_on: [script_solution]
     resume_output: "work/audio/03-solution.wav"
     script_path: "work/scripts/03-solution.txt"
     output_path: "work/audio/03-solution.wav"
     server: "{{tts_server}}"
     reference_audio: "{{voice_ref}}"
     reference_text: "{{voice_ref_text}}"
+    python_path: "{{python_path}}"
 
   - id: tts_architecture
     kind: tts_generate
+    depends_on: [script_architecture]
     resume_output: "work/audio/04-architecture.wav"
     script_path: "work/scripts/04-architecture.txt"
     output_path: "work/audio/04-architecture.wav"
     server: "{{tts_server}}"
     reference_audio: "{{voice_ref}}"
     reference_text: "{{voice_ref_text}}"
+    python_path: "{{python_path}}"
 
   - id: tts_step_types
     kind: tts_generate
+    depends_on: [script_step_types]
     resume_output: "work/audio/05-step_types.wav"
     script_path: "work/scripts/05-step_types.txt"
     output_path: "work/audio/05-step_types.wav"
     server: "{{tts_server}}"
     reference_audio: "{{voice_ref}}"
     reference_text: "{{voice_ref_text}}"
+    python_path: "{{python_path}}"
 
   - id: tts_service_architecture
     kind: tts_generate
+    depends_on: [script_service_architecture]
     resume_output: "work/audio/06-service_architecture.wav"
     script_path: "work/scripts/06-service_architecture.txt"
     output_path: "work/audio/06-service_architecture.wav"
     server: "{{tts_server}}"
     reference_audio: "{{voice_ref}}"
     reference_text: "{{voice_ref_text}}"
+    python_path: "{{python_path}}"
 
   - id: tts_setup_repository
     kind: tts_generate
+    depends_on: [script_setup_repository]
     resume_output: "work/audio/07-setup_repository.wav"
     script_path: "work/scripts/07-setup_repository.txt"
     output_path: "work/audio/07-setup_repository.wav"
     server: "{{tts_server}}"
     reference_audio: "{{voice_ref}}"
     reference_text: "{{voice_ref_text}}"
+    python_path: "{{python_path}}"
 
   - id: tts_setup_new_project
     kind: tts_generate
+    depends_on: [script_setup_new_project]
     resume_output: "work/audio/08-setup_new_project.wav"
     script_path: "work/scripts/08-setup_new_project.txt"
     output_path: "work/audio/08-setup_new_project.wav"
     server: "{{tts_server}}"
     reference_audio: "{{voice_ref}}"
     reference_text: "{{voice_ref_text}}"
+    python_path: "{{python_path}}"
 
   - id: tts_workflow_yaml
     kind: tts_generate
+    depends_on: [script_workflow_yaml]
     resume_output: "work/audio/09-workflow_yaml.wav"
     script_path: "work/scripts/09-workflow_yaml.txt"
     output_path: "work/audio/09-workflow_yaml.wav"
     server: "{{tts_server}}"
     reference_audio: "{{voice_ref}}"
     reference_text: "{{voice_ref_text}}"
+    python_path: "{{python_path}}"
 
   - id: tts_voice_reference
     kind: tts_generate
+    depends_on: [script_voice_reference]
     resume_output: "work/audio/10-voice_reference.wav"
     script_path: "work/scripts/10-voice_reference.txt"
     output_path: "work/audio/10-voice_reference.wav"
     server: "{{tts_server}}"
     reference_audio: "{{voice_ref}}"
     reference_text: "{{voice_ref_text}}"
+    python_path: "{{python_path}}"
 
   - id: tts_basic_execution
     kind: tts_generate
+    depends_on: [script_basic_execution]
     resume_output: "work/audio/11-basic_execution.wav"
     script_path: "work/scripts/11-basic_execution.txt"
     output_path: "work/audio/11-basic_execution.wav"
     server: "{{tts_server}}"
     reference_audio: "{{voice_ref}}"
     reference_text: "{{voice_ref_text}}"
+    python_path: "{{python_path}}"
 
   - id: tts_command_safety
     kind: tts_generate
+    depends_on: [script_command_safety]
     resume_output: "work/audio/12-command_safety.wav"
     script_path: "work/scripts/12-command_safety.txt"
     output_path: "work/audio/12-command_safety.wav"
     server: "{{tts_server}}"
     reference_audio: "{{voice_ref}}"
     reference_text: "{{voice_ref_text}}"
+    python_path: "{{python_path}}"
 
   - id: tts_resume_mode
     kind: tts_generate
+    depends_on: [script_resume_mode]
     resume_output: "work/audio/13-resume_mode.wav"
     script_path: "work/scripts/13-resume_mode.txt"
     output_path: "work/audio/13-resume_mode.wav"
     server: "{{tts_server}}"
     reference_audio: "{{voice_ref}}"
     reference_text: "{{voice_ref_text}}"
+    python_path: "{{python_path}}"
 
   - id: tts_variable_overrides
     kind: tts_generate
+    depends_on: [script_variable_overrides]
     resume_output: "work/audio/14-variable_overrides.wav"
     script_path: "work/scripts/14-variable_overrides.txt"
     output_path: "work/audio/14-variable_overrides.wav"
     server: "{{tts_server}}"
     reference_audio: "{{voice_ref}}"
     reference_text: "{{voice_ref_text}}"
+    python_path: "{{python_path}}"
 
   - id: tts_tts_voxcpm
     kind: tts_generate
+    depends_on: [script_tts_voxcpm]
     resume_output: "work/audio/15-tts_voxcpm.wav"
     script_path: "work/scripts/15-tts_voxcpm.txt"
     output_path: "work/audio/15-tts_voxcpm.wav"
     server: "{{tts_server}}"
     reference_audio: "{{voice_ref}}"
     reference_text: "{{voice_ref_text}}"
+    python_path: "{{python_path}}"
 
   - id: tts_image_generation_flux1
     kind: tts_generate
+    depends_on: [script_image_generation_flux1]
     resume_output: "work/audio/16-image_generation_flux1.wav"
     script_path: "work/scripts/16-image_generation_flux1.txt"
     output_path: "work/audio/16-image_generation_flux1.wav"
     server: "{{tts_server}}"
     reference_audio: "{{voice_ref}}"
     reference_text: "{{voice_ref_text}}"
+    python_path: "{{python_path}}"
 
   - id: tts_video_generation
     kind: tts_generate
+    depends_on: [script_video_generation]
     resume_output: "work/audio/17-video_generation.wav"
     script_path: "work/scripts/17-video_generation.txt"
     output_path: "work/audio/17-video_generation.wav"
     server: "{{tts_server}}"
     reference_audio: "{{voice_ref}}"
     reference_text: "{{voice_ref_text}}"
+    python_path: "{{python_path}}"
 
   - id: tts_local_llm_ollama
     kind: tts_generate
+    depends_on: [script_local_llm_ollama]
     resume_output: "work/audio/18-local_llm_ollama.wav"
     script_path: "work/scripts/18-local_llm_ollama.txt"
     output_path: "work/audio/18-local_llm_ollama.wav"
     server: "{{tts_server}}"
     reference_audio: "{{voice_ref}}"
     reference_text: "{{voice_ref_text}}"
+    python_path: "{{python_path}}"
 
   - id: tts_audio_processing
     kind: tts_generate
+    depends_on: [script_audio_processing]
     resume_output: "work/audio/19-audio_processing.wav"
     script_path: "work/scripts/19-audio_processing.txt"
     output_path: "work/audio/19-audio_processing.wav"
     server: "{{tts_server}}"
     reference_audio: "{{voice_ref}}"
     reference_text: "{{voice_ref_text}}"
+    python_path: "{{python_path}}"
 
   - id: tts_video_assembly
     kind: tts_generate
+    depends_on: [script_video_assembly]
     resume_output: "work/audio/20-video_assembly.wav"
     script_path: "work/scripts/20-video_assembly.txt"
     output_path: "work/audio/20-video_assembly.wav"
     server: "{{tts_server}}"
     reference_audio: "{{voice_ref}}"
     reference_text: "{{voice_ref_text}}"
+    python_path: "{{python_path}}"
 
   - id: tts_qa_llm_audit
     kind: tts_generate
+    depends_on: [script_qa_llm_audit]
     resume_output: "work/audio/21-qa_llm_audit.wav"
     script_path: "work/scripts/21-qa_llm_audit.txt"
     output_path: "work/audio/21-qa_llm_audit.wav"
     server: "{{tts_server}}"
     reference_audio: "{{voice_ref}}"
     reference_text: "{{voice_ref_text}}"
+    python_path: "{{python_path}}"
 
   - id: tts_meta_demonstration
     kind: tts_generate
+    depends_on: [script_meta_demonstration]
     resume_output: "work/audio/22-meta_demonstration.wav"
     script_path: "work/scripts/22-meta_demonstration.txt"
     output_path: "work/audio/22-meta_demonstration.wav"
     server: "{{tts_server}}"
     reference_audio: "{{voice_ref}}"
     reference_text: "{{voice_ref_text}}"
+    python_path: "{{python_path}}"
 
   - id: tts_dogfooding_philosophy
     kind: tts_generate
+    depends_on: [script_dogfooding_philosophy]
     resume_output: "work/audio/23-dogfooding_philosophy.wav"
     script_path: "work/scripts/23-dogfooding_philosophy.txt"
     output_path: "work/audio/23-dogfooding_philosophy.wav"
     server: "{{tts_server}}"
     reference_audio: "{{voice_ref}}"
     reference_text: "{{voice_ref_text}}"
+    python_path: "{{python_path}}"
 
   - id: tts_getting_started
     kind: tts_generate
+    depends_on: [script_getting_started]
     resume_output: "work/audio/24-getting_started.wav"
     script_path: "work/scripts/24-getting_started.txt"
     output_path: "work/audio/24-getting_started.wav"
     server: "{{tts_server}}"
     reference_audio: "{{voice_ref}}"
     reference_text: "{{voice_ref_text}}"
+    python_path: "{{python_path}}"
 
   - id: tts_resources
     kind: tts_generate
+    depends_on: [script_resources]
     resume_output: "work/audio/25-resources.wav"
     script_path: "work/scripts/25-resources.txt"
     output_path: "work/audio/25-resources.wav"
     server: "{{tts_server}}"
     reference_audio: "{{voice_ref}}"
     reference_text: "{{voice_ref_text}}"
+    python_path: "{{python_path}}"
 
   - id: tts_call_to_action
     kind: tts_generate
+    depends_on: [script_call_to_action]
     resume_output: "work/audio/26-call_to_action.wav"
     script_path: "work/scripts/26-call_to_action.txt"
     output_path: "work/audio/26-call_to_action.wav"
     server: "{{tts_server}}"
     reference_audio: "{{voice_ref}}"
     reference_text: "{{voice_ref_text}}"
+    python_path: "{{python_path}}"
 
   # ========== Visual Generation ==========
   - id: img_introduction
     kind: create_slide
+    depends_on: [setup_dirs]
     resume_output: "work/images/00-introduction.png"
     template: title
     text: "Title Screen"
@@ -844,6 +924,7 @@ steps:
 
   - id: img_hook
     kind: create_slide
+    depends_on: [setup_dirs]
     resume_output: "work/images/01-hook.png"
     template: title
     text: "Opening Hook"
@@ -853,6 +934,7 @@ steps:
 
   - id: img_problem
     kind: create_slide
+    depends_on: [setup_dirs]
     resume_output: "work/images/02-problem.png"
     template: title
     text: "Problem Statement"
@@ -862,6 +944,7 @@ steps:
 
   - id: img_solution
     kind: create_slide
+    depends_on: [setup_dirs]
     resume_output: "work/images/03-solution.png"
     template: title
     text: "Solution Overview"
@@ -871,24 +954,29 @@ steps:
 
   - id: img_architecture
     kind: text_to_image
+    depends_on: [setup_dirs]
     resume_output: "work/images/04-architecture.png"
     prompt: "Professional diagram showing core concepts, dark theme, clean modern design, high contrast"
     output_path: "work/images/04-architecture.png"
     orientation: landscape
     seed: 2030
     server: "{{tti_server}}"
+    python_path: "{{python_path}}"
 
   - id: img_step_types
     kind: text_to_image
+    depends_on: [setup_dirs]
     resume_output: "work/images/05-step_types.png"
     prompt: "Professional diagram showing step types overview, dark theme, clean modern design, high contrast"
     output_path: "work/images/05-step_types.png"
     orientation: landscape
     seed: 2031
     server: "{{tti_server}}"
+    python_path: "{{python_path}}"
 
   - id: img_service_architecture
     kind: create_slide
+    depends_on: [setup_dirs]
     resume_output: "work/images/06-service_architecture.png"
     template: title
     text: "Service Architecture"
@@ -898,6 +986,7 @@ steps:
 
   - id: img_setup_repository
     kind: create_slide
+    depends_on: [setup_dirs]
     resume_output: "work/images/07-setup_repository.png"
     template: title
     text: "Repository Structure"
@@ -907,6 +996,7 @@ steps:
 
   - id: img_setup_new_project
     kind: create_slide
+    depends_on: [setup_dirs]
     resume_output: "work/images/08-setup_new_project.png"
     template: title
     text: "Creating a New Project"
@@ -916,6 +1006,7 @@ steps:
 
   - id: img_workflow_yaml
     kind: create_slide
+    depends_on: [setup_dirs]
     resume_output: "work/images/09-workflow_yaml.png"
     template: title
     text: "Workflow YAML Structure"
@@ -925,6 +1016,7 @@ steps:
 
   - id: img_voice_reference
     kind: create_slide
+    depends_on: [setup_dirs]
     resume_output: "work/images/10-voice_reference.png"
     template: title
     text: "Voice Reference Setup"
@@ -934,6 +1026,7 @@ steps:
 
   - id: img_basic_execution
     kind: create_slide
+    depends_on: [setup_dirs]
     resume_output: "work/images/11-basic_execution.png"
     template: title
     text: "Basic Execution"
@@ -943,6 +1036,7 @@ steps:
 
   - id: img_command_safety
     kind: create_slide
+    depends_on: [setup_dirs]
     resume_output: "work/images/12-command_safety.png"
     template: title
     text: "Command Safety"
@@ -952,6 +1046,7 @@ steps:
 
   - id: img_resume_mode
     kind: create_slide
+    depends_on: [setup_dirs]
     resume_output: "work/images/13-resume_mode.png"
     template: title
     text: "Resume Mode"
@@ -961,6 +1056,7 @@ steps:
 
   - id: img_variable_overrides
     kind: create_slide
+    depends_on: [setup_dirs]
     resume_output: "work/images/14-variable_overrides.png"
     template: title
     text: "Variable Overrides"
@@ -970,6 +1066,7 @@ steps:
 
   - id: img_tts_voxcpm
     kind: create_slide
+    depends_on: [setup_dirs]
     resume_output: "work/images/15-tts_voxcpm.png"
     template: title
     text: "Text-to-Speech with VoxCPM"
@@ -979,6 +1076,7 @@ steps:
 
   - id: img_image_generation_flux1
     kind: create_slide
+    depends_on: [setup_dirs]
     resume_output: "work/images/16-image_generation_flux1.png"
     template: title
     text: "Image Generation with FLUX.1"
@@ -988,6 +1086,7 @@ steps:
 
   - id: img_video_generation
     kind: create_slide
+    depends_on: [setup_dirs]
     resume_output: "work/images/17-video_generation.png"
     template: title
     text: "Video Generation"
@@ -997,6 +1096,7 @@ steps:
 
   - id: img_local_llm_ollama
     kind: create_slide
+    depends_on: [setup_dirs]
     resume_output: "work/images/18-local_llm_ollama.png"
     template: title
     text: "Local LLM with Ollama"
@@ -1006,6 +1106,7 @@ steps:
 
   - id: img_audio_processing
     kind: create_slide
+    depends_on: [setup_dirs]
     resume_output: "work/images/19-audio_processing.png"
     template: title
     text: "Audio Processing"
@@ -1015,6 +1116,7 @@ steps:
 
   - id: img_video_assembly
     kind: create_slide
+    depends_on: [setup_dirs]
     resume_output: "work/images/20-video_assembly.png"
     template: title
     text: "Video Assembly"
@@ -1024,6 +1126,7 @@ steps:
 
   - id: img_qa_llm_audit
     kind: create_slide
+    depends_on: [setup_dirs]
     resume_output: "work/images/21-qa_llm_audit.png"
     template: title
     text: "Quality Assurance with llm_audit"
@@ -1033,6 +1136,7 @@ steps:
 
   - id: img_meta_demonstration
     kind: create_slide
+    depends_on: [setup_dirs]
     resume_output: "work/images/22-meta_demonstration.png"
     template: title
     text: "Meta Demonstration"
@@ -1042,6 +1146,7 @@ steps:
 
   - id: img_dogfooding_philosophy
     kind: create_slide
+    depends_on: [setup_dirs]
     resume_output: "work/images/23-dogfooding_philosophy.png"
     template: title
     text: "Dogfooding Philosophy"
@@ -1051,6 +1156,7 @@ steps:
 
   - id: img_getting_started
     kind: create_slide
+    depends_on: [setup_dirs]
     resume_output: "work/images/24-getting_started.png"
     template: title
     text: "Getting Started"
@@ -1060,6 +1166,7 @@ steps:
 
   - id: img_resources
     kind: create_slide
+    depends_on: [setup_dirs]
     resume_output: "work/images/25-resources.png"
     template: title
     text: "Resources"
@@ -1069,6 +1176,7 @@ steps:
 
   - id: img_call_to_action
     kind: create_slide
+    depends_on: [setup_dirs]
     resume_output: "work/images/26-call_to_action.png"
     template: title
     text: "Call to Action"
@@ -1078,6 +1186,7 @@ steps:
 
   - id: img_outro
     kind: create_slide
+    depends_on: [setup_dirs]
     resume_output: "work/images/27-outro.png"
     template: title
     text: "Closing"
@@ -1087,6 +1196,7 @@ steps:
   # ========== Clip Assembly ==========
   - id: clip_introduction
     kind: run_command
+    depends_on: [img_introduction]
     program: ffmpeg
     args:
       - "-y"
@@ -1116,6 +1226,7 @@ steps:
 
   - id: clip_hook
     kind: run_command
+    depends_on: [img_hook, tts_hook]
     program: ffmpeg
     args:
       - "-y"
@@ -1140,6 +1251,7 @@ steps:
 
   - id: clip_problem
     kind: run_command
+    depends_on: [img_problem, tts_problem]
     program: ffmpeg
     args:
       - "-y"
@@ -1164,6 +1276,7 @@ steps:
 
   - id: clip_solution
     kind: run_command
+    depends_on: [img_solution, tts_solution]
     program: ffmpeg
     args:
       - "-y"
@@ -1188,6 +1301,7 @@ steps:
 
   - id: clip_architecture
     kind: run_command
+    depends_on: [img_architecture, tts_architecture]
     program: ffmpeg
     args:
       - "-y"
@@ -1212,6 +1326,7 @@ steps:
 
   - id: clip_step_types
     kind: run_command
+    depends_on: [img_step_types, tts_step_types]
     program: ffmpeg
     args:
       - "-y"
@@ -1236,6 +1351,7 @@ steps:
 
   - id: clip_service_architecture
     kind: run_command
+    depends_on: [img_service_architecture, tts_service_architecture]
     program: ffmpeg
     args:
       - "-y"
@@ -1260,6 +1376,7 @@ steps:
 
   - id: clip_setup_repository
     kind: run_command
+    depends_on: [img_setup_repository, tts_setup_repository]
     program: ffmpeg
     args:
       - "-y"
@@ -1284,6 +1401,7 @@ steps:
 
   - id: clip_setup_new_project
     kind: run_command
+    depends_on: [img_setup_new_project, tts_setup_new_project]
     program: ffmpeg
     args:
       - "-y"
@@ -1308,6 +1426,7 @@ steps:
 
   - id: clip_workflow_yaml
     kind: run_command
+    depends_on: [img_workflow_yaml, tts_workflow_yaml]
     program: ffmpeg
     args:
       - "-y"
@@ -1332,6 +1451,7 @@ steps:
 
   - id: clip_voice_reference
     kind: run_command
+    depends_on: [img_voice_reference, tts_voice_reference]
     program: ffmpeg
     args:
       - "-y"
@@ -1356,6 +1476,7 @@ steps:
 
   - id: clip_basic_execution
     kind: run_command
+    depends_on: [img_basic_execution, tts_basic_execution]
     program: ffmpeg
     args:
       - "-y"
@@ -1380,6 +1501,7 @@ steps:
 
   - id: clip_command_safety
     kind: run_command
+    depends_on: [img_command_safety, tts_command_safety]
     program: ffmpeg
     args:
       - "-y"
@@ -1404,6 +1526,7 @@ steps:
 
   - id: clip_resume_mode
     kind: run_command
+    depends_on: [img_resume_mode, tts_resume_mode]
     program: ffmpeg
     args:
       - "-y"
@@ -1428,6 +1551,7 @@ steps:
 
   - id: clip_variable_overrides
     kind: run_command
+    depends_on: [img_variable_overrides, tts_variable_overrides]
     program: ffmpeg
     args:
       - "-y"
@@ -1452,6 +1576,7 @@ steps:
 
   - id: clip_tts_voxcpm
     kind: run_command
+    depends_on: [img_tts_voxcpm, tts_tts_voxcpm]
     program: ffmpeg
     args:
       - "-y"
@@ -1476,6 +1601,7 @@ steps:
 
   - id: clip_image_generation_flux1
     kind: run_command
+    depends_on: [img_image_generation_flux1, tts_image_generation_flux1]
     program: ffmpeg
     args:
       - "-y"
@@ -1500,6 +1626,7 @@ steps:
 
   - id: clip_video_generation
     kind: run_command
+    depends_on: [img_video_generation, tts_video_generation]
     program: ffmpeg
     args:
       - "-y"
@@ -1524,6 +1651,7 @@ steps:
 
   - id: clip_local_llm_ollama
     kind: run_command
+    depends_on: [img_local_llm_ollama, tts_local_llm_ollama]
     program: ffmpeg
     args:
       - "-y"
@@ -1548,6 +1676,7 @@ steps:
 
   - id: clip_audio_processing
     kind: run_command
+    depends_on: [img_audio_processing, tts_audio_processing]
     program: ffmpeg
     args:
       - "-y"
@@ -1572,6 +1701,7 @@ steps:
 
   - id: clip_video_assembly
     kind: run_command
+    depends_on: [img_video_assembly, tts_video_assembly]
     program: ffmpeg
     args:
       - "-y"
@@ -1596,6 +1726,7 @@ steps:
 
   - id: clip_qa_llm_audit
     kind: run_command
+    depends_on: [img_qa_llm_audit, tts_qa_llm_audit]
     program: ffmpeg
     args:
       - "-y"
@@ -1620,6 +1751,7 @@ steps:
 
   - id: clip_meta_demonstration
     kind: run_command
+    depends_on: [img_meta_demonstration, tts_meta_demonstration]
     program: ffmpeg
     args:
       - "-y"
@@ -1644,6 +1776,7 @@ steps:
 
   - id: clip_dogfooding_philosophy
     kind: run_command
+    depends_on: [img_dogfooding_philosophy, tts_dogfooding_philosophy]
     program: ffmpeg
     args:
       - "-y"
@@ -1668,6 +1801,7 @@ steps:
 
   - id: clip_getting_started
     kind: run_command
+    depends_on: [img_getting_started, tts_getting_started]
     program: ffmpeg
     args:
       - "-y"
@@ -1692,6 +1826,7 @@ steps:
 
   - id: clip_resources
     kind: run_command
+    depends_on: [img_resources, tts_resources]
     program: ffmpeg
     args:
       - "-y"
@@ -1716,6 +1851,7 @@ steps:
 
   - id: clip_call_to_action
     kind: run_command
+    depends_on: [img_call_to_action, tts_call_to_action]
     program: ffmpeg
     args:
       - "-y"
@@ -1740,6 +1876,7 @@ steps:
 
   - id: clip_outro
     kind: run_command
+    depends_on: [img_outro]
     program: ffmpeg
     args:
       - "-y"
@@ -1770,6 +1907,7 @@ steps:
   # ========== Final Assembly ==========
   - id: final_concat
     kind: video_concat
+    depends_on: [clip_introduction, clip_hook, clip_problem, clip_solution, clip_architecture, clip_step_types, clip_service_architecture, clip_setup_repository, clip_setup_new_project, clip_workflow_yaml, clip_voice_reference, clip_basic_execution, clip_command_safety, clip_resume_mode, clip_variable_overrides, clip_tts_voxcpm, clip_image_generation_flux1, clip_video_generation, clip_local_llm_ollama, clip_audio_processing, clip_video_assembly, clip_qa_llm_audit, clip_meta_demonstration, clip_dogfooding_philosophy, clip_getting_started, clip_resources, clip_call_to_action, clip_outro]
     clips:
       - "work/clips/00-introduction.mp4"
       - "work/clips/01-hook.mp4"
@@ -1805,6 +1943,7 @@ steps:
   # ========== Quality Audit ==========
   - id: audit_output
     kind: llm_audit
+    depends_on: [final_concat]
     assets:
       - "output/final.mp4"
     audit_prompt: |

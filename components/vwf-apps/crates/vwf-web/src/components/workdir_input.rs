@@ -12,7 +12,9 @@ pub struct Props {
 pub fn workdir_input(props: &Props) -> Html {
     let onchange = props.onchange.clone();
     let oninput = Callback::from(move |e: InputEvent| {
-        let t = e.target_unchecked_into::<web_sys::HtmlInputElement>().value();
+        let t = e
+            .target_unchecked_into::<web_sys::HtmlInputElement>()
+            .value();
         onchange.emit(t);
     });
 

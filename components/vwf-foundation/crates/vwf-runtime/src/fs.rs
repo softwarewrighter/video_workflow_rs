@@ -15,12 +15,18 @@ pub struct FsRuntime {
 
 impl FsRuntime {
     pub fn new(workdir: impl Into<PathBuf>, llm: Box<dyn LlmClient>) -> Self {
-        Self { workdir: workdir.into(), llm, command_allowlist: Default::default() }
+        Self {
+            workdir: workdir.into(),
+            llm,
+            command_allowlist: Default::default(),
+        }
     }
 }
 
 impl Runtime for FsRuntime {
-    fn workdir(&self) -> &Path { &self.workdir }
+    fn workdir(&self) -> &Path {
+        &self.workdir
+    }
 
     fn ensure_dir(&mut self, rel: &str) -> Result<()> {
         let p = self.workdir.join(rel);
@@ -29,7 +35,9 @@ impl Runtime for FsRuntime {
 
     fn write_text(&mut self, rel: &str, content: &str) -> Result<()> {
         let p = self.workdir.join(rel);
-        if let Some(parent) = p.parent() { std::fs::create_dir_all(parent)?; }
+        if let Some(parent) = p.parent() {
+            std::fs::create_dir_all(parent)?;
+        }
         std::fs::write(&p, content).with_context(|| format!("write {}", p.display()))
     }
 
@@ -44,10 +52,19 @@ impl Runtime for FsRuntime {
             anyhow::bail!("Command not allowed: `{prog}`. Add it to the allowlist.");
         }
         let mut cmd = std::process::Command::new(prog);
-        cmd.args(args).current_dir(cwd.map(|c| self.workdir.join(c)).unwrap_or_else(|| self.workdir.clone()));
+        cmd.args(args).current_dir(
+            cwd.map(|c| self.workdir.join(c))
+                .unwrap_or_else(|| self.workdir.clone()),
+        );
         let output = cmd.output().with_context(|| format!("run `{prog}`"))?;
-        Ok(CmdOut { status: output.status.code().unwrap_or(-1), stdout: String::from_utf8_lossy(&output.stdout).into(), stderr: String::from_utf8_lossy(&output.stderr).into() })
+        Ok(CmdOut {
+            status: output.status.code().unwrap_or(-1),
+            stdout: String::from_utf8_lossy(&output.stdout).into(),
+            stderr: String::from_utf8_lossy(&output.stderr).into(),
+        })
     }
 
-    fn llm(&mut self) -> &mut dyn LlmClient { self.llm.as_mut() }
+    fn llm(&mut self) -> &mut dyn LlmClient {
+        self.llm.as_mut()
+    }
 }

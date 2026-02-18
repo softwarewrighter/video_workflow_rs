@@ -34,13 +34,19 @@ fn render_inputs(key: &UseStateHandle<String>, val: &UseStateHandle<String>) -> 
     let key_cb = {
         let key = key.clone();
         Callback::from(move |e: InputEvent| {
-            key.set(e.target_unchecked_into::<web_sys::HtmlInputElement>().value());
+            key.set(
+                e.target_unchecked_into::<web_sys::HtmlInputElement>()
+                    .value(),
+            );
         })
     };
     let val_cb = {
         let val = val.clone();
         Callback::from(move |e: InputEvent| {
-            val.set(e.target_unchecked_into::<web_sys::HtmlInputElement>().value());
+            val.set(
+                e.target_unchecked_into::<web_sys::HtmlInputElement>()
+                    .value(),
+            );
         })
     };
     html! {

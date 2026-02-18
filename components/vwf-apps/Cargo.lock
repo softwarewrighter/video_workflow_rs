@@ -2360,10 +2360,10 @@ dependencies = [
 name = "vwf-web"
 version = "0.1.0"
 dependencies = [
+ "chrono",
  "gloo 0.11.0",
  "serde",
  "serde_json",
- "vwf-core",
  "wasm-bindgen",
  "web-sys",
  "yew",

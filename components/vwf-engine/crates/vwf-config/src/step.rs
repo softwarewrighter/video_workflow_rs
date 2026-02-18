@@ -10,6 +10,10 @@ pub struct StepConfig {
     /// Use a separate field name to avoid conflicts with step payload fields.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub resume_output: Option<String>,
+    /// Steps that must complete before this step can run.
+    /// If empty, step can run immediately (no dependencies).
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub depends_on: Vec<String>,
     #[serde(flatten)]
     pub payload: serde_json::Value,
 }

@@ -6,10 +6,48 @@
     <title>VWF Web</title>
     <link rel="icon" type="image/x-icon" href="favicon.ico" />
     <style>
-      body { font-family: system-ui, -apple-system, sans-serif; margin: 24px; }
-      .card { border: 1px solid #ddd; border-radius: 12px; padding: 16px; margin: 12px 0; }
+      body { font-family: system-ui, -apple-system, sans-serif; margin: 24px; background: #fafafa; }
+      .card { border: 1px solid #ddd; border-radius: 12px; padding: 16px; margin: 12px 0; background: white; }
       textarea { width: 100%; min-height: 140px; }
       input[type="text"] { width: 100%; }
+
+      /* Tabs */
+      .tabs { display: flex; gap: 8px; margin-top: 12px; }
+      .tab { padding: 8px 16px; border: 1px solid #ddd; border-radius: 8px 8px 0 0; background: #f5f5f5; cursor: pointer; }
+      .tab.active { background: white; border-bottom-color: white; font-weight: 600; }
+
+      /* Status badges */
+      .status-summary { display: flex; gap: 12px; margin: 12px 0; flex-wrap: wrap; }
+      .status-badge { padding: 4px 12px; border-radius: 16px; font-size: 0.9em; font-weight: 500; }
+      .status-ok { background: #d4edda; color: #155724; }
+      .status-skipped { background: #e2e3e5; color: #383d41; }
+      .status-failed { background: #f8d7da; color: #721c24; }
+      .status-blocked { background: #fff3cd; color: #856404; }
+      .status-total { color: #666; align-self: center; }
+
+      /* Alert */
+      .alert { padding: 12px 16px; border-radius: 8px; margin: 12px 0; }
+      .alert-warning { background: #fff3cd; border: 1px solid #ffc107; color: #856404; }
+
+      /* Step table */
+      .step-table { width: 100%; border-collapse: collapse; margin-top: 16px; font-size: 0.9em; }
+      .step-table th, .step-table td { padding: 8px 12px; text-align: left; border-bottom: 1px solid #eee; }
+      .step-table th { background: #f8f9fa; font-weight: 600; }
+      .step-row:hover { background: #f8f9fa; }
+      .step-row.status-failed { background: #fff5f5; }
+      .step-row.status-blocked { background: #fffbeb; }
+      .status-indicator { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.8em; font-weight: 600; }
+      .status-indicator.status-ok { background: #28a745; color: white; }
+      .status-indicator.status-skipped { background: #6c757d; color: white; }
+      .status-indicator.status-failed { background: #dc3545; color: white; }
+      .status-indicator.status-blocked { background: #ffc107; color: #333; }
+      .step-id { font-family: monospace; }
+      .step-kind { color: #666; }
+      .step-error { color: #dc3545; font-size: 0.85em; max-width: 300px; overflow: hidden; text-overflow: ellipsis; }
+
+      /* File input */
+      input[type="file"] { margin: 8px 0; }
+      .status-empty { color: #666; font-style: italic; }
     </style>
   </head>
   <body>

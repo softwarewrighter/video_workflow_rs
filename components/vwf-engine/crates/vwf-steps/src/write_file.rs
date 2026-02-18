@@ -24,8 +24,8 @@ pub fn execute(ctx: &mut StepCtx<'_>, payload: &Value) -> Result<()> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use vwf_runtime::{DryRunRuntime, MockLlmClient};
     use std::collections::BTreeMap;
+    use vwf_runtime::{DryRunRuntime, MockLlmClient};
 
     #[test]
     fn writes_file_with_vars() {
@@ -35,6 +35,9 @@ mod tests {
         let payload = serde_json::json!({"path": "out.txt", "content": "Hello {{name}}"});
         let mut ctx = StepCtx::new(&mut rt, &vars, "test");
         execute(&mut ctx, &payload).unwrap();
-        assert_eq!(rt.planned_writes, vec![("out.txt".into(), "Hello world".into())]);
+        assert_eq!(
+            rt.planned_writes,
+            vec![("out.txt".into(), "Hello world".into())]
+        );
     }
 }

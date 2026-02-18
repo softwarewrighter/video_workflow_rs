@@ -11,7 +11,7 @@ gloo = { version = "0.11", features = ["dialogs", "file", "storage"] }
 web-sys = { version = "0.3", features = ["HtmlInputElement", "HtmlTextAreaElement"] }
 serde.workspace = true
 serde_json.workspace = true
-vwf-core.workspace = true
+chrono = { version = "0.4", default-features = false, features = ["serde"] }
 
 [package.metadata.trunk]
 # trunk serves /dist by default

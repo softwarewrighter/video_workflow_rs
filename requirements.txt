@@ -1,0 +1,11 @@
+# Python dependencies for VWF workflow steps
+# Install with: uv pip install -r requirements.txt
+
+# For TTS generation (VoxCPM via Gradio)
+gradio-client>=1.0.0
+
+# For text-to-image (FLUX.1 via ComfyUI)
+requests>=2.28.0
+
+# For image processing
+pillow>=10.0.0

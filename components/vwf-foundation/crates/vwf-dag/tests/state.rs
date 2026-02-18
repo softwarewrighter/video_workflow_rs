@@ -13,7 +13,9 @@ fn state_persistence() {
     assert!(store.load().unwrap().is_none());
 
     let mut state = WorkflowState::new("test_workflow", 1);
-    state.inputs.insert("episode".to_string(), serde_json::json!(17));
+    state
+        .inputs
+        .insert("episode".to_string(), serde_json::json!(17));
     state.add_task(Task::new("generate_text", "llm_generate"));
 
     store.save(&state).unwrap();
@@ -28,20 +30,27 @@ fn state_persistence() {
 #[test]
 fn checkpoint_approval() {
     let mut state = WorkflowState::new("test", 1);
-    state.checkpoints.insert("review_text".to_string(), CheckpointStatus {
-        name: "review_text".to_string(),
-        message: "Review the text files".to_string(),
-        reached_at: Utc::now(),
-        approved: false,
-        approved_at: None,
-    });
+    state.checkpoints.insert(
+        "review_text".to_string(),
+        CheckpointStatus {
+            name: "review_text".to_string(),
+            message: "Review the text files".to_string(),
+            reached_at: Utc::now(),
+            approved: false,
+            approved_at: None,
+        },
+    );
 
     // Check pending state via direct field access
     assert!(!state.checkpoints.get("review_text").unwrap().approved);
 
     // Approve via direct field access
     state.checkpoints.get_mut("review_text").unwrap().approved = true;
-    state.checkpoints.get_mut("review_text").unwrap().approved_at = Some(Utc::now());
+    state
+        .checkpoints
+        .get_mut("review_text")
+        .unwrap()
+        .approved_at = Some(Utc::now());
 
     assert!(state.checkpoints.get("review_text").unwrap().approved);
 }

@@ -38,7 +38,9 @@ fn write_section(ctx: &mut StepCtx<'_>, text: &str, out: &Output) -> Result<()> 
 }
 
 fn extract_section<'a>(text: &'a str, heading: &str) -> Result<&'a str> {
-    let start = text.find(heading).ok_or_else(|| anyhow::anyhow!("heading not found"))?;
+    let start = text
+        .find(heading)
+        .ok_or_else(|| anyhow::anyhow!("heading not found"))?;
     let after = &text[start + heading.len()..];
     let end_idx = find_next_heading(after);
     Ok(after[..end_idx].trim_matches(['\n', '\r'].as_ref()))
