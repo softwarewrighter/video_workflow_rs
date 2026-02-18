@@ -449,6 +449,34 @@ steps:
     # ...
 ```
 
+### Segments (Semantic Grouping)
+Group steps semantically with `segments` to prevent audio conflicts:
+
+```yaml
+segments:
+  - id: intro
+    segment_type: music_only       # No narration allowed
+    description: "Title card with background music"
+    steps: [title_slide, title_video, intro_music]
+
+  - id: main_content
+    segment_type: narration_only   # No music allowed
+    steps: [tts_hook, clip_hook, tts_solution, clip_solution]
+
+  - id: outro
+    segment_type: music_only
+    steps: [outro_slide, outro_video, outro_music]
+```
+
+**Segment Types:**
+| Type | Description |
+|------|-------------|
+| music_only | Background music, no narration |
+| narration_only | Spoken content, no music |
+| mixed | Both allowed (default) |
+
+Segments are optional but help document intent and can be validated.
+
 ### Dependencies (DAG Execution)
 Use `depends_on` to declare step dependencies:
 

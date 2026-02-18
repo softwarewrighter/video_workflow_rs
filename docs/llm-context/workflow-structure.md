@@ -261,6 +261,7 @@ steps:
   # Intro segment
   - id: gen_title
     kind: create_slide
+    depends_on: [setup_dirs]
     resume_output: "work/images/title.png"
     template: title
     text: "{{project_name}}"
@@ -269,14 +270,16 @@ steps:
 
   - id: title_to_video
     kind: image_to_video
+    depends_on: [gen_title]
     resume_output: "work/videos/title.mp4"
     input_path: "work/images/title.png"
     output_path: "work/videos/title.mp4"
     motion: 40
 
-  # Hook segment
+  # Hook segment - TTS and image generation run in parallel
   - id: write_hook
     kind: write_file
+    depends_on: [setup_dirs]
     path: "work/scripts/hook.txt"
     content: |
       What if you could automate your entire workflow
@@ -284,6 +287,7 @@ steps:
 
   - id: tts_hook
     kind: tts_generate
+    depends_on: [write_hook]
     resume_output: "work/audio/hook.wav"
     script_path: "work/scripts/hook.txt"
     output_path: "work/audio/hook.wav"
@@ -293,6 +297,7 @@ steps:
 
   - id: gen_hook_visual
     kind: text_to_image
+    depends_on: [setup_dirs]  # Can run in parallel with TTS
     resume_output: "work/images/hook.png"
     prompt: "Modern office worker looking frustrated at complex software interface"
     output_path: "work/images/hook.png"
@@ -301,6 +306,8 @@ steps:
 
   - id: hook_video
     kind: run_command
+    depends_on: [tts_hook, gen_hook_visual]  # Needs both audio and image
+    resume_output: "work/videos/hook.mp4"
     program: ffmpeg
     args:
       - "-y"
@@ -319,16 +326,24 @@ steps:
       - "-shortest"
       - "work/videos/hook.mp4"
 
-  # ... more steps ...
+  # Normalization (after clips are created)
+  - id: normalize_title
+    kind: normalize_volume
+    depends_on: [title_to_video]
+    clip_path: "work/videos/title.mp4"
 
-  # Final assembly
+  - id: normalize_hook
+    kind: normalize_volume
+    depends_on: [hook_video]
+    clip_path: "work/videos/hook.mp4"
+
+  # Final assembly - depends on all normalized clips
   - id: concat_final
     kind: video_concat
+    depends_on: [normalize_title, normalize_hook]  # Add all clip deps
     clips:
       - "work/videos/title.mp4"
       - "work/videos/hook.mp4"
-      - "work/videos/demo.mp4"
-      - "work/videos/cta.mp4"
     output_path: "output/{{project_name}}_explainer.mp4"
     reencode: true
 ```
