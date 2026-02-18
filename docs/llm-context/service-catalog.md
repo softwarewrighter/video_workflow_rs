@@ -230,7 +230,22 @@ vwf run workflow.yaml --workdir project --llm-model qwen2.5-coder:14b
 
 ## Service Health Checking
 
-Before running a workflow, verify services are available:
+Use the `vwf services` command to check which services are required and available:
+
+```bash
+# Check services for a workflow
+vwf services workflow.yaml
+
+# Output shows:
+# Required services:
+#   [RUNNING] Ollama - Local LLM http://localhost:11434
+#   [NOT RUNNING] VoxCPM - Voice cloning TTS http://curiosity:7860
+#   [RUNNING] FLUX.1 - Text-to-image http://192.168.1.64:8570
+```
+
+The command also provides startup instructions for missing services.
+
+### Manual Health Checks
 
 ```bash
 # Check VoxCPM

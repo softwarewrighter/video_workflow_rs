@@ -155,36 +155,67 @@ Run with `--resume` flag to skip completed steps.
 
 ---
 
-## Step Ordering
+## Step Ordering and Dependencies
 
-Steps execute in declaration order. Dependencies are implicit based on file paths:
+Steps use explicit `depends_on` for DAG-based execution. Steps run as soon as their dependencies are satisfied:
 
 ```yaml
 steps:
-  # 1. Create directories first
+  # 1. Create directories first (no dependencies)
   - id: setup
     kind: ensure_dirs
     dirs: ["work/scripts", "work/audio", "work/videos"]
 
-  # 2. Write content
+  # 2. Write content (depends on setup)
   - id: write_intro
     kind: write_file
+    depends_on: [setup]
     path: "work/scripts/intro.txt"
     content: "..."
 
-  # 3. Generate audio (depends on script)
+  # 3. Generate image (depends on setup, can run in parallel with write_intro)
+  - id: gen_image
+    kind: text_to_image
+    depends_on: [setup]
+    prompt: "..."
+    output_path: "work/images/intro.png"
+
+  # 4. Generate audio (depends on script being written)
   - id: tts_intro
     kind: tts_generate
-    script_path: "work/scripts/intro.txt"  # Uses output from write_intro
+    depends_on: [write_intro]
+    script_path: "work/scripts/intro.txt"
     output_path: "work/audio/intro.wav"
 
-  # 4. Final assembly (depends on all previous)
+  # 5. Final assembly (depends on all clips being ready)
   - id: concat
     kind: video_concat
+    depends_on: [tts_intro, gen_image]  # Both must complete
     clips:
       - "work/videos/intro.mp4"
       - "work/videos/main.mp4"
 ```
+
+### DAG Execution Benefits
+
+- **Parallel execution**: Independent steps run simultaneously
+- **Failure isolation**: Failed steps only block their dependents
+- **Clear reporting**: Shows which steps are blocked and why
+- **Cycle detection**: Validates no circular dependencies before execution
+
+### Blocked Steps
+
+If a step fails, all steps that depend on it (directly or transitively) are marked as "blocked":
+
+```
+[OK] setup
+[OK] write_intro
+[FAILED] gen_image        # Service offline
+[OK] tts_intro            # Still runs (doesn't depend on gen_image)
+[BLOCKED] concat          # Blocked because gen_image failed
+```
+
+Resume with `--resume` after fixing the issue to continue from failures.
 
 ---
 
