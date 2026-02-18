@@ -1,7 +1,9 @@
 /target
 **/target/
 /dist
+**/dist/
 /work
+**/work/
 **/*.wasm
 **/*.js
 **/*.d.ts
