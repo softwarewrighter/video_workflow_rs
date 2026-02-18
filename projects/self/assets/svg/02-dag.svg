@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a1a2e"/>
+      <stop offset="100%" style="stop-color:#16213e"/>
+    </linearGradient>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#4ade80"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1920" height="1080" fill="url(#bgGrad)"/>
+
+  <!-- Header -->
+  <rect x="100" y="50" width="1720" height="140" rx="16" fill="#0f0f23" fill-opacity="0.92"/>
+  <text x="150" y="100" font-family="Arial, sans-serif" font-size="32"
+        fill="#ff6b6b" letter-spacing="4">
+    CONCEPT 2
+  </text>
+  <text x="150" y="160" font-family="Arial, sans-serif" font-size="72"
+        font-weight="bold" fill="#00d4ff">
+    Dependency Graph
+  </text>
+
+  <!-- DAG visualization -->
+  <!-- Node: Script -->
+  <rect x="200" y="300" width="200" height="80" rx="12" fill="#282a36" stroke="#ffd93d" stroke-width="3"/>
+  <text x="300" y="350" font-family="Arial, sans-serif" font-size="28"
+        fill="#ffd93d" text-anchor="middle">Script</text>
+
+  <!-- Node: TTS (parallel) -->
+  <rect x="500" y="250" width="200" height="80" rx="12" fill="#282a36" stroke="#4ade80" stroke-width="3"/>
+  <text x="600" y="300" font-family="Arial, sans-serif" font-size="28"
+        fill="#4ade80" text-anchor="middle">TTS Audio</text>
+
+  <!-- Node: Slides (parallel) -->
+  <rect x="500" y="370" width="200" height="80" rx="12" fill="#282a36" stroke="#4ade80" stroke-width="3"/>
+  <text x="600" y="420" font-family="Arial, sans-serif" font-size="28"
+        fill="#4ade80" text-anchor="middle">Slides</text>
+
+  <!-- Node: Clips -->
+  <rect x="800" y="300" width="200" height="80" rx="12" fill="#282a36" stroke="#00d4ff" stroke-width="3"/>
+  <text x="900" y="350" font-family="Arial, sans-serif" font-size="28"
+        fill="#00d4ff" text-anchor="middle">Clips</text>
+
+  <!-- Node: Video -->
+  <rect x="1100" y="300" width="200" height="80" rx="12" fill="#282a36" stroke="#ff79c6" stroke-width="3"/>
+  <text x="1200" y="350" font-family="Arial, sans-serif" font-size="28"
+        fill="#ff79c6" text-anchor="middle">Video</text>
+
+  <!-- Arrows -->
+  <line x1="400" y1="340" x2="490" y2="290" stroke="#4ade80" stroke-width="3" marker-end="url(#arrowhead)"/>
+  <line x1="400" y1="340" x2="490" y2="410" stroke="#4ade80" stroke-width="3" marker-end="url(#arrowhead)"/>
+  <line x1="700" y1="290" x2="790" y2="340" stroke="#4ade80" stroke-width="3" marker-end="url(#arrowhead)"/>
+  <line x1="700" y1="410" x2="790" y2="340" stroke="#4ade80" stroke-width="3" marker-end="url(#arrowhead)"/>
+  <line x1="1000" y1="340" x2="1090" y2="340" stroke="#4ade80" stroke-width="3" marker-end="url(#arrowhead)"/>
+
+  <!-- Parallel indicator -->
+  <rect x="450" y="480" width="300" height="50" rx="8" fill="#4ade80" fill-opacity="0.2"/>
+  <text x="600" y="515" font-family="Arial, sans-serif" font-size="24"
+        fill="#4ade80" text-anchor="middle">
+    Runs in Parallel
+  </text>
+
+  <!-- Key points -->
+  <rect x="100" y="580" width="550" height="120" rx="12" fill="#0f0f23" fill-opacity="0.92"/>
+  <text x="150" y="630" font-family="Arial, sans-serif" font-size="32" fill="#eee">
+    Safe to parallelize?
+  </text>
+  <text x="150" y="680" font-family="Arial, sans-serif" font-size="32" fill="#4ade80" font-weight="bold">
+    Runs them together
+  </text>
+
+  <rect x="700" y="580" width="550" height="120" rx="12" fill="#0f0f23" fill-opacity="0.92"/>
+  <text x="750" y="630" font-family="Arial, sans-serif" font-size="32" fill="#eee">
+    Must be sequential?
+  </text>
+  <text x="750" y="680" font-family="Arial, sans-serif" font-size="32" fill="#ffd93d" font-weight="bold">
+    Waits automatically
+  </text>
+
+  <!-- Avatar safe zone: keep x=1400-1920, y=800-1080 clear -->
+</svg>

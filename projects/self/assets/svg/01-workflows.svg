@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a1a2e"/>
+      <stop offset="100%" style="stop-color:#16213e"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1920" height="1080" fill="url(#bgGrad)"/>
+
+  <!-- Header -->
+  <rect x="100" y="50" width="1720" height="140" rx="16" fill="#0f0f23" fill-opacity="0.92"/>
+  <text x="150" y="100" font-family="Arial, sans-serif" font-size="32"
+        fill="#ff6b6b" letter-spacing="4">
+    CONCEPT 1
+  </text>
+  <text x="150" y="160" font-family="Arial, sans-serif" font-size="72"
+        font-weight="bold" fill="#00d4ff">
+    Workflows as Data
+  </text>
+
+  <!-- Left: Problem -->
+  <rect x="100" y="230" width="700" height="380" rx="16"
+        fill="#0f0f23" fill-opacity="0.92" stroke="#ff6b6b" stroke-width="4"/>
+  <text x="150" y="300" font-family="Arial, sans-serif" font-size="40"
+        font-weight="bold" fill="#ff6b6b">
+    Agent Memory
+  </text>
+  <text x="150" y="370" font-family="Arial, sans-serif" font-size="32" fill="#aaa">
+    Steps forgotten mid-task
+  </text>
+  <text x="150" y="420" font-family="Arial, sans-serif" font-size="32" fill="#aaa">
+    Parameters hallucinated
+  </text>
+  <text x="150" y="470" font-family="Arial, sans-serif" font-size="32" fill="#aaa">
+    No reproducibility
+  </text>
+  <text x="150" y="520" font-family="Arial, sans-serif" font-size="32" fill="#aaa">
+    Context window limits
+  </text>
+  <text x="150" y="580" font-family="Arial, sans-serif" font-size="36" fill="#ff6b6b" font-weight="bold">
+    "Agent Drift"
+  </text>
+
+  <!-- Right: Solution - YAML -->
+  <rect x="850" y="230" width="850" height="380" rx="16"
+        fill="#0f0f23" fill-opacity="0.92" stroke="#4ade80" stroke-width="4"/>
+  <text x="900" y="300" font-family="Arial, sans-serif" font-size="40"
+        font-weight="bold" fill="#4ade80">
+    YAML Pipeline
+  </text>
+  <text x="900" y="370" font-family="monospace" font-size="28" fill="#f8f8f2">
+    <tspan fill="#ff79c6">name:</tspan> <tspan fill="#f1fa8c">"video-pipeline"</tspan>
+  </text>
+  <text x="900" y="420" font-family="monospace" font-size="28" fill="#f8f8f2">
+    <tspan fill="#ff79c6">steps:</tspan>
+  </text>
+  <text x="900" y="470" font-family="monospace" font-size="28" fill="#f8f8f2">
+    <tspan fill="#6272a4">  - id:</tspan> generate_tts
+  </text>
+  <text x="900" y="520" font-family="monospace" font-size="28" fill="#f8f8f2">
+    <tspan fill="#6272a4">  - id:</tspan> render_slides
+  </text>
+  <text x="900" y="570" font-family="monospace" font-size="28" fill="#f8f8f2">
+    <tspan fill="#6272a4">  - id:</tspan> build_video
+  </text>
+
+  <!-- Bottom keypoint -->
+  <rect x="100" y="650" width="1100" height="90" rx="12" fill="#0f0f23" fill-opacity="0.92"/>
+  <text x="650" y="710" font-family="Arial, sans-serif" font-size="44"
+        fill="#ffd93d" text-anchor="middle">
+    Your pipeline lives in version control
+  </text>
+
+  <!-- Avatar safe zone: keep x=1400-1920, y=800-1080 clear -->
+</svg>

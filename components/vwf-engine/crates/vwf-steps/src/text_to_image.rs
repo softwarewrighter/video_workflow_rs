@@ -27,6 +27,13 @@ struct Payload {
     /// ComfyUI server URL
     #[serde(default = "default_server")]
     server: String,
+    /// Python interpreter path (default: python3)
+    #[serde(default = "default_python")]
+    python_path: Option<String>,
+}
+
+fn default_python() -> Option<String> {
+    None
 }
 
 fn default_orientation() -> String {
@@ -58,11 +65,15 @@ pub fn execute(ctx: &mut StepCtx<'_>, payload: &Value) -> Result<()> {
     };
 
     let seed = p.seed.unwrap_or_else(|| rand::random());
+    let python = p.python_path
+        .map(|pp| ctx.render(&pp))
+        .transpose()?
+        .unwrap_or_else(|| "python3".to_string());
 
     // Generate image via Python script
     let script = image_gen_script(&server, &prompt, width, height, seed, &output_path);
 
-    let status = Command::new("python3")
+    let status = Command::new(&python)
         .args(["-c", &script])
         .status()
         .with_context(|| ctx.error_context("spawn text_to_image python"))?;

@@ -24,4 +24,5 @@ pub enum StepKind {
     LlmGenerate,
     TtsGenerate,
     TextToImage,
+    NormalizeVolume,
 }

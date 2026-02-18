@@ -1,0 +1,218 @@
+version: 1
+name: "VWF Self-Explainer Video"
+description: >
+  Meta explainer video: VWF explaining itself.
+  Landscape 1920x1080, ~60 seconds total.
+  Sections: intro, workflows, dag, placeholders, checkpoints, incremental, cta.
+
+vars:
+  project_name: "VWF Self-Explainer"
+  topic: "Video Workflow Framework"
+  duration_secs: "60"
+  style: "straightforward, professional"
+  audience: "developers interested in video automation"
+  # TTS voice cloning settings
+  python_path: "/Users/mike/github/softwarewrighter/video_workflow_rs/projects/self/.venv/bin/python"
+  tts_server: "http://curiosity:7860"
+  reference_audio: "/Users/mike/github/softwarewrighter/video-publishing/reference/voice/mike-medium-ref-1.wav"
+  reference_text: "In this session, I'm going to write a small command line tool and explain the decision making process as I go. I'll begin with a basic skeleton, argument parsing, a configuration loader, and a minimal main function. Once everything compiles, I'll run it with a few sample inputs to confirm the behavior. After that, I'll be fine the internal design. I'll reorganize the functions, extract shared logic, and add error messages that actually help the user understand what went wrong. None of this is complicated, but it's the kind of work that separates a rough prototype from a tool someone can rely on. As we move forward, I'll highlight why I chose certain patterns, some decisions, optimize clarity, while others optimize performance or extensibility. The important thing is to understand the trade-offs well enough that the code feels intentional instead of accidental."
+
+steps:
+  # Setup directories
+  - id: ensure_dirs
+    kind: ensure_dirs
+    dirs:
+      - "work/scripts"
+      - "work/audio"
+      - "work/images"
+      - "work/clips"
+      - "output"
+
+  # Write production manifest
+  - id: write_manifest
+    kind: write_file
+    path: "output/manifest.txt"
+    content: |
+      VWF Self-Explainer Video Production
+      ====================================
+      Project: {{project_name}}
+      Topic: {{topic}}
+      Format: Landscape 1920x1080 (16:9)
+      Duration: ~{{duration_secs}} seconds
+
+      Structure:
+      - 00-intro (~5s) - "Five things you need to know about VWF..."
+      - 01-workflows (~8s) - "Workflows are data..."
+      - 02-dag (~8s) - "Dependency graph..."
+      - 03-placeholders (~8s) - "Placeholders keep you moving..."
+      - 04-checkpoints (~8s) - "Checkpoints for human review..."
+      - 05-incremental (~8s) - "Incremental builds..."
+      - 06-cta (~5s) - "Stop fighting. Start shipping."
+
+      Narration Scripts:
+      - work/scripts/00-intro.txt
+      - work/scripts/01-workflows.txt
+      - work/scripts/02-dag.txt
+      - work/scripts/03-placeholders.txt
+      - work/scripts/04-checkpoints.txt
+      - work/scripts/05-incremental.txt
+      - work/scripts/06-cta.txt
+
+      Build:
+      - scripts/build-video.sh - Assembles preview video
+      - output/preview.mp4 - Final preview output
+
+  # Image Generation (Flux)
+  - id: img_intro
+    kind: text_to_image
+    resume_output: "work/images/00-intro-bg.png"
+    prompt: "Abstract digital workflow visualization, glowing blue data streams flowing through geometric pipeline nodes, dark tech background with cyan and gold accents, futuristic automation concept art, clean professional style"
+    output_path: "work/images/00-intro-bg.png"
+    orientation: "landscape"
+    seed: 42001
+    server: "http://192.168.1.64:8570"
+    python_path: "{{python_path}}"
+    python_path: "{{python_path}}"
+
+  - id: img_workflows
+    kind: text_to_image
+    resume_output: "work/images/01-workflows-bg.png"
+    prompt: "YAML code floating in 3D space, structured data blocks glowing blue and gold, dark background with soft light rays, clean tech visualization, configuration files as holographic displays"
+    output_path: "work/images/01-workflows-bg.png"
+    orientation: "landscape"
+    seed: 42002
+    server: "http://192.168.1.64:8570"
+    python_path: "{{python_path}}"
+
+  - id: img_dag
+    kind: text_to_image
+    resume_output: "work/images/02-dag-bg.png"
+    prompt: "Directed acyclic graph visualization, glowing nodes connected by flowing energy lines, parallel processing paths branching and merging, dark tech background, cyan and green node colors, network topology art"
+    output_path: "work/images/02-dag-bg.png"
+    orientation: "landscape"
+    seed: 42003
+    server: "http://192.168.1.64:8570"
+    python_path: "{{python_path}}"
+
+  - id: img_placeholders
+    kind: text_to_image
+    resume_output: "work/images/03-placeholders-bg.png"
+    prompt: "Blueprint wireframe style visualization, dotted outlines transforming into solid shapes, placeholder boxes becoming filled content, construction progress concept, blue and orange accents on dark background"
+    output_path: "work/images/03-placeholders-bg.png"
+    orientation: "landscape"
+    seed: 42004
+    server: "http://192.168.1.64:8570"
+    python_path: "{{python_path}}"
+
+  - id: img_checkpoints
+    kind: text_to_image
+    resume_output: "work/images/04-checkpoints-bg.png"
+    prompt: "Quality gate checkpoint visualization, glowing approval stamps, verification shields, pipeline stages with review gates between them, professional tech style, gold and green checkmark accents on dark background"
+    output_path: "work/images/04-checkpoints-bg.png"
+    orientation: "landscape"
+    seed: 42005
+    server: "http://192.168.1.64:8570"
+    python_path: "{{python_path}}"
+
+  - id: img_incremental
+    kind: text_to_image
+    resume_output: "work/images/05-incremental-bg.png"
+    prompt: "Cache and delta visualization, some blocks glowing bright while others are faded cached, incremental build concept, efficiency arrows, speed lines, cyan and gold on dark tech background"
+    output_path: "work/images/05-incremental-bg.png"
+    orientation: "landscape"
+    seed: 42006
+    server: "http://192.168.1.64:8570"
+    python_path: "{{python_path}}"
+
+  - id: img_cta
+    kind: text_to_image
+    resume_output: "work/images/06-cta-bg.png"
+    prompt: "Call to action tech visualization, forward arrow motion, launch and ship concept, glowing runway leading to horizon, energy and momentum, cyan blue and gold accents, professional dark background"
+    output_path: "work/images/06-cta-bg.png"
+    orientation: "landscape"
+    seed: 42007
+    server: "http://192.168.1.64:8570"
+    python_path: "{{python_path}}"
+
+  # TTS Audio Generation
+  - id: tts_intro
+    kind: tts_generate
+    resume_output: "work/audio/00-intro.wav"
+    script_path: "work/scripts/00-intro.txt"
+    output_path: "work/audio/00-intro.wav"
+    server: "{{tts_server}}"
+    reference_audio: "{{reference_audio}}"
+    reference_text: "{{reference_text}}"
+    python_path: "{{python_path}}"
+
+  - id: tts_workflows
+    kind: tts_generate
+    resume_output: "work/audio/01-workflows.wav"
+    script_path: "work/scripts/01-workflows.txt"
+    output_path: "work/audio/01-workflows.wav"
+    server: "{{tts_server}}"
+    reference_audio: "{{reference_audio}}"
+    reference_text: "{{reference_text}}"
+    python_path: "{{python_path}}"
+
+  - id: tts_dag
+    kind: tts_generate
+    resume_output: "work/audio/02-dag.wav"
+    script_path: "work/scripts/02-dag.txt"
+    output_path: "work/audio/02-dag.wav"
+    server: "{{tts_server}}"
+    reference_audio: "{{reference_audio}}"
+    reference_text: "{{reference_text}}"
+    python_path: "{{python_path}}"
+
+  - id: tts_placeholders
+    kind: tts_generate
+    resume_output: "work/audio/03-placeholders.wav"
+    script_path: "work/scripts/03-placeholders.txt"
+    output_path: "work/audio/03-placeholders.wav"
+    server: "{{tts_server}}"
+    reference_audio: "{{reference_audio}}"
+    reference_text: "{{reference_text}}"
+    python_path: "{{python_path}}"
+
+  - id: tts_checkpoints
+    kind: tts_generate
+    resume_output: "work/audio/04-checkpoints.wav"
+    script_path: "work/scripts/04-checkpoints.txt"
+    output_path: "work/audio/04-checkpoints.wav"
+    server: "{{tts_server}}"
+    reference_audio: "{{reference_audio}}"
+    reference_text: "{{reference_text}}"
+    python_path: "{{python_path}}"
+
+  - id: tts_incremental
+    kind: tts_generate
+    resume_output: "work/audio/05-incremental.wav"
+    script_path: "work/scripts/05-incremental.txt"
+    output_path: "work/audio/05-incremental.wav"
+    server: "{{tts_server}}"
+    reference_audio: "{{reference_audio}}"
+    reference_text: "{{reference_text}}"
+    python_path: "{{python_path}}"
+
+  - id: tts_cta
+    kind: tts_generate
+    resume_output: "work/audio/06-cta.wav"
+    script_path: "work/scripts/06-cta.txt"
+    output_path: "work/audio/06-cta.wav"
+    server: "{{tts_server}}"
+    reference_audio: "{{reference_audio}}"
+    reference_text: "{{reference_text}}"
+    python_path: "{{python_path}}"
+
+  # Verify TTS output with Whisper
+  - id: verify_tts
+    kind: run_command
+    program: "./scripts/verify-tts.sh"
+    capture_path: "output/verify-tts.log"
+
+  # Build video preview
+  - id: build_video
+    kind: run_command
+    program: "./scripts/build-video.sh"
+    capture_path: "output/build.log"
