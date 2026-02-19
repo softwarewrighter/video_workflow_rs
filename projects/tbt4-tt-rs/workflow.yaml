@@ -1,0 +1,232 @@
+version: 1
+name: "TBT4: ToonTalk - Teaching Robots to Program"
+description: |
+  Throwback Thursday episode about ToonTalk, a visual programming environment
+  where you train robots by showing them what to do. Covers the history,
+  concepts, and the modern tt-rs Rust/WebAssembly reimplementation.
+
+vars:
+  project_name: "TBT4 ToonTalk"
+  tts_server: "http://curiosity:7860"
+  reference_audio: "assets/voice-reference.wav"
+  reference_text: "This is my voice sample for cloning."
+  python_path: ".venv/bin/python"
+  soundfont: "/opt/homebrew/Cellar/fluid-synth/2.5.2/share/fluid-synth/sf2/VintageDreamsWaves-v2.sf2"
+
+segments:
+  - id: intro
+    segment_type: music_only
+    description: "Title card with upbeat retro music"
+    steps: [setup_dirs, music_intro]
+  - id: hook
+    segment_type: narration_only
+    description: "Opening hook about teaching robots to program"
+    steps: [script_hook]
+  - id: history
+    segment_type: narration_only
+    description: "ToonTalk history and Ken Kahn"
+    steps: [script_history]
+  - id: concepts
+    segment_type: narration_only
+    description: "The concrete metaphors"
+    steps: [script_concepts]
+  - id: generations
+    segment_type: narration_only
+    description: "Three generations of ToonTalk"
+    steps: [script_generations]
+  - id: tt_rs
+    segment_type: narration_only
+    description: "Modern tt-rs reimplementation"
+    steps: [script_tt_rs]
+  - id: robot_demo
+    segment_type: narration_only
+    description: "Programming by demonstration"
+    steps: [script_robot_demo]
+  - id: whats_next
+    segment_type: narration_only
+    description: "Roadmap and future features"
+    steps: [script_whats_next]
+  - id: closing
+    segment_type: narration_only
+    description: "Why ToonTalk matters"
+    steps: [script_closing]
+  - id: outro
+    segment_type: music_only
+    description: "Closing music and CTA"
+    steps: [music_outro]
+
+steps:
+  # === Setup ===
+  - id: setup_dirs
+    kind: ensure_dirs
+    dirs:
+      - "work/scripts"
+      - "work/audio"
+      - "work/images"
+      - "work/clips"
+      - "output"
+
+  # === Music (can generate without GPU services) ===
+  - id: music_intro
+    kind: run_command
+    depends_on: [setup_dirs]
+    resume_output: "work/audio/intro_music.wav"
+    program: midi-cli-rs
+    args: ["preset", "--mood", "upbeat", "--duration", "8", "--soundfont", "{{soundfont}}", "-o", "work/audio/intro_music.wav"]
+
+  - id: music_outro
+    kind: run_command
+    depends_on: [setup_dirs]
+    resume_output: "work/audio/outro_music.wav"
+    program: midi-cli-rs
+    args: ["preset", "--mood", "calm", "--duration", "10", "--soundfont", "{{soundfont}}", "-o", "work/audio/outro_music.wav"]
+
+  # === Scripts ===
+
+  # Hook (15s) - Grab attention with the core concept
+  - id: script_hook
+    kind: write_file
+    depends_on: [setup_dirs]
+    path: "work/scripts/hook.txt"
+    content: |
+      What if you could teach a computer to program by showing it what to do?
+
+      Not by writing code. Not by dragging blocks. Just by demonstrating the
+      steps while a robot watches and learns.
+
+      This is ToonTalk. And it has been doing this since nineteen ninety-five.
+
+  # History (45s) - The origin story
+  - id: script_history
+    kind: write_file
+    depends_on: [setup_dirs]
+    path: "work/scripts/history.txt"
+    content: |
+      ToonTalk was created by Ken Kahn, a researcher who wanted to make
+      programming accessible to children without dumbing down the concepts.
+
+      I first discovered it during the Windows XP era, probably around
+      two thousand three or four. It was unlike anything I had seen.
+      A programming environment disguised as a video game.
+
+      The design was influenced by games like The Legend of Zelda and
+      Robot Odyssey. The kind of games that made you think while you played.
+
+      The concept stuck with me for two decades.
+
+  # Concepts (60s) - The concrete metaphors
+  - id: script_concepts
+    kind: write_file
+    depends_on: [setup_dirs]
+    path: "work/scripts/concepts.txt"
+    content: |
+      The genius of ToonTalk is how it maps abstract programming concepts
+      to concrete, animated metaphors.
+
+      Variables become boxes with numbered holes.
+      Values are numbers, text, and images that go inside boxes.
+      Comparisons use scales that tip when values differ.
+      Functions are robots that watch and learn.
+      Message passing uses birds that carry items to nests.
+      And garbage collection? Trucks that haul away unused items.
+
+      Every abstract idea becomes something you can see, touch, and manipulate.
+      The abstraction is complete.
+
+  # Three Generations (45s)
+  - id: script_generations
+    kind: write_file
+    depends_on: [setup_dirs]
+    path: "work/scripts/generations.txt"
+    content: |
+      ToonTalk has existed in three forms.
+
+      The original, from nineteen ninety-five to two thousand nine, was a full
+      three D desktop application written in C plus plus. It had cities, houses,
+      helicopters, even bombs for debugging.
+
+      ToonTalk Reborn, from twenty fourteen to twenty seventeen, was a simplified
+      JavaScript version that runs in browsers.
+
+      And now, tee tee dash R-S. A modern reimplementation in Rust and WebAssembly
+      that I have been building since twenty twenty-five.
+
+  # tt-rs Features (60s)
+  - id: script_tt_rs
+    kind: write_file
+    depends_on: [setup_dirs]
+    path: "work/scripts/tt_rs.txt"
+    content: |
+      Tee tee dash R-S uses Rust for the core logic, WebAssembly for browser
+      execution, and Yew for reactive user interface components.
+
+      It is not a port. It is a fresh implementation inspired by the same ideas.
+      Building it myself lets me understand the concepts deeply and experiment
+      with variations.
+
+      The current demo includes number widgets with full arithmetic, boxes with
+      configurable holes, scales for comparison, and the beginnings of the robot
+      training system.
+
+      You can also use birds and nests for message passing, and tools like the
+      wand for copying and the vacuum for removing widgets.
+
+  # Robot Demo (60s) - Programming by demonstration
+  - id: script_robot_demo
+    kind: write_file
+    depends_on: [setup_dirs]
+    path: "work/scripts/robot_demo.txt"
+    content: |
+      The core feature that makes ToonTalk unique is programming by demonstration.
+
+      Here is how it works. You create a robot and put it in training mode.
+      A yellow glow indicates the robot is watching.
+
+      Then you perform actions. Move items around. Compare values. Do arithmetic.
+      The robot records everything you do.
+
+      When you are done training, give the robot a box that matches the pattern
+      you used during training. The robot executes the learned behavior.
+
+      This is the same conceptual model as teaching a child.
+      Watch what I do. Then you try.
+
+  # What's Next (45s)
+  - id: script_whats_next
+    kind: write_file
+    depends_on: [setup_dirs]
+    path: "work/scripts/whats_next.txt"
+    content: |
+      The immediate priorities for tee tee dash R-S are completing the robot
+      demonstration workflow.
+
+      First, holding widgets. The robot needs to pick up a number and put it
+      somewhere.
+
+      Second, watched execution. You should see the robot work step by step
+      with an animated cursor.
+
+      Third, pattern matching. The robot should add five to any number, not
+      just the specific one you trained on.
+
+      The goal is a three to five minute demo where you train a robot to
+      perform a simple task, then watch it generalize to new inputs.
+
+  # Closing (30s) - Why it matters
+  - id: script_closing
+    kind: write_file
+    depends_on: [setup_dirs]
+    path: "work/scripts/closing.txt"
+    content: |
+      What makes ToonTalk fascinating is not just the visual metaphors.
+      It is the computational model underneath.
+
+      Under the hood, ToonTalk implements concurrent constraint logic programming.
+      The robots are essentially guarded Horn clauses. The birds and nests
+      implement the actor model.
+
+      Heavy concepts. But you do not need to know any of that to use it.
+      You just train robots by example.
+
+      Good abstractions are rare. When you find one, it is worth understanding
+      deeply. That is why ToonTalk stuck with me for twenty years.

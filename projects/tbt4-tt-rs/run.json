@@ -1,0 +1,114 @@
+{
+  "run_id": "75cab49e-6ed8-41ed-80c9-e39c79a3dc0b",
+  "workflow_name": "TBT4: ToonTalk - Teaching Robots to Program",
+  "started_at": "2026-02-19T22:03:09.017610Z",
+  "finished_at": "2026-02-19T22:03:09.403173Z",
+  "steps": [
+    {
+      "id": "setup_dirs",
+      "kind": "EnsureDirs",
+      "status": "ok",
+      "started_at": "2026-02-19T22:03:09.017833Z",
+      "finished_at": "2026-02-19T22:03:09.021724Z",
+      "error": null,
+      "duration_ms": 3
+    },
+    {
+      "id": "music_intro",
+      "kind": "RunCommand",
+      "status": "ok",
+      "started_at": "2026-02-19T22:03:09.022378Z",
+      "finished_at": "2026-02-19T22:03:09.208952Z",
+      "error": null,
+      "duration_ms": 186
+    },
+    {
+      "id": "music_outro",
+      "kind": "RunCommand",
+      "status": "ok",
+      "started_at": "2026-02-19T22:03:09.210134Z",
+      "finished_at": "2026-02-19T22:03:09.392217Z",
+      "error": null,
+      "duration_ms": 182
+    },
+    {
+      "id": "script_hook",
+      "kind": "WriteFile",
+      "status": "ok",
+      "started_at": "2026-02-19T22:03:09.392243Z",
+      "finished_at": "2026-02-19T22:03:09.393901Z",
+      "error": null,
+      "duration_ms": 1
+    },
+    {
+      "id": "script_history",
+      "kind": "WriteFile",
+      "status": "ok",
+      "started_at": "2026-02-19T22:03:09.394019Z",
+      "finished_at": "2026-02-19T22:03:09.395315Z",
+      "error": null,
+      "duration_ms": 1
+    },
+    {
+      "id": "script_concepts",
+      "kind": "WriteFile",
+      "status": "ok",
+      "started_at": "2026-02-19T22:03:09.395370Z",
+      "finished_at": "2026-02-19T22:03:09.396565Z",
+      "error": null,
+      "duration_ms": 1
+    },
+    {
+      "id": "script_generations",
+      "kind": "WriteFile",
+      "status": "ok",
+      "started_at": "2026-02-19T22:03:09.396587Z",
+      "finished_at": "2026-02-19T22:03:09.397726Z",
+      "error": null,
+      "duration_ms": 1
+    },
+    {
+      "id": "script_tt_rs",
+      "kind": "WriteFile",
+      "status": "ok",
+      "started_at": "2026-02-19T22:03:09.397734Z",
+      "finished_at": "2026-02-19T22:03:09.399473Z",
+      "error": null,
+      "duration_ms": 1
+    },
+    {
+      "id": "script_robot_demo",
+      "kind": "WriteFile",
+      "status": "ok",
+      "started_at": "2026-02-19T22:03:09.399500Z",
+      "finished_at": "2026-02-19T22:03:09.400838Z",
+      "error": null,
+      "duration_ms": 1
+    },
+    {
+      "id": "script_whats_next",
+      "kind": "WriteFile",
+      "status": "ok",
+      "started_at": "2026-02-19T22:03:09.400850Z",
+      "finished_at": "2026-02-19T22:03:09.401996Z",
+      "error": null,
+      "duration_ms": 1
+    },
+    {
+      "id": "script_closing",
+      "kind": "WriteFile",
+      "status": "ok",
+      "started_at": "2026-02-19T22:03:09.402005Z",
+      "finished_at": "2026-02-19T22:03:09.403130Z",
+      "error": null,
+      "duration_ms": 1
+    }
+  ],
+  "vars": {
+    "project_name": "TBT4 ToonTalk",
+    "python_path": ".venv/bin/python",
+    "reference_audio": "assets/voice-reference.wav",
+    "reference_text": "This is my voice sample for cloning.",
+    "tts_server": "http://curiosity:7860"
+  }
+}
