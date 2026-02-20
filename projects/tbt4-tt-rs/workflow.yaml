@@ -12,6 +12,7 @@ vars:
   reference_text: "This is my voice sample for cloning."
   python_path: ".venv/bin/python"
   soundfont: "/opt/homebrew/Cellar/fluid-synth/2.5.2/share/fluid-synth/sf2/VintageDreamsWaves-v2.sf2"
+  music_seed: "1771547214483"
 
 segments:
   - id: intro
@@ -67,19 +68,27 @@ steps:
       - "output"
 
   # === Music (can generate without GPU services) ===
-  - id: music_intro
+  # Generate 20s of jazz, then split into intro (fade-in) and outro (fade-out)
+  - id: music_full
     kind: run_command
     depends_on: [setup_dirs]
-    resume_output: "work/audio/intro_music.wav"
+    resume_output: "work/audio/full_music.wav"
     program: midi-cli-rs
-    args: ["preset", "--mood", "upbeat", "--duration", "8", "--soundfont", "{{soundfont}}", "-o", "work/audio/intro_music.wav"]
+    args: ["preset", "--mood", "jazz", "--duration", "20", "--tempo", "70", "--intensity", "30", "--key", "G", "--seed", "{{music_seed}}", "--soundfont", "{{soundfont}}", "-o", "work/audio/full_music.wav"]
+
+  - id: music_intro
+    kind: run_command
+    depends_on: [music_full]
+    resume_output: "work/audio/intro_music.wav"
+    program: ffmpeg
+    args: ["-y", "-i", "work/audio/full_music.wav", "-t", "10", "-af", "afade=t=in:st=0:d=5", "work/audio/intro_music.wav"]
 
   - id: music_outro
     kind: run_command
-    depends_on: [setup_dirs]
+    depends_on: [music_full]
     resume_output: "work/audio/outro_music.wav"
-    program: midi-cli-rs
-    args: ["preset", "--mood", "calm", "--duration", "10", "--soundfont", "{{soundfont}}", "-o", "work/audio/outro_music.wav"]
+    program: ffmpeg
+    args: ["-y", "-i", "work/audio/full_music.wav", "-ss", "10", "-af", "afade=t=out:st=5:d=5", "work/audio/outro_music.wav"]
 
   # === Scripts ===
 
